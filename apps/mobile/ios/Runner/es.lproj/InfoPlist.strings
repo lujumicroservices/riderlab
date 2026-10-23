@@ -1,0 +1,11 @@
+/* Textos de permisos es-MX (paquete App Store §2.5 y §9.2). */
+"CFBundleDisplayName" = "RiderLab";
+"NSLocationWhenInUseUsageDescription" = "RiderLab usa tu ubicación para grabar la línea que recorres en moto y mostrarla en el mapa con tu velocidad, curvas y frenadas.";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "RiderLab necesita tu ubicación todo el tiempo para seguir grabando tu rodada con la pantalla bloqueada y el teléfono guardado en la chamarra o en la moto, y para que \"Armar auto\" empiece a grabar solo cuando arrancas. Sin este permiso la grabación se corta y tu línea queda incompleta. Solo se usa durante una rodada o con Armar auto activo; no la vendemos ni la usamos para publicidad.";
+"NSLocationAlwaysUsageDescription" = "RiderLab necesita tu ubicación todo el tiempo para seguir grabando tu rodada con la pantalla bloqueada y para que \"Armar auto\" empiece a grabar solo cuando arrancas. Solo se usa durante una rodada o con Armar auto activo.";
+"NSMotionUsageDescription" = "RiderLab usa los sensores de movimiento y el barómetro del teléfono para medir la inclinación y la altitud de tu recorrido.";
+"NSBluetoothAlwaysUsageDescription" = "RiderLab usa Bluetooth para iniciar y detener una cámara GoPro opcional con tu recorrido.";
+"NSBluetoothPeripheralUsageDescription" = "RiderLab usa Bluetooth para iniciar y detener una cámara GoPro opcional con tu recorrido.";
+"NSCameraUsageDescription" = "RiderLab usa la cámara para que tomes fotos durante una rodada y las fijes en la ruta.";
+"NSPhotoLibraryUsageDescription" = "RiderLab revisa las fotos tomadas durante tu recorrido para que puedas agregarlas al álbum y al reel de la rodada. Nada se sube hasta que confirmas.";
+"NSPhotoLibraryAddUsageDescription" = "RiderLab guarda en tu galería las fotos que tomas en la app para que no se pierdan si falla la subida.";

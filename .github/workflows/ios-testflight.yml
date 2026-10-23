@@ -1,0 +1,169 @@
+name: ios-testflight
+
+# Compila RiderLab iOS (solo iPhone) en una Mac de GitHub y, opcionalmente, lo sube a TestFlight.
+# Solo manual (workflow_dispatch); nunca corre en push. Ver docs/IOS_TESTFLIGHT.md.
+#
+# Secretos requeridos (Settings > Secrets and variables > Actions):
+#   APP_STORE_CONNECT_API_KEY_ID      Key ID de la llave de API de App Store Connect
+#   APP_STORE_CONNECT_ISSUER_ID       Issuer ID de App Store Connect
+#   APP_STORE_CONNECT_API_KEY_P8      Contenido del AuthKey_XXXX.p8 en base64
+#   APPLE_TEAM_ID                     Team ID de Apple Developer (10 caracteres)
+#   GOOGLE_SERVICE_INFO_PLIST         GoogleService-Info.plist de Firebase (app iOS) en base64
+#   MOBILE_ENV_IOS                    Contenido completo de apps/mobile/.env para iOS
+#                                     (si falta se usa MOBILE_ENV, el mismo de play-release).
+#                                     REVENUECAT_API_KEY debe ser la clave appl_ en iOS.
+on:
+  workflow_dispatch:
+    inputs:
+      upload_to_testflight:
+        description: Subir el .ipa a TestFlight (si es false solo compila y guarda el artefacto)
+        type: boolean
+        default: false
+      build_number:
+        description: CFBundleVersion (vacío = github.run_number + 100; debe ser mayor a 99)
+        type: string
+        default: ""
+
+concurrency:
+  group: ios-testflight
+  cancel-in-progress: false
+
+jobs:
+  build-ios:
+    # Imagen macOS con Xcode 26 (requisito de App Store Connect desde abr 2026).
+    runs-on: macos-26
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: apps/mobile
+    env:
+      ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Check required secrets
+        env:
+          ASC_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+          GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
+          MOBILE_ENV_IOS: ${{ secrets.MOBILE_ENV_IOS }}
+          MOBILE_ENV: ${{ secrets.MOBILE_ENV }}
+        run: |
+          set -euo pipefail
+          missing=0
+          for name in ASC_KEY_ID ASC_ISSUER_ID APPLE_TEAM_ID ASC_KEY_P8; do
+            if [ -z "${!name:-}" ]; then echo "::error::Falta el secreto para $name (ver docs/IOS_TESTFLIGHT.md)"; missing=1; fi
+          done
+          if [ -z "${GOOGLE_SERVICE_INFO_PLIST:-}" ]; then
+            echo "::error::Falta el secreto GOOGLE_SERVICE_INFO_PLIST (GoogleService-Info.plist de la app iOS en Firebase, en base64). Sin él no hay push en iOS."
+            missing=1
+          fi
+          if [ -z "${MOBILE_ENV_IOS:-}${MOBILE_ENV:-}" ]; then
+            echo "::error::Falta MOBILE_ENV_IOS (o MOBILE_ENV) con el contenido de apps/mobile/.env"; missing=1
+          fi
+          exit $missing
+
+      - name: Write .env, GoogleService-Info.plist and API key
+        env:
+          ASC_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+          GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
+          MOBILE_ENV_IOS: ${{ secrets.MOBILE_ENV_IOS }}
+          MOBILE_ENV: ${{ secrets.MOBILE_ENV }}
+        run: |
+          set -euo pipefail
+          printf '%s\n' "${MOBILE_ENV_IOS:-$MOBILE_ENV}" > .env
+          # El archivo está en .gitignore pero referenciado en project.pbxproj (target Runner > Resources).
+          echo "$GOOGLE_SERVICE_INFO_PLIST" | base64 --decode > ios/Runner/GoogleService-Info.plist
+          if ! plutil -lint ios/Runner/GoogleService-Info.plist; then
+            echo "::error::GOOGLE_SERVICE_INFO_PLIST no es un plist válido (¿se codificó en base64 el archivo completo?)"; exit 1
+          fi
+          BUNDLE=$(/usr/libexec/PlistBuddy -c 'Print :BUNDLE_ID' ios/Runner/GoogleService-Info.plist)
+          if [ "$BUNDLE" != "com.rawthrottle.riderlab" ]; then
+            echo "::error::GoogleService-Info.plist es de $BUNDLE, se esperaba com.rawthrottle.riderlab"; exit 1
+          fi
+          KEY_DIR="$RUNNER_TEMP/asc"
+          mkdir -p "$KEY_DIR"
+          echo "$ASC_KEY_P8" | base64 --decode > "$KEY_DIR/AuthKey_${ASC_KEY_ID}.p8"
+          chmod 600 "$KEY_DIR/AuthKey_${ASC_KEY_ID}.p8"
+          echo "ASC_KEY_PATH=$KEY_DIR/AuthKey_${ASC_KEY_ID}.p8" >> "$GITHUB_ENV"
+          # ExportOptions: sustituye el Team ID y, si se pidió, sube directo a App Store Connect.
+          cp ios/ExportOptions.plist "$RUNNER_TEMP/ExportOptions.plist"
+          /usr/libexec/PlistBuddy -c "Set :teamID $APPLE_TEAM_ID" "$RUNNER_TEMP/ExportOptions.plist"
+          if [ "${{ inputs.upload_to_testflight }}" = "true" ]; then
+            /usr/libexec/PlistBuddy -c "Set :destination upload" "$RUNNER_TEMP/ExportOptions.plist"
+          fi
+
+      - name: ride_core deps
+        working-directory: packages/ride_core
+        run: dart pub get
+
+      - name: Flutter config (no codesign)
+        run: |
+          set -euo pipefail
+          BUILD_NUMBER="${{ inputs.build_number }}"
+          if [ -z "$BUILD_NUMBER" ]; then BUILD_NUMBER=$(( ${{ github.run_number }} + 100 )); fi
+          echo "BUILD_NUMBER=$BUILD_NUMBER" >> "$GITHUB_ENV"
+          flutter pub get
+          flutter gen-l10n
+          # Genera Generated.xcconfig, corre pod install y compila Dart; la firma la hace xcodebuild abajo.
+          flutter build ios --release --config-only --no-codesign \
+            --build-number="$BUILD_NUMBER" \
+            --dart-define=DISTRIBUTION=play
+
+      - name: Archive (firma automática con la API key)
+        working-directory: apps/mobile/ios
+        run: |
+          set -euo pipefail
+          xcodebuild archive \
+            -workspace Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            CODE_SIGN_STYLE=Automatic \
+            | tee "$RUNNER_TEMP/archive.log" | grep -E '(error|warning: .*sign|ARCHIVE)' || true
+          test "${PIPESTATUS[0]}" -eq 0 || { tail -100 "$RUNNER_TEMP/archive.log"; exit 1; }
+
+      - name: Export IPA (y subida a TestFlight si upload_to_testflight)
+        working-directory: apps/mobile/ios
+        run: |
+          set -euo pipefail
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -exportPath "$RUNNER_TEMP/export" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+          ls -la "$RUNNER_TEMP/export" || true
+
+      - name: Upload IPA artifact
+        if: ${{ !inputs.upload_to_testflight }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: RiderLab-ios-${{ env.BUILD_NUMBER }}
+          path: ${{ runner.temp }}/export/*.ipa
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Clean up secrets
+        if: always()
+        run: |
+          rm -f ios/Runner/GoogleService-Info.plist .env
+          rm -rf "$RUNNER_TEMP/asc"
