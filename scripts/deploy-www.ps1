@@ -4,6 +4,7 @@
 # URL: https://riderlab.rawthrottle.com.mx/
 # Partner decks remain at /short.es.html etc. Hub moves to /partners/
 # Does not overwrite /watch, /legal, /auth, or partner-deck /img.
+# Publishes /soporte/ (App Store support URL) from docs/www/soporte/index.html.
 #
 # iOS store URL: set iosUrl in docs/www/store.json, then re-run this script.
 
@@ -30,6 +31,7 @@ New-Item -ItemType Directory -Path (Join-Path $Stage 'go\apk') | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $Stage 'partners') | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $Stage 'simm') | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $Stage 'app') | Out-Null
+New-Item -ItemType Directory -Path (Join-Path $Stage 'soporte') | Out-Null
 
 Copy-Item (Join-Path $Source 'index.html') (Join-Path $Stage 'index.html')
 Copy-Item (Join-Path $Source '404.html') (Join-Path $Stage '404.html')
@@ -37,6 +39,7 @@ Copy-Item (Join-Path $Source 'store.json') (Join-Path $Stage 'store.json')
 Copy-Item (Join-Path $Source 'go\android\index.html') (Join-Path $Stage 'go\android\index.html')
 Copy-Item (Join-Path $Source 'go\apk\index.html') (Join-Path $Stage 'go\apk\index.html')
 Copy-Item (Join-Path $Source 'simm\index.html') (Join-Path $Stage 'simm\index.html')
+Copy-Item (Join-Path $Source 'soporte\index.html') (Join-Path $Stage 'soporte\index.html')
 
 $envFile = Join-Path $PWD 'apps\mobile\.env'
 $anon = ''
@@ -145,6 +148,7 @@ $uploads = @(
   @{ File = 'go\apk\index.html'; Blob = 'go/apk/index.html'; Type = 'text/html; charset=utf-8' },
   @{ File = 'simm\index.html'; Blob = 'simm/index.html'; Type = 'text/html; charset=utf-8' },
   @{ File = 'simm\config.js'; Blob = 'simm/config.js'; Type = 'application/javascript; charset=utf-8' },
+  @{ File = 'soporte\index.html'; Blob = 'soporte/index.html'; Type = 'text/html; charset=utf-8' },
   @{ File = 'site\icon-512.png'; Blob = 'site/icon-512.png'; Type = 'image/png' },
   @{ File = 'site\wordmark.png'; Blob = 'site/wordmark.png'; Type = 'image/png' },
   @{ File = 'site\hero.png'; Blob = 'site/hero.png'; Type = 'image/png' },
@@ -198,3 +202,4 @@ Write-Host "  $($store.publicOrigin)/go/android"
 Write-Host "  $($store.publicOrigin)/go/ios"
 Write-Host "  $($store.publicOrigin)/simm"
 Write-Host 'SIMM:     https://riderlab.rawthrottle.com.mx/simm'
+Write-Host 'Soporte:  https://riderlab.rawthrottle.com.mx/soporte/'
