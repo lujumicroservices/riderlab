@@ -49,6 +49,8 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
+          # Fijo: misma versión que la PC de desarrollo (LUJU3), donde pasa flutter analyze.
+          flutter-version: 3.41.4
           channel: stable
           cache: true
 
@@ -136,8 +138,14 @@ jobs:
             -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
             CODE_SIGN_STYLE=Automatic \
-            | tee "$RUNNER_TEMP/archive.log" | grep -E '(error|warning: .*sign|ARCHIVE)' || true
-          test "${PIPESTATUS[0]}" -eq 0 || { tail -100 "$RUNNER_TEMP/archive.log"; exit 1; }
+            > "$RUNNER_TEMP/archive.log" 2>&1 || status=$?
+          # Resumen corto (errores, firma, resultado) sin que grep afecte el estado.
+          grep -E '(error|warning: .*sign|ARCHIVE)' "$RUNNER_TEMP/archive.log" || true
+          if [ "${status:-0}" -ne 0 ]; then
+            echo "::error::xcodebuild archive falló (código $status). Últimas 150 líneas del log:"
+            tail -150 "$RUNNER_TEMP/archive.log"
+            exit "$status"
+          fi
 
       - name: Export IPA (y subida a TestFlight si upload_to_testflight)
         working-directory: apps/mobile/ios
