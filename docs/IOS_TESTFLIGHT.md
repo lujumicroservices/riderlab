@@ -1,6 +1,6 @@
 # RiderLab iOS → TestFlight desde GitHub Actions (sin Mac local)
 
-Flujo: `.github/workflows/ios-testflight.yml`. Corre en una Mac de GitHub (`macos-26`, Xcode estable),
+Flujo: `.github/workflows/ios-testflight.yml`. Corre en una Mac de GitHub (`macos-26`, Xcode estable, **Flutter 3.41.4 fijo**),
 **solo a mano** (Actions → ios-testflight → Run workflow). Nunca corre en push.
 
 - `upload_to_testflight = false` (por defecto): compila, firma y deja el `.ipa` como artefacto (14 días).
@@ -56,7 +56,10 @@ Con `upload_to_testflight` el export usa `destination=upload` y sube directo con
 Cargar los secretos de la tabla de arriba (plist y `.p8` en base64).
 
 ### 5. Correr y probar
-1. Hacer push de la rama `ios/testflight-ci` (y mergear a master cuando se apruebe). `workflow_dispatch` solo aparece en Actions cuando el flujo está en la rama por defecto; mientras tanto se puede lanzar con `gh workflow run ios-testflight.yml --ref ios/testflight-ci`.
+1. Hacer push de la rama `ios/testflight-ci` y **mergearla a master** (rama por defecto). GitHub solo permite disparar
+   `workflow_dispatch` (botón "Run workflow" o `gh workflow run`) si el YAML **existe en la rama por defecto**; antes del merge
+   `gh workflow run ios-testflight.yml --ref ios/testflight-ci` falla con "workflow not found". Ya en master, `--ref` sí sirve
+   para compilar otra rama que también tenga el YAML. (Alternativa temporal sin merge: agregar un trigger `push` limitado a esa rama; no recomendado.)
 2. Correr con `upload_to_testflight = false`; si compila, correr con `true`.
 3. En TestFlight, instalar en un **iPhone real** y probar: permisos en español, grabar con pantalla bloqueada ("Siempre"),
    barómetro sin crash, y **push** (invitación a rodada) — el simulador no recibe push.
@@ -65,6 +68,21 @@ Cargar los secretos de la tabla de arriba (plist y `.p8` en base64).
 ## Alcance de la 1.0 iOS
 - **Métrica (vinculación BLE) queda fuera de la 1.0 iOS; entra en 1.1 junto con un video de emparejamiento en iPhone real para App Review.**
   Esta rama sale de `origin/master` y no incluye `exp/gps-track-points` ni `cursor/metrica-ble-pairing-9627`; el permiso de Bluetooth solo menciona la cámara GoPro.
+
+## Ajustes de build en esta rama
+- **Podfile** (`post_install`): activa en `permission_handler` solo `PERMISSION_LOCATION=1`, `PERMISSION_NOTIFICATIONS=1` y `PERMISSION_BLUETOOTH=1`.
+  `permission_handler_apple` 9.6.1 define todos los `PERMISSION_*` en 0; sin las macros, en iOS `Permission.locationAlways`/`locationWhenInUse`,
+  `notification` y `bluetoothScan`/`bluetoothConnect` regresan "denegado" sin mostrar diálogo (rompía "Siempre" en dos pasos y la GoPro).
+  Cámara, fotos y sensores no van por `permission_handler` (image_picker, photo_manager, sensors_plus), así que sus macros siguen apagadas.
+  Si se agrega otro `Permission.*` en `lib/`, hay que agregar su macro aquí.
+- **Workflow, paso Archive**: el log de `xcodebuild` va a `archive.log`, se guarda su código de salida, el `grep` de resumen ya no lo altera
+  y, si falla, el paso imprime las últimas 150 líneas y sale con ese código (antes `| tee | grep || true` reiniciaba `PIPESTATUS` y el paso pasaba en verde).
+- **`ios/Flutter/sync_google_sign_in.sh`** (build phase): solo agrega o actualiza el esquema `com.googleusercontent.apps.*` en `CFBundleURLTypes`;
+  ya no borra `com.rawthrottle.riderlab://` (respaldo de Google por navegador y deep links de Supabase) ni otros esquemas.
+- **Pro en iOS**: sin switch local de Pro ni canje de códigos de socio (3.1.1), y sin el trial propio (`start_pro_trial`): en iOS
+  `startTrialIfEligible()` no hace nada, no se muestra `startTrialHelp` y, si no hay paquetes en la tienda, el aviso es `proStoreNotReadyIos`
+  (sin mencionar trial ni códigos). El trial en iOS debe ser la oferta introductoria de la suscripción en App Store. Android/sideload sin cambios.
+  Una cuenta que ya inició el trial en Android sigue viendo Pro en iOS mientras dure (lo da el servidor).
 
 ## Pendiente en código (no incluido en esta rama)
 - **Sign in with Apple (código hecho en esta rama)**: paquete `sign_in_with_apple`, botón de Apple solo en iOS (primero, junto a Google, estilo de Apple),
@@ -76,7 +94,8 @@ Cargar los secretos de la tabla de arriba (plist y `.p8` en base64).
   `Firebase.initializeApp()` sin opciones lee `GoogleService-Info.plist` del bundle. `push_notification_service.dart` ya pide permiso en iOS
   (`requestPermission`). Recomendado: llamar `FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(alert: true, badge: true, sound: true)`
   y, antes de `getToken()` en iOS, esperar `getAPNSToken()` (si no, el primer `getToken()` puede fallar con `apns-token-not-set`). El backend que envía FCM debe incluir bloque `apns` (sonido/alerta) para iOS.
-- **Pro en iOS**: leer `REVENUECAT_API_KEY_IOS`, ocultar switch local de Pro y códigos de socio, no mostrar `start_pro_trial` en iOS (paquete §8.3).
+- **Pro en iOS**: leer `REVENUECAT_API_KEY_IOS` (hoy `REVENUECAT_API_KEY` debe ser la `appl_` en `MOBILE_ENV_IOS`) y la hoja de compra completa de la 3.1.2
+  (precio, duración, renovación, Restaurar, enlaces a Términos y Privacidad) (paquete §8.3). Switch, códigos de socio y trial propio ya están ocultos en iOS.
 - **Ubicación (hecho en esta rama)**: "Siempre" en dos pasos en iOS. Paso 1 "Al usar la app" al tocar Grabar / Armar auto / rodada (aviso propio + diálogo del sistema).
   Paso 2 "Siempre" solo al activar Armar auto o al terminar un recorrido, con pantalla propia (paquete §9.3) y luego el aviso único de iOS;
   "Ahora no" se recuerda (`ios_location_always_not_now`) y no se vuelve a pedir. Si está denegado, diálogo con "Abrir Ajustes". Android sin cambios.
