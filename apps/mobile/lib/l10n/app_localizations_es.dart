@@ -1031,6 +1031,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'La compra aún no está en la tienda. Entra con tu cuenta para 30 días de Pro, o canjea un código de socio.';
 
   @override
+  String get proStoreNotReadyIos =>
+      'La suscripción Pro aún no está disponible en el App Store. Intenta más tarde.';
+
+  @override
   String brakesProTeaser(int shown, int total) {
     return 'Mostrando $shown de $total. Desbloquea Pro para el historial completo de frenadas.';
   }

@@ -1026,6 +1026,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Paid upgrade is not in the store yet. Sign in for a 30-day Pro trial, or redeem a partner code.';
 
   @override
+  String get proStoreNotReadyIos =>
+      'The Pro subscription is not available in the App Store yet. Please try again later.';
+
+  @override
   String brakesProTeaser(int shown, int total) {
     return 'Showing $shown of $total. Unlock Pro for the full brake list.';
   }

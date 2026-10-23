@@ -1928,6 +1928,12 @@ abstract class AppLocalizations {
   /// **'La compra aún no está en la tienda. Entra con tu cuenta para 30 días de Pro, o canjea un código de socio.'**
   String get proStoreNotReady;
 
+  /// No description provided for @proStoreNotReadyIos.
+  ///
+  /// In es, this message translates to:
+  /// **'La suscripción Pro aún no está disponible en el App Store. Intenta más tarde.'**
+  String get proStoreNotReadyIos;
+
   /// No description provided for @brakesProTeaser.
   ///
   /// In es, this message translates to:

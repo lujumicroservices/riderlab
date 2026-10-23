@@ -35,6 +35,11 @@ bool get revenueCatConfigured {
   }
 }
 
+/// The no-card 30-day trial (RPC `start_pro_trial`) is offered on Android and
+/// sideload only. On iOS the trial must come from the App Store subscription
+/// (introductory offer), so the app never starts or advertises its own trial.
+bool get offersOwnProTrial => kIsWeb || !Platform.isIOS;
+
 /// Sideload, not signed in: keep the local Settings toggle for pilots.
 /// Never on iOS: App Store guideline 3.1.1 (Pro only via In-App Purchase).
 bool get allowLocalProToggle {
@@ -206,7 +211,8 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
   }
 
   /// Present store packages (yearly first). If billing is off, start the
-  /// no-card 30-day trial instead of a dead checkout.
+  /// no-card 30-day trial instead of a dead checkout (not on iOS; see
+  /// [offersOwnProTrial]).
   Future<bool> purchasePro() async {
     await startTrialIfEligible();
     if (state.isPro) return true;
@@ -255,6 +261,7 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
 
   /// First sign-in starts a 30-day trial (server enforces one per account).
   Future<void> startTrialIfEligible() async {
+    if (!offersOwnProTrial) return;
     if (state.trialUsed && state.isPro) return;
     if (SupabaseBootstrap.permanentUser == null) return;
     final result = await _repo.startTrial();

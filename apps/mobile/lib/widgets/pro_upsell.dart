@@ -114,7 +114,12 @@ class _ProUpsellSheet extends ConsumerWidget {
                       Navigator.of(context).pop();
                       return;
                     }
-                    showAppSnack(context, l10n.proStoreNotReady);
+                    showAppSnack(
+                      context,
+                      offersOwnProTrial
+                          ? l10n.proStoreNotReady
+                          : l10n.proStoreNotReadyIos,
+                    );
                   },
                   child: Text(l10n.upgradeToPro),
                 ),
@@ -127,15 +132,17 @@ class _ProUpsellSheet extends ConsumerWidget {
                   const SizedBox(height: 8),
                   const PartnerCodeRedeemField(compact: true),
                 ],
-                const SizedBox(height: 8),
-                Text(
-                  l10n.startTrialHelp,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.rajdhani(
-                    color: AppTheme.steel,
-                    fontSize: 12,
+                if (offersOwnProTrial) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.startTrialHelp,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.rajdhani(
+                      color: AppTheme.steel,
+                      fontSize: 12,
+                    ),
                   ),
-                ),
+                ],
               ],
             ],
           ),
