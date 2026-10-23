@@ -3377,6 +3377,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get locationDisclosureContinue => 'Continue';
 
   @override
+  String get locationDisclosureBodyIos =>
+      'RiderLab records your GPS line during an active ride.\n\n• Location is used only while you record, with Auto-arm, in a rodada or with Family Watch\n• You\'ll see the blue location indicator in the status bar\n• Recording continues with the screen locked or the phone in your pocket\n• Location stops when you end the ride\n\nNext, iOS will ask for location permission. Choose \"Allow While Using App\".';
+
+  @override
+  String get locationAlwaysTitle => 'Record with the screen locked';
+
+  @override
+  String get locationAlwaysBody =>
+      'On the bike your phone is stowed and locked. So RiderLab doesn\'t lose your line mid-ride, iOS will ask you to allow location \"Always\". We only use it while you record or with Auto-arm on; you\'ll see the blue indicator in the status bar.\n\nIn the next iOS prompt, choose the option to change to \"Always\".';
+
+  @override
+  String get locationAlwaysDeclinedTitle => 'Location stays on \"While Using\"';
+
+  @override
+  String get locationAlwaysDeclinedBody =>
+      'RiderLab keeps working, but recording or Auto-arm may stop when the screen locks. You can change it to \"Always\" anytime in Settings → RiderLab → Location.';
+
+  @override
+  String get locationDeniedTitle => 'Location is off for RiderLab';
+
+  @override
+  String get locationDeniedBody =>
+      'RiderLab needs your location to record your line. Turn it on in Settings → RiderLab → Location and choose \"While Using the App\" or \"Always\".';
+
+  @override
+  String get locationOpenSettings => 'Open Settings';
+
+  @override
   String get locationRodadaLiveDisclosureTitle => 'Location for rodada live';
 
   @override

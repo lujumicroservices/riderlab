@@ -6056,6 +6056,54 @@ abstract class AppLocalizations {
   /// **'Continuar'**
   String get locationDisclosureContinue;
 
+  /// No description provided for @locationDisclosureBodyIos.
+  ///
+  /// In es, this message translates to:
+  /// **'RiderLab graba tu línea GPS durante un recorrido activo.\n\n• La ubicación se usa solo mientras grabas, con Armar auto, en una rodada o con Avisar a familia\n• Verás el indicador azul de ubicación en la barra de estado\n• La grabación continúa con la pantalla bloqueada o el teléfono en el bolsillo\n• La ubicación se detiene cuando terminas el recorrido\n\nA continuación, iOS te pedirá permiso de ubicación. Elige «Permitir al usar la app».'**
+  String get locationDisclosureBodyIos;
+
+  /// No description provided for @locationAlwaysTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Graba con la pantalla bloqueada'**
+  String get locationAlwaysTitle;
+
+  /// No description provided for @locationAlwaysBody.
+  ///
+  /// In es, this message translates to:
+  /// **'En la moto el teléfono va guardado y bloqueado. Para que RiderLab no pierda tu línea a media rodada, iOS te pedirá permitir la ubicación «Siempre». Solo la usamos mientras grabas o con Armar auto activo; verás el indicador azul en la barra de estado.\n\nEn el siguiente aviso de iOS elige la opción para cambiar a «Siempre».'**
+  String get locationAlwaysBody;
+
+  /// No description provided for @locationAlwaysDeclinedTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'La ubicación sigue en «Al usar la app»'**
+  String get locationAlwaysDeclinedTitle;
+
+  /// No description provided for @locationAlwaysDeclinedBody.
+  ///
+  /// In es, this message translates to:
+  /// **'RiderLab seguirá funcionando, pero la grabación o Armar auto pueden cortarse si la pantalla se bloquea. Puedes cambiarlo a «Siempre» cuando quieras en Ajustes → RiderLab → Ubicación.'**
+  String get locationAlwaysDeclinedBody;
+
+  /// No description provided for @locationDeniedTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Ubicación desactivada para RiderLab'**
+  String get locationDeniedTitle;
+
+  /// No description provided for @locationDeniedBody.
+  ///
+  /// In es, this message translates to:
+  /// **'RiderLab necesita tu ubicación para grabar tu línea. Actívala en Ajustes → RiderLab → Ubicación y elige «Al usar la app» o «Siempre».'**
+  String get locationDeniedBody;
+
+  /// No description provided for @locationOpenSettings.
+  ///
+  /// In es, this message translates to:
+  /// **'Abrir Ajustes'**
+  String get locationOpenSettings;
+
   /// No description provided for @locationRodadaLiveDisclosureTitle.
   ///
   /// In es, this message translates to:

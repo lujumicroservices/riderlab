@@ -3394,6 +3394,35 @@ class AppLocalizationsEs extends AppLocalizations {
   String get locationDisclosureContinue => 'Continuar';
 
   @override
+  String get locationDisclosureBodyIos =>
+      'RiderLab graba tu línea GPS durante un recorrido activo.\n\n• La ubicación se usa solo mientras grabas, con Armar auto, en una rodada o con Avisar a familia\n• Verás el indicador azul de ubicación en la barra de estado\n• La grabación continúa con la pantalla bloqueada o el teléfono en el bolsillo\n• La ubicación se detiene cuando terminas el recorrido\n\nA continuación, iOS te pedirá permiso de ubicación. Elige «Permitir al usar la app».';
+
+  @override
+  String get locationAlwaysTitle => 'Graba con la pantalla bloqueada';
+
+  @override
+  String get locationAlwaysBody =>
+      'En la moto el teléfono va guardado y bloqueado. Para que RiderLab no pierda tu línea a media rodada, iOS te pedirá permitir la ubicación «Siempre». Solo la usamos mientras grabas o con Armar auto activo; verás el indicador azul en la barra de estado.\n\nEn el siguiente aviso de iOS elige la opción para cambiar a «Siempre».';
+
+  @override
+  String get locationAlwaysDeclinedTitle =>
+      'La ubicación sigue en «Al usar la app»';
+
+  @override
+  String get locationAlwaysDeclinedBody =>
+      'RiderLab seguirá funcionando, pero la grabación o Armar auto pueden cortarse si la pantalla se bloquea. Puedes cambiarlo a «Siempre» cuando quieras en Ajustes → RiderLab → Ubicación.';
+
+  @override
+  String get locationDeniedTitle => 'Ubicación desactivada para RiderLab';
+
+  @override
+  String get locationDeniedBody =>
+      'RiderLab necesita tu ubicación para grabar tu línea. Actívala en Ajustes → RiderLab → Ubicación y elige «Al usar la app» o «Siempre».';
+
+  @override
+  String get locationOpenSettings => 'Abrir Ajustes';
+
+  @override
   String get locationRodadaLiveDisclosureTitle => 'Ubicación para En vivo';
 
   @override

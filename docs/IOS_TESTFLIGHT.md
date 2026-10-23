@@ -74,4 +74,7 @@ Cargar los secretos de la tabla de arriba (plist y `.p8` en base64).
   (`requestPermission`). Recomendado: llamar `FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(alert: true, badge: true, sound: true)`
   y, antes de `getToken()` en iOS, esperar `getAPNSToken()` (si no, el primer `getToken()` puede fallar con `apns-token-not-set`). El backend que envía FCM debe incluir bloque `apns` (sonido/alerta) para iOS.
 - **Pro en iOS**: leer `REVENUECAT_API_KEY_IOS`, ocultar switch local de Pro y códigos de socio, no mostrar `start_pro_trial` en iOS (paquete §8.3).
-- **Ubicación**: pedir "Siempre" en dos pasos y dejar de pedirlo en cada verificación (`location_service.dart:125`, paquete §9.1).
+- **Ubicación (hecho en esta rama)**: "Siempre" en dos pasos en iOS. Paso 1 "Al usar la app" al tocar Grabar / Armar auto / rodada (aviso propio + diálogo del sistema).
+  Paso 2 "Siempre" solo al activar Armar auto o al terminar un recorrido, con pantalla propia (paquete §9.3) y luego el aviso único de iOS;
+  "Ahora no" se recuerda (`ios_location_always_not_now`) y no se vuelve a pedir. Si está denegado, diálogo con "Abrir Ajustes". Android sin cambios.
+  Pendiente: grabar el video para App Review (paquete §9.5) y pegar la nota §9.4.

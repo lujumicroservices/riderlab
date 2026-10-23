@@ -77,11 +77,36 @@ class LocationService {
   /// Prefer starting once horizontal accuracy is at least this good.
   static const double warmTargetAccuracyMeters = 10;
 
-  /// True when location services are on and background ("always") is granted.
+  static bool get _isIos => !kIsWeb && Platform.isIOS;
+
+  /// True when location services are on and recording can start.
+  ///
+  /// Android: background ("always") is required (foreground service flow).
+  /// iOS: "While Using" is enough — with UIBackgroundModes `location`,
+  /// `allowBackgroundLocationUpdates` and the blue indicator, a stream started
+  /// in the foreground keeps running with the screen locked. "Always" is
+  /// offered later, in context (step 2, [LocationPermissionGate]).
   Future<bool> hasRecordingPermission() async {
     if (!await Geolocator.isLocationServiceEnabled()) return false;
     final permission = await Geolocator.checkPermission();
+    if (_isIos) {
+      return permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always;
+    }
     return permission == LocationPermission.always;
+  }
+
+  /// True when background ("always") location is granted.
+  Future<bool> hasAlwaysPermission() async {
+    final permission = await Geolocator.checkPermission();
+    return permission == LocationPermission.always;
+  }
+
+  /// iOS step 2: upgrade "While Using" → "Always". iOS shows this system
+  /// prompt only once; afterwards the change must be made in Settings.
+  Future<bool> requestAlwaysUpgrade() async {
+    final status = await Permission.locationAlways.request();
+    return status.isGranted;
   }
 
   Future<LocationPermissionResult> ensurePermission() async {
@@ -110,7 +135,8 @@ class LocationService {
     }
 
     if (permission == LocationPermission.deniedForever) {
-      await openAppSettings();
+      // iOS: LocationPermissionGate shows an explanation with "Open Settings".
+      if (!_isIos) await openAppSettings();
       return const LocationPermissionResult(
         granted: false,
         reason: LocationPermissionDenyReason.deniedForever,
@@ -121,7 +147,13 @@ class LocationService {
       await Permission.notification.request();
     }
 
-    // Always / background — required for glorieta loops with screen off.
+    // iOS step 1 ends here ("While Using"). Never ask "Always" on every
+    // check: LocationPermissionGate.offerAlwaysIfUseful asks it once, in context.
+    if (_isIos) {
+      return const LocationPermissionResult(granted: true);
+    }
+
+    // Android: always / background — required for glorieta loops with screen off.
     await Permission.locationAlways.request();
 
     return const LocationPermissionResult(granted: true);
