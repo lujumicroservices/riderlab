@@ -481,7 +481,7 @@
   "deleteAccountConfirmTitle": "¿Eliminar la cuenta para siempre?",
   "deleteAccountConfirmBody": "Se borrará tu cuenta de RiderLab y los datos en la nube asociados (recorridos, perfil, amigos, rodadas que creaste). También se limpia el garaje en este teléfono. No se puede deshacer.",
   "deleteAccountConfirmAction": "Eliminar para siempre",
-  "deleteAccountFailed": "No se pudo eliminar la cuenta. Intenta de nuevo o usa el correo de soporte del listado de Play.",
+  "deleteAccountFailed": "No se pudo eliminar la cuenta. Intenta de nuevo o escribe a jvaldes.garcia@gmail.com.",
   "deleteAccountDoneSnack": "Cuenta eliminada",
   "accountSignedInSnack": "Sesión iniciada — perfil sincronizado",
   "accountSignedOutSnack": "Sesión cerrada",

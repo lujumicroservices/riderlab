@@ -2219,7 +2219,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteAccountFailed.
   ///
   /// In es, this message translates to:
-  /// **'No se pudo eliminar la cuenta. Intenta de nuevo o usa el correo de soporte del listado de Play.'**
+  /// **'No se pudo eliminar la cuenta. Intenta de nuevo o escribe a jvaldes.garcia@gmail.com.'**
   String get deleteAccountFailed;
 
   /// No description provided for @deleteAccountDoneSnack.

@@ -1193,7 +1193,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get deleteAccountFailed =>
-      'No se pudo eliminar la cuenta. Intenta de nuevo o usa el correo de soporte del listado de Play.';
+      'No se pudo eliminar la cuenta. Intenta de nuevo o escribe a jvaldes.garcia@gmail.com.';
 
   @override
   String get deleteAccountDoneSnack => 'Cuenta eliminada';

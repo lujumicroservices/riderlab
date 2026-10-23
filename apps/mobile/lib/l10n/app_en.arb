@@ -410,7 +410,7 @@
   "deleteAccountConfirmTitle": "Delete account permanently?",
   "deleteAccountConfirmBody": "This removes your RiderLab account and associated cloud data (rides, profile, friends, rodadas you own). Local garage data on this phone is also cleared. This cannot be undone.",
   "deleteAccountConfirmAction": "Delete forever",
-  "deleteAccountFailed": "Could not delete account. Try again or use the support email on the Play listing.",
+  "deleteAccountFailed": "Could not delete account. Try again or email jvaldes.garcia@gmail.com.",
   "deleteAccountDoneSnack": "Account deleted",
   "accountSignedInSnack": "Signed in — profile synced",
   "accountSignedOutSnack": "Signed out",

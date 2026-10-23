@@ -253,4 +253,4 @@ Do **not** promote to Production if Play Google Sign-In still fails.
 - RevenueCat **paid** Pro (Play IAP). Product matrix, no-card trial, and partner codes: [FREE_VS_PRO.md](FREE_VS_PRO.md). Keep this Play listing **Price: Free** and **In-app purchases: No** until that contract’s store packages are wired.  
 - GitHub Action `play-release` (optional later; does not shorten the 14-day closed test)
 
-Support email on the listing: use the address you monitor.
+Support email on the listing: jvaldes.garcia@gmail.com (support page: https://riderlab.rawthrottle.com.mx/soporte/).
