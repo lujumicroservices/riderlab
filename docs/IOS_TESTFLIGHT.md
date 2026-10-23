@@ -67,8 +67,11 @@ Cargar los secretos de la tabla de arriba (plist y `.p8` en base64).
   Esta rama sale de `origin/master` y no incluye `exp/gps-track-points` ni `cursor/metrica-ble-pairing-9627`; el permiso de Bluetooth solo menciona la cámara GoPro.
 
 ## Pendiente en código (no incluido en esta rama)
-- **Sign in with Apple**: falta el paquete (`sign_in_with_apple` o `supabase_flutter` `signInWithIdToken` con nonce), el botón en el login de iOS
-  con la misma jerarquía que Google, el proveedor Apple en Supabase Auth (Services ID, Key ID, Team ID, `.p8`) y revocar el token de Apple al borrar la cuenta.
+- **Sign in with Apple (código hecho en esta rama)**: paquete `sign_in_with_apple`, botón de Apple solo en iOS (primero, junto a Google, estilo de Apple),
+  `signInWithIdToken(provider: apple)` con nonce (SHA-256 a Apple, nonce crudo a Supabase). Android sigue solo con Google.
+  Falta configurar (Juan): Supabase → Authentication → Providers → **Apple** → Enable y en **Client IDs** poner `com.rawthrottle.riderlab`
+  (para el flujo nativo no hace falta Services ID ni secreto; solo si algún día se usa Apple por web/OAuth). En el portal: capability Sign in with Apple en el App ID.
+  Pendiente en código: revocar el token de Apple al borrar la cuenta (Edge Function `delete-account` con `/auth/revoke`; requiere authorization code + client secret firmado con una llave .p8 de Sign in with Apple).
 - **Push iOS**: `AppDelegate.swift` no necesita cambios para lo básico — `firebase_messaging` registra APNs por swizzling y
   `Firebase.initializeApp()` sin opciones lee `GoogleService-Info.plist` del bundle. `push_notification_service.dart` ya pide permiso en iOS
   (`requestPermission`). Recomendado: llamar `FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(alert: true, badge: true, sound: true)`

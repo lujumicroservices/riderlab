@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../core/auth/auth_provider_kind.dart';
 import '../../core/auth/email_password.dart';
@@ -103,15 +104,25 @@ class _SignInFormState extends ConsumerState<SignInForm> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (final provider in auth.availableProviders) ...[
-          FilledButton.icon(
-            onPressed: () => _google(provider),
-            icon: Icon(_iconFor(provider)),
-            label: Text(l10n.signInWith(provider.label)),
-            style: FilledButton.styleFrom(
-              backgroundColor: AppTheme.mist,
-              foregroundColor: AppTheme.asphalt,
+          if (provider == AuthProviderKind.apple)
+            // Apple's own button style (HIG), same size and position as Google.
+            SignInWithAppleButton(
+              onPressed: () => _google(provider),
+              text: l10n.signInWith(provider.label),
+              style: SignInWithAppleButtonStyle.white,
+              height: 44,
+              borderRadius: const BorderRadius.all(Radius.circular(22)),
+            )
+          else
+            FilledButton.icon(
+              onPressed: () => _google(provider),
+              icon: Icon(_iconFor(provider)),
+              label: Text(l10n.signInWith(provider.label)),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppTheme.mist,
+                foregroundColor: AppTheme.asphalt,
+              ),
             ),
-          ),
           const SizedBox(height: 8),
         ],
         _orDivider(l10n),
@@ -203,6 +214,7 @@ class _SignInFormState extends ConsumerState<SignInForm> {
 
   IconData _iconFor(AuthProviderKind provider) {
     return switch (provider) {
+      AuthProviderKind.apple => Icons.apple,
       AuthProviderKind.google => Icons.g_mobiledata_rounded,
     };
   }
