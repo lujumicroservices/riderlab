@@ -303,7 +303,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   child: Text(l10n.restorePurchases),
                 ),
               ],
-              const PartnerCodeRedeemField(),
+              if (showPartnerCodeRedeem) const PartnerCodeRedeemField(),
               const SizedBox(height: 8),
               if (!isPro)
                 OutlinedButton(

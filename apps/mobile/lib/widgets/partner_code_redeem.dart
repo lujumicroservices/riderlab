@@ -1,3 +1,6 @@
+import 'dart:io' show Platform;
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +10,10 @@ import '../l10n/l10n_ext.dart';
 import '../providers/pro_entitlement_provider.dart';
 import '../theme/app_theme.dart';
 import 'app_snack.dart';
+
+/// Partner codes unlock Pro without In-App Purchase, which App Store
+/// guideline 3.1.1 forbids. Hidden on iOS; Android/sideload unchanged.
+bool get showPartnerCodeRedeem => kIsWeb || !Platform.isIOS;
 
 String partnerCodeErrorMessage(AppLocalizations l10n, String? error) {
   switch (error) {

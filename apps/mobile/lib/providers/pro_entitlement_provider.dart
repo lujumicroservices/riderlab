@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show Platform;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -35,7 +36,9 @@ bool get revenueCatConfigured {
 }
 
 /// Sideload, not signed in: keep the local Settings toggle for pilots.
+/// Never on iOS: App Store guideline 3.1.1 (Pro only via In-App Purchase).
 bool get allowLocalProToggle {
+  if (!kIsWeb && Platform.isIOS) return false;
   if (AppDistribution.isPlayStore) return false;
   if (SupabaseBootstrap.isReady && SupabaseBootstrap.permanentUser != null) {
     return false;

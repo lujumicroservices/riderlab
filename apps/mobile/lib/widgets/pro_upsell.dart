@@ -118,13 +118,15 @@ class _ProUpsellSheet extends ConsumerWidget {
                   },
                   child: Text(l10n.upgradeToPro),
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  l10n.havePartnerCode,
-                  style: GoogleFonts.rajdhani(fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 8),
-                const PartnerCodeRedeemField(compact: true),
+                if (showPartnerCodeRedeem) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    l10n.havePartnerCode,
+                    style: GoogleFonts.rajdhani(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 8),
+                  const PartnerCodeRedeemField(compact: true),
+                ],
                 const SizedBox(height: 8),
                 Text(
                   l10n.startTrialHelp,
