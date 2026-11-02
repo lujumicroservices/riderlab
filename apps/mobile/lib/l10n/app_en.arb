@@ -1471,6 +1471,17 @@
       "duration": {"type": "String"}
     }
   },
+  "circuit8hReliefStats": "Alt {alt} m · ↑{climb} ↓{descent} · {minAlt}–{maxAlt} m",
+  "@circuit8hReliefStats": {
+    "placeholders": {
+      "alt": {"type": "String"},
+      "climb": {"type": "String"},
+      "descent": {"type": "String"},
+      "minAlt": {"type": "String"},
+      "maxAlt": {"type": "String"}
+    }
+  },
+  "circuit8hReliefNote": "Phone GPS altitude (relative relief; vertical error is usually worse than horizontal).",
   "circuit8hTogglePoints": "Show/hide GPS points",
   "circuit8hUploadCloud": "Upload to cloud for analysis",
   "circuit8hUploading": "Uploading…",

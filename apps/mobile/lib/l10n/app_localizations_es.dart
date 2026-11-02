@@ -3303,6 +3303,21 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String circuit8hReliefStats(
+    String alt,
+    String climb,
+    String descent,
+    String minAlt,
+    String maxAlt,
+  ) {
+    return 'Alt $alt m · ↑$climb ↓$descent · $minAlt–$maxAlt m';
+  }
+
+  @override
+  String get circuit8hReliefNote =>
+      'Altitud GPS del teléfono (relieve relativo; error vertical suele ser mayor que el horizontal).';
+
+  @override
   String get circuit8hTogglePoints => 'Mostrar/ocultar puntos GPS';
 
   @override

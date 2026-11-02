@@ -34,6 +34,7 @@ import '../ride_active/location_permission_gate.dart';
 import '../rodadas/rodada_providers.dart';
 import '../watch/family_circle_screen.dart';
 import 'impersonate_screen.dart';
+import 'logger_hardware_screen.dart';
 import 'settings_group.dart';
 import '../../widgets/app_snack.dart';
 
@@ -378,6 +379,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             title: l10n.labsSectionTitle,
             help: l10n.labsSectionHelp,
             children: [
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.memory, color: AppTheme.lineHot),
+                title: Text('M5 Logger', style: _tileTitle),
+                subtitle: Text(
+                  'Emparejar hardware / importar sesión SD',
+                  style: _tileSub,
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const LoggerHardwareScreen(),
+                    ),
+                  );
+                },
+              ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(l10n.showForceStartArmed, style: _tileTitle),

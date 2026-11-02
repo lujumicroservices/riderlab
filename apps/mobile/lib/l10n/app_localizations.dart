@@ -5858,6 +5858,24 @@ abstract class AppLocalizations {
   /// **'{points} puntos GPS · {distance} · {duration}'**
   String circuit8hPassViewStats(int points, String distance, String duration);
 
+  /// No description provided for @circuit8hReliefStats.
+  ///
+  /// In es, this message translates to:
+  /// **'Alt {alt} m · ↑{climb} ↓{descent} · {minAlt}–{maxAlt} m'**
+  String circuit8hReliefStats(
+    String alt,
+    String climb,
+    String descent,
+    String minAlt,
+    String maxAlt,
+  );
+
+  /// No description provided for @circuit8hReliefNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Altitud GPS del teléfono (relieve relativo; error vertical suele ser mayor que el horizontal).'**
+  String get circuit8hReliefNote;
+
   /// No description provided for @circuit8hTogglePoints.
   ///
   /// In es, this message translates to:
