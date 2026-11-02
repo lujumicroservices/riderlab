@@ -1,0 +1,3 @@
+trabaja en optimizacion en la rodad, especificamente en las paradas, quiero que las paradas tengan definido un orden de paradas y que el mapa muestre el trajecto completo pasando por las paradas, tambien si es posible quiero poder diferenciar los tramos entre paradas con algun color y las paradas con un identificador de letra o de numero 
+
+tambien deseo que el administrador de la ruta pueda dar por iniciarda la rodada con un boton en la pantalla principal de rodada 

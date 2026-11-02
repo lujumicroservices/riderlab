@@ -10,6 +10,7 @@ import '../settings/logger_hardware_screen.dart';
 import 'circuits_list_screen.dart';
 import 'session_model.dart';
 import 'sessions_list_screen.dart';
+import '../../widgets/pro_upsell.dart';
 
 /// OFF home: performance strip + Circuits + Sessions (mirrors ON garage layout).
 class OffroadHomeScreen extends ConsumerWidget {
@@ -102,9 +103,13 @@ class OffroadHomeScreen extends ConsumerWidget {
               icon: Icons.bluetooth_searching_rounded,
               title: l10n.offroadMetricaTitle,
               subtitle: l10n.offroadMetricaSubtitle,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const LoggerHardwareScreen(),
+              onTap: () => openIfPro(
+                context,
+                ref,
+                () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const LoggerHardwareScreen(),
+                  ),
                 ),
               ),
             ),

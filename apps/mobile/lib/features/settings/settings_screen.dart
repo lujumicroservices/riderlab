@@ -38,6 +38,8 @@ import 'impersonate_screen.dart';
 import 'logger_hardware_screen.dart';
 import 'settings_group.dart';
 import '../../widgets/app_snack.dart';
+import '../../core/distribution.dart';
+import '../../core/pro/store_l10n.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -328,16 +330,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               if (revenueCatConfigured) ...[
                 OutlinedButton(
                   onPressed: () async {
-                    await ref
+                    final ok = await ref
                         .read(proEntitlementProvider.notifier)
                         .restorePurchases();
                     if (!context.mounted) return;
-                    showAppSnack(context, l10n.proUnlocked);
+                    showAppSnack(
+                      context,
+                      ok
+                          ? l10n.proUnlocked
+                          : StoreL10n.of(context).restoredNone,
+                    );
                   },
                   child: Text(l10n.restorePurchases),
                 ),
+                if (AppDistribution.allowsOfferCodes)
+                  TextButton(
+                    onPressed: () => ref
+                        .read(proEntitlementProvider.notifier)
+                        .presentOfferCodeRedemption(),
+                    child: Text(StoreL10n.of(context).redeemOfferCode),
+                  ),
               ],
-              const PartnerCodeRedeemField(),
+              if (AppDistribution.allowsPartnerCodes)
+                const PartnerCodeRedeemField(),
               const SizedBox(height: 8),
               if (!isPro)
                 OutlinedButton(
@@ -397,14 +412,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   'Emparejar hardware / importar sesión SD',
                   style: _tileSub,
                 ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
+                trailing: isPro
+                    ? const Icon(Icons.chevron_right)
+                    : const ProBadge(),
+                onTap: () => openIfPro(context, ref, () {
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(
                       builder: (_) => const LoggerHardwareScreen(),
                     ),
                   );
-                },
+                }),
               ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
@@ -487,7 +504,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         },
                       ),
               ),
-              const AdventureCameraSettingsSection(),
+              if (isPro)
+                const AdventureCameraSettingsSection()
+              else
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.videocam_outlined),
+                  title: Text(
+                    StoreL10n.of(context).proHardwareTitle,
+                    style: _tileTitle,
+                  ),
+                  subtitle: Text(
+                    StoreL10n.of(context).proHardwareBody,
+                    style: _tileSub,
+                  ),
+                  trailing: const ProBadge(),
+                  onTap: () => showProUpsellSheet(context, ref),
+                ),
             ],
           ),
           SettingsGroup(

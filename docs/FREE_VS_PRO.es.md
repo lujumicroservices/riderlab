@@ -43,6 +43,7 @@ Mientras haya un periodo activo (prueba, socio o pago):
 | Rutas con nombre + auto-vueltas | Pausado en v1 | Pro **cuando se reactive** |
 | Comparar vs tu mejor / misma ruta | Pausado en v1 | Pro cuando vuelvan las rutas |
 | “Sin anuncios” | No se vende | El banner es placeholder, no AdMob |
+| Logger Métrica / cámara de aventura (GoPro) | No | Sí |
 
 Después de que expire Pro: **no se borran rides**. El análisis vuelve a profundidad Gratis.
 
@@ -70,11 +71,13 @@ Distinto del código de rodada.
 
 ---
 
-## Pago (cuando Play IAP esté listo)
+## Pago (App Store: ver APP_STORE.md)
 
 Un entitlement: `pro`.
 
-- Mensual
-- Anual (opción por defecto; ~2 meses de descuento vs mensual)
+- Mensual — `riderlab_pro_monthly` — MX$59
+- Anual — `riderlab_pro_yearly` — MX$499 (opción por defecto)
+
+En iOS los códigos de socio se reemplazan por **códigos de oferta de Apple** (guía 3.1.1).
 
 Sin SKU de por vida al arranque. Sin plan familiar hasta que Family Watch sea superficie de pago.

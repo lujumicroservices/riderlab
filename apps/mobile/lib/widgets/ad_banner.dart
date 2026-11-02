@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../core/distribution.dart';
+import '../core/pro/store_l10n.dart';
 import '../l10n/l10n_ext.dart';
 import '../providers/pro_entitlement_provider.dart';
 import '../theme/app_theme.dart';
@@ -26,6 +28,10 @@ class FreeAdBanner extends ConsumerWidget {
     if (ref.watch(isProProvider)) return const SizedBox.shrink();
 
     final l10n = context.l10n;
+    // Store builds ship no ads SDK: never show an "Ad" placeholder or a
+    // "remove ads" pitch there (App Store 2.3 / Play policy).
+    final storeBuild = AppDistribution.isStoreBuild;
+    final store = StoreL10n.of(context);
     final height = compact ? 50.0 : 56.0;
 
     return Material(
@@ -55,7 +61,7 @@ class FreeAdBanner extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  l10n.adPlaceholder,
+                  storeBuild ? store.freeStripLabel : l10n.adPlaceholder,
                   style: GoogleFonts.rajdhani(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
@@ -67,7 +73,7 @@ class FreeAdBanner extends ConsumerWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  l10n.removeAdsWithPro,
+                  storeBuild ? store.freeStripBody : l10n.removeAdsWithPro,
                   style: GoogleFonts.rajdhani(
                     fontSize: 13,
                     color: AppTheme.mist,

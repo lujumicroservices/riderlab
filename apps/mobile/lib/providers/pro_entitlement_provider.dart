@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'dart:io' show Platform;
+
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -24,19 +26,37 @@ const revenueCatProEntitlement = 'pro';
 /// How many brake events Free can see in full (rest are obfuscated).
 const freeBrakePreviewCount = 3;
 
-/// True when a RevenueCat API key is present in `.env`.
-bool get revenueCatConfigured {
+/// RevenueCat public SDK key for this platform.
+///
+/// RevenueCat issues one key per store: `appl_…` (App Store) and `goog_…`
+/// (Play). `.env` keys, in order:
+///   iOS:     REVENUECAT_API_KEY_IOS, then REVENUECAT_API_KEY
+///   Android: REVENUECAT_API_KEY_ANDROID, then REVENUECAT_API_KEY
+String get revenueCatApiKey {
   try {
-    final key = dotenv.env['REVENUECAT_API_KEY']?.trim() ?? '';
-    return key.isNotEmpty;
+    String read(String k) => dotenv.env[k]?.trim() ?? '';
+    final platformKey = kIsWeb
+        ? ''
+        : Platform.isIOS
+            ? read('REVENUECAT_API_KEY_IOS')
+            : read('REVENUECAT_API_KEY_ANDROID');
+    return platformKey.isNotEmpty ? platformKey : read('REVENUECAT_API_KEY');
   } catch (_) {
-    return false;
+    return '';
   }
 }
 
+/// True when a RevenueCat API key is present in `.env`.
+bool get revenueCatConfigured => revenueCatApiKey.isNotEmpty;
+
+/// App Store Connect / Play product ids (RevenueCat offering `default`).
+/// Contract: docs/APP_STORE.md
+const proMonthlyProductId = 'riderlab_pro_monthly';
+const proYearlyProductId = 'riderlab_pro_yearly';
+
 /// Sideload, not signed in: keep the local Settings toggle for pilots.
 bool get allowLocalProToggle {
-  if (AppDistribution.isPlayStore) return false;
+  if (AppDistribution.isStoreBuild) return false;
   if (SupabaseBootstrap.isReady && SupabaseBootstrap.permanentUser != null) {
     return false;
   }
@@ -105,7 +125,7 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
 
   Future<void> _initRevenueCat() async {
     try {
-      final key = dotenv.env['REVENUECAT_API_KEY']!.trim();
+      final key = revenueCatApiKey;
       await Purchases.setLogLevel(
         kDebugMode ? LogLevel.debug : LogLevel.info,
       );
@@ -191,14 +211,56 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
     await _persist();
   }
 
-  Future<void> restorePurchases() async {
-    if (!_rcReady) return;
+  /// Returns true when an active Pro entitlement was restored.
+  Future<bool> restorePurchases() async {
+    if (!_rcReady) return false;
     try {
       final info = await Purchases.restorePurchases();
       _applyRevenueCat(info);
       await refresh(fromStoreOnly: true);
+      return _rcPro;
     } catch (e) {
       debugPrint('RevenueCat restore failed: $e');
+      return false;
+    }
+  }
+
+  /// Current RevenueCat offering (monthly + annual packages), or null.
+  Future<Offering?> currentOffering() async {
+    if (!_rcReady) return null;
+    try {
+      final offerings = await Purchases.getOfferings();
+      return offerings.current;
+    } catch (e) {
+      debugPrint('RevenueCat offerings failed: $e');
+      return null;
+    }
+  }
+
+  /// Buy one store package picked in the paywall. Returns true when Pro.
+  Future<bool> purchasePackage(Package package) async {
+    if (!_rcReady) return state.isPro;
+    try {
+      final purchase = await Purchases.purchase(
+        PurchaseParams.package(package),
+      );
+      _applyRevenueCat(purchase.customerInfo);
+      await refresh(fromStoreOnly: true);
+      return state.isPro;
+    } catch (e) {
+      debugPrint('RevenueCat purchase failed: $e');
+      return state.isPro;
+    }
+  }
+
+  /// iOS: Apple's own offer-code sheet (replaces partner codes on iOS).
+  /// The purchase arrives through the customer-info listener.
+  Future<void> presentOfferCodeRedemption() async {
+    if (!_rcReady || !AppDistribution.allowsOfferCodes) return;
+    try {
+      await Purchases.presentCodeRedemptionSheet();
+    } catch (e) {
+      debugPrint('RevenueCat offer code sheet failed: $e');
     }
   }
 
@@ -264,6 +326,9 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
   Future<void> onRideCompleted() => startTrialIfEligible();
 
   Future<ProRpcResult> redeemPartnerCode(String code) async {
+    if (!AppDistribution.allowsPartnerCodes) {
+      return const ProRpcResult(ok: false, error: 'invalid_code');
+    }
     if (_rcPro) {
       return const ProRpcResult(ok: false, error: 'already_paying');
     }
