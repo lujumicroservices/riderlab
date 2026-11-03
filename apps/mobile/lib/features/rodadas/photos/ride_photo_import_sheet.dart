@@ -47,7 +47,7 @@ class _RidePhotoImportSheetState extends ConsumerState<RidePhotoImportSheet> {
     final store = ref.read(ridePhotoStoreProvider);
     try {
       for (final c in _items.where((c) => c.selected)) {
-        final bytes = await c.asset.originBytes;
+        final bytes = await loadGalleryBytes(c.asset);
         if (bytes == null || bytes.isEmpty) continue;
         await store.saveCaptured(
           rideId: widget.rideId,

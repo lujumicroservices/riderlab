@@ -1,7 +1,8 @@
 #!/bin/sh
 # Reads GOOGLE_IOS_CLIENT_ID from apps/mobile/.env and writes:
 #   - Flutter/GoogleSignIn.xcconfig (build settings)
-#   - Runner/Info.plist GIDClientID + URL scheme (literal — Xcode was not
+#   - Runner/Info.plist GIDClientID + Google URL scheme, added or updated in
+#     place without removing other CFBundleURLTypes (literal — Xcode was not
 #     expanding $(GID_URL_SCHEME) into the installed Info.plist)
 set -e
 
@@ -22,14 +23,41 @@ EOF
 apply_info_plist() {
   client_id="$1"
   url_scheme="$2"
-  /usr/libexec/PlistBuddy -c "Delete :GIDClientID" "$INFO_PLIST" 2>/dev/null || true
-  /usr/libexec/PlistBuddy -c "Add :GIDClientID string ${client_id}" "$INFO_PLIST"
-  /usr/libexec/PlistBuddy -c "Delete :CFBundleURLTypes" "$INFO_PLIST" 2>/dev/null || true
-  /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes array" "$INFO_PLIST"
-  /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:0 dict" "$INFO_PLIST"
-  /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:0:CFBundleTypeRole string Editor" "$INFO_PLIST"
-  /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:0:CFBundleURLSchemes array" "$INFO_PLIST"
-  /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:0:CFBundleURLSchemes:0 string ${url_scheme}" "$INFO_PLIST"
+  PB=/usr/libexec/PlistBuddy
+  $PB -c "Delete :GIDClientID" "$INFO_PLIST" 2>/dev/null || true
+  $PB -c "Add :GIDClientID string ${client_id}" "$INFO_PLIST"
+
+  # Add or update ONLY the Google scheme. Other URL types (e.g. the
+  # com.rawthrottle.riderlab:// deep link used by Supabase OAuth/recovery)
+  # are left untouched.
+  if ! $PB -c "Print :CFBundleURLTypes" "$INFO_PLIST" >/dev/null 2>&1; then
+    $PB -c "Add :CFBundleURLTypes array" "$INFO_PLIST"
+  fi
+  i=0
+  google_i=""
+  google_j=""
+  while $PB -c "Print :CFBundleURLTypes:$i" "$INFO_PLIST" >/dev/null 2>&1; do
+    j=0
+    while scheme=$($PB -c "Print :CFBundleURLTypes:$i:CFBundleURLSchemes:$j" "$INFO_PLIST" 2>/dev/null); do
+      case "$scheme" in
+        com.googleusercontent.apps.*|'$(GID_URL_SCHEME)')
+          google_i="$i"
+          google_j="$j"
+          ;;
+      esac
+      j=$((j + 1))
+    done
+    i=$((i + 1))
+  done
+
+  if [ -n "$google_i" ]; then
+    $PB -c "Set :CFBundleURLTypes:$google_i:CFBundleURLSchemes:$google_j ${url_scheme}" "$INFO_PLIST"
+  else
+    $PB -c "Add :CFBundleURLTypes:$i dict" "$INFO_PLIST"
+    $PB -c "Add :CFBundleURLTypes:$i:CFBundleTypeRole string Editor" "$INFO_PLIST"
+    $PB -c "Add :CFBundleURLTypes:$i:CFBundleURLSchemes array" "$INFO_PLIST"
+    $PB -c "Add :CFBundleURLTypes:$i:CFBundleURLSchemes:0 string ${url_scheme}" "$INFO_PLIST"
+  fi
 }
 
 if [ ! -f "$ENV_FILE" ]; then

@@ -112,7 +112,11 @@ class ProUpsellBanner extends ConsumerWidget {
                 if (!context.mounted) return;
                 showAppSnack(
                   context,
-                  ok ? l10n.proUnlocked : l10n.proStoreNotReady,
+                  ok
+                      ? l10n.proUnlocked
+                      : (offersOwnProTrial
+                            ? l10n.proStoreNotReady
+                            : l10n.proStoreNotReadyIos),
                 );
               },
               style: FilledButton.styleFrom(

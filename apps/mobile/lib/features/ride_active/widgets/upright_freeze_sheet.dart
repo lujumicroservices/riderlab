@@ -51,7 +51,10 @@ Future<bool> freezeThenArm(
     }
     if (recorder.isArmed || recorder.isRecording) return true;
     final l10n = context.l10n;
-    if (!await LocationPermissionGate.requestForRecording(context)) {
+    if (!await LocationPermissionGate.requestForRecording(
+      context,
+      offerBackground: true,
+    )) {
       return false;
     }
     if (!context.mounted) return false;

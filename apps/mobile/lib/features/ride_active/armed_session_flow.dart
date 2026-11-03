@@ -13,6 +13,7 @@ import '../rodadas/rodada_post_ride_flow.dart';
 import '../watch/watch_providers.dart';
 import 'active_ride_screen.dart';
 import 'armed_session_nav.dart';
+import 'location_permission_gate.dart';
 
 void ensureArmedSessionHub(
   BuildContext context,
@@ -112,6 +113,10 @@ Future<void> completeArmedOrActiveRide(
       rideId: ride.id,
       replaceCurrent: false,
     );
+    // iOS step 2: after the first finished ride, offer "Always" (once).
+    if (nav.mounted) {
+      await LocationPermissionGate.offerAlwaysIfUseful(nav.context);
+    }
   } catch (e) {
     if (!context.mounted) return;
     showAppSnackError(context, l10n.userFacingError(e));

@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:convert' show utf8;
 import 'dart:io' show Platform;
 
+import 'package:crypto/crypto.dart' show sha256;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../db/ride_database.dart';
@@ -120,16 +123,84 @@ class AuthService {
     return null;
   }
 
-  /// Providers the app can offer in Settings (filter by platform later).
-  List<AuthProviderKind> get availableProviders => const [
-        AuthProviderKind.google,
-      ];
+  /// Providers the app offers. On iOS, Sign in with Apple is listed first and
+  /// next to Google (App Store guideline 4.8). Android stays Google-only.
+  List<AuthProviderKind> get availableProviders => (!kIsWeb && Platform.isIOS)
+      ? const [AuthProviderKind.apple, AuthProviderKind.google]
+      : const [AuthProviderKind.google];
 
   Future<AuthResponse> signInWith(AuthProviderKind provider) async {
     return switch (provider) {
+      AuthProviderKind.apple => _signInWithApple(),
       AuthProviderKind.google => _signInWithGoogle(),
     };
   }
+
+  /// Native Sign in with Apple -> Supabase `signInWithIdToken`.
+  ///
+  /// Apple receives the SHA-256 of a random nonce; Supabase receives the raw
+  /// nonce and checks it against the `nonce` claim of the identity token.
+  /// Requires the Apple provider enabled in Supabase Auth with the bundle id
+  /// `com.rawthrottle.riderlab` as an authorized client id.
+  Future<AuthResponse> _signInWithApple() async {
+    if (kIsWeb || !Platform.isIOS) {
+      throw AuthException('Sign in with Apple is only available on iOS');
+    }
+    if (!SupabaseBootstrap.isReady) {
+      throw AuthException('Cloud is not configured');
+    }
+    final rawNonce = newGoogleNonce();
+    final hashedNonce = sha256.convert(utf8.encode(rawNonce)).toString();
+
+    final AuthorizationCredentialAppleID credential;
+    try {
+      credential = await SignInWithApple.getAppleIDCredential(
+        scopes: const [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        nonce: hashedNonce,
+      );
+    } on SignInWithAppleAuthorizationException catch (e) {
+      if (e.code == AuthorizationErrorCode.canceled) {
+        throw AuthException('Apple sign-in was canceled');
+      }
+      throw AuthException('Apple sign-in failed: ${e.code.name} ${e.message}');
+    }
+
+    final idToken = credential.identityToken;
+    if (idToken == null || idToken.isEmpty) {
+      throw AuthException('No Apple identity token');
+    }
+
+    final auth = SupabaseBootstrap.client.auth;
+    final signedIn = await auth.signInWithIdToken(
+      provider: OAuthProvider.apple,
+      idToken: idToken,
+      nonce: rawNonce,
+    );
+
+    // Apple only sends the name on the very first authorization.
+    final fullName = [credential.givenName, credential.familyName]
+        .whereType<String>()
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .join(' ');
+    if (fullName.isNotEmpty) {
+      try {
+        await auth.updateUser(UserAttributes(data: {'full_name': fullName}));
+      } catch (e) {
+        debugPrint('Apple full_name metadata: $e');
+      }
+    }
+    await _afterIdentity(
+      signedIn.user ?? auth.currentUser,
+      googleDisplayName: fullName.isNotEmpty ? fullName : null,
+      googleEmail: credential.email,
+    );
+    return signedIn;
+  }
+
 
   /// Existing email account.
   Future<AuthResponse> signInWithEmail({

@@ -39,5 +39,21 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+
+    # permission_handler compiles every iOS permission out by default (=0).
+    # Enable only what lib/ requests via Permission.* (checked with rg):
+    #   locationWhenInUse / locationAlways -> PERMISSION_LOCATION
+    #   notification                       -> PERMISSION_NOTIFICATIONS
+    #   bluetoothScan / bluetoothConnect   -> PERMISSION_BLUETOOTH (GoPro)
+    # Camera / photos / motion go through image_picker, photo_manager and
+    # sensors_plus, not permission_handler, so their macros stay off.
+    target.build_configurations.each do |config|
+      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] += [
+        'PERMISSION_LOCATION=1',
+        'PERMISSION_NOTIFICATIONS=1',
+        'PERMISSION_BLUETOOTH=1',
+      ]
+    end
   end
 end

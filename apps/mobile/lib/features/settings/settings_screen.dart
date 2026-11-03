@@ -204,6 +204,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     final ok =
                         await LocationPermissionGate.requestForRecording(
                           context,
+                          offerBackground: true,
                         );
                     if (!ok || !context.mounted) return;
                   }
