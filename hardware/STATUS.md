@@ -20,6 +20,10 @@ ESP32 Basic = **solo 2.4 GHz**.
 - GNSS 1 Hz sigue solo por Serial (no llena el log).
 - App (2026-10-10): emparejado BLE alineado con el firmware 0.6.8-ble. Servicio `6f8a0001-5c3e-4b8e-9a51-4d4554524943`, fragmentos `0x1E`, MTU 247, STATUS `msg`/`err`/`left`. El Wi-Fi se escribe antes del PAIR. El secreto no se muestra ni se escribe en logs. El `PAIR` por USB sigue en la misma pantalla.
 
+## Referencias
+
+- Comparación con **AiM Solo 2** cerrada el 26 Sep 2026. Números en el skill y en [comparacion-solo-2.pdf](comparacion-solo-2.pdf). Misma clase de sensor; línea esperada 1–2.5 m hasta medir en pista.
+
 ## Nube
 
 15 sesiones en `logger-sessions/unpaired` (3 oct). Mapa: `captures/cloud_rides.html`. Dos recortadas al tope 24 kB del POST.
