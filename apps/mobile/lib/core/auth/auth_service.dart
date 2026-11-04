@@ -455,8 +455,10 @@ class AuthService {
     if (session == null) {
       throw AuthException('Not signed in');
     }
+    final appleCode = await _appleCodeForRevocation(session.user);
     final res = await SupabaseBootstrap.client.functions.invoke(
       'delete-account',
+      body: {'apple_authorization_code': ?appleCode},
     );
     if (res.status >= 400) {
       final data = res.data;
@@ -471,6 +473,35 @@ class AuthService {
       debugPrint('Local wipe after deleteAccount: $e');
     }
     await signOut();
+  }
+
+  /// Apple guideline 5.1.1(v): deleting an account created with Sign in with
+  /// Apple must revoke the user's Apple tokens. Apple only accepts a fresh
+  /// authorization code for that, so ask for one here; `delete-account`
+  /// exchanges it and calls Apple's /auth/revoke before deleting the user.
+  ///
+  /// Returns null when the account has no Apple identity or this is not iOS
+  /// (Apple accounts can only be created on iOS in this app).
+  Future<String?> _appleCodeForRevocation(User user) async {
+    if (kIsWeb || !Platform.isIOS) return null;
+    final providers = user.appMetadata['providers'];
+    final hasApple =
+        (user.identities ?? const []).any((i) => i.provider == 'apple') ||
+        (providers is List && providers.contains('apple'));
+    if (!hasApple) return null;
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: const [],
+      );
+      return credential.authorizationCode;
+    } on SignInWithAppleAuthorizationException catch (e) {
+      if (e.code == AuthorizationErrorCode.canceled) {
+        throw AuthException(
+          'Confirm with Apple to delete your account. Nothing was deleted.',
+        );
+      }
+      throw AuthException('Apple confirmation failed: ${e.code.name}');
+    }
   }
 
   Future<void> _afterIdentity(

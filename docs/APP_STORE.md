@@ -1,5 +1,8 @@
 # RiderLab → App Store (iOS)
 
+Step-by-step release checklist with copy-paste listing text:
+[APP_STORE_RELEASE.md](APP_STORE_RELEASE.md).
+
 Bundle ID: `com.rawthrottle.riderlab` · Team: `886UT95Y7R` · App Store Connect app id: `6804365101`
 
 ## Build
@@ -29,7 +32,10 @@ auto-renew disclosure, Restore, Terms and Privacy links (guideline 3.1.2).
 
 ### Free trial and codes on iOS
 
-- 30-day no-card trial stays server-side (Supabase), same as Android.
+- No app-run trial on iOS: `startTrialIfEligible()` is a no-op there and the
+  paywall never mentions it. The iOS trial is the subscription's
+  **introductory offer** (free trial) in App Store Connect. An account that
+  started the server-side trial on Android still sees Pro on iOS while it lasts.
 - Partner codes (`PRO-…`) are **hidden on iOS** (guideline 3.1.1). Use App Store
   **offer codes** instead: App Store Connect → Subscriptions → RiderLab Pro →
   Offer Codes. Users redeem them from Settings / paywall → "Canjear código de oferta".
@@ -51,6 +57,19 @@ builds (no ads SDK). It promotes Pro features instead.
 - Privacy: https://riderlab.rawthrottle.com.mx/legal/privacy.html
 - Terms (EULA): https://riderlab.rawthrottle.com.mx/legal/terms.html
 - Delete account: https://riderlab.rawthrottle.com.mx/legal/delete-account.html
+
+## Métrica logger
+
+Hidden on iOS 1.0 (`AppDistribution.allowsMetricaLogger`); returns in 1.1.
+
+## Account deletion and Sign in with Apple
+
+`delete-account` revokes the user's Apple tokens (guideline 5.1.1(v)). On iOS
+the app asks Apple for a fresh authorization code before deleting an account
+that has an Apple identity, and the function exchanges and revokes it. Needs
+Edge Function secrets `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY`
+(a key with Sign in with Apple enabled). Deletion still proceeds if Apple
+fails; the failure is logged as `apple revoke failed`.
 
 ## EU (DSA)
 

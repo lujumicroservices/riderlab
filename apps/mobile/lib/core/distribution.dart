@@ -42,4 +42,10 @@ class AppDistribution {
 
   /// iOS: App Store offer codes (redeemed through Apple's own sheet).
   static bool get allowsOfferCodes => isAppStore;
+
+  /// Métrica logger (BLE pairing / SD import). Out of iOS 1.0: App Review
+  /// cannot test it without the hardware, so it ships in 1.1 together with a
+  /// pairing video on a real iPhone. Flip this to `true` for that release
+  /// (and restore the Métrica wording in the iOS Bluetooth usage strings).
+  static bool get allowsMetricaLogger => !isAppStore;
 }

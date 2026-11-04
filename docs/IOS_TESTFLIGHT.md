@@ -67,7 +67,7 @@ Cargar los secretos de la tabla de arriba (plist y `.p8` en base64).
 
 ## Alcance de la 1.0 iOS
 - **Métrica (vinculación BLE) queda fuera de la 1.0 iOS; entra en 1.1 junto con un video de emparejamiento en iPhone real para App Review.**
-  Esta rama sale de `origin/master` y no incluye `exp/gps-track-points` ni `cursor/metrica-ble-pairing-9627`; el permiso de Bluetooth solo menciona la cámara GoPro.
+  El código sí está en `ios/appstore-release`, pero oculto en iOS con `AppDistribution.allowsMetricaLogger`; el permiso de Bluetooth solo menciona la cámara GoPro.
 
 ## Ajustes de build en esta rama
 - **Podfile** (`post_install`): activa en `permission_handler` solo `PERMISSION_LOCATION=1`, `PERMISSION_NOTIFICATIONS=1` y `PERMISSION_BLUETOOTH=1`.
@@ -89,13 +89,12 @@ Cargar los secretos de la tabla de arriba (plist y `.p8` en base64).
   `signInWithIdToken(provider: apple)` con nonce (SHA-256 a Apple, nonce crudo a Supabase). Android sigue solo con Google.
   Falta configurar (Juan): Supabase → Authentication → Providers → **Apple** → Enable y en **Client IDs** poner `com.rawthrottle.riderlab`
   (para el flujo nativo no hace falta Services ID ni secreto; solo si algún día se usa Apple por web/OAuth). En el portal: capability Sign in with Apple en el App ID.
-  Pendiente en código: revocar el token de Apple al borrar la cuenta (Edge Function `delete-account` con `/auth/revoke`; requiere authorization code + client secret firmado con una llave .p8 de Sign in with Apple).
+  Revocación del token de Apple al borrar la cuenta: **hecha** (`delete-account` + código fresco desde la app). Falta cargar los secretos `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` en Supabase y desplegar la función.
 - **Push iOS**: `AppDelegate.swift` no necesita cambios para lo básico — `firebase_messaging` registra APNs por swizzling y
   `Firebase.initializeApp()` sin opciones lee `GoogleService-Info.plist` del bundle. `push_notification_service.dart` ya pide permiso en iOS
-  (`requestPermission`). Recomendado: llamar `FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(alert: true, badge: true, sound: true)`
-  y, antes de `getToken()` en iOS, esperar `getAPNSToken()` (si no, el primer `getToken()` puede fallar con `apns-token-not-set`). El backend que envía FCM debe incluir bloque `apns` (sonido/alerta) para iOS.
-- **Pro en iOS**: leer `REVENUECAT_API_KEY_IOS` (hoy `REVENUECAT_API_KEY` debe ser la `appl_` en `MOBILE_ENV_IOS`) y la hoja de compra completa de la 3.1.2
-  (precio, duración, renovación, Restaurar, enlaces a Términos y Privacidad) (paquete §8.3). Switch, códigos de socio y trial propio ya están ocultos en iOS.
+  (`requestPermission`). **Hecho:** antes de `getToken()` en iOS se espera `getAPNSToken()` hasta 10 s, sin bloquear el arranque. `setForegroundNotificationPresentationOptions`
+  **no** se activa a propósito: `_onForeground` ya muestra una notificación local en iOS y saldría duplicada. El backend que envía FCM debe incluir bloque `apns` (sonido/alerta) para iOS.
+- **Pro en iOS (hecho)**: se lee `REVENUECAT_API_KEY_IOS` y el paywall tiene la hoja completa de la 3.1.2. Switch, códigos de socio y trial propio ocultos en iOS.
 - **Ubicación (hecho en esta rama)**: "Siempre" en dos pasos en iOS. Paso 1 "Al usar la app" al tocar Grabar / Armar auto / rodada (aviso propio + diálogo del sistema).
   Paso 2 "Siempre" solo al activar Armar auto o al terminar un recorrido, con pantalla propia (paquete §9.3) y luego el aviso único de iOS;
   "Ahora no" se recuerda (`ios_location_always_not_now`) y no se vuelve a pedir. Si está denegado, diálogo con "Abrir Ajustes". Android sin cambios.
