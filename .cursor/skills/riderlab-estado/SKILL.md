@@ -61,7 +61,7 @@ Falta:
 - Preguntas abiertas: antena SparkFun vs incluida; BLE en vivo (fuera de plan).
 - Ruta a ~10 cm: RTK (ver indice). Decision de compra pendiente.
 
-Detalle vivo: `hardware/STATUS.md`, `hardware/BOM.md`, `hardware/DECISIONS.md`, `hardware/CONTEXT.md`.
+Detalle vivo: `hardware/STATUS.md`, `hardware/BOM-standard.md`, `hardware/DECISIONS.md`, `hardware/CONTEXT.md`.
 
 ## 3. Indice de temas (con puntero)
 
@@ -76,7 +76,7 @@ Detalle vivo: `hardware/STATUS.md`, `hardware/BOM.md`, `hardware/DECISIONS.md`, 
 | Plano de tierra | Disco de acero >=10 cm (ideal 15) centrado bajo la antena; unos mm de plastico no importan. Ref: u-blox UBX-15030289, ArduSimple (EUR 8.20), SparkFun (US$7.25) | `.cursor/rules/experto-riderlab.mdc` |
 | RTK barato | LC29H(EA) rover L1/L5 10 Hz + LC29H(BS) base (~US$100 + antenas); LG290P Waveshare US$89.99 (L1/L2/L5, 20 Hz, PPK, limite 4 g); UM980 ~US$150 como base. No LC29H(DA) (RTK 1 Hz) | `.cursor/rules/experto-riderlab.mdc`; chat 2026-10-05 y 2026-10-08 |
 | RTK caro (BOM Pro) | ZED-F9P ~US$495/unidad + ~US$443 base | PR #6, rama `discrete-rtk-bom`, `hardware/BOM-pro.md` |
-| Competencia AiM Solo 2 | Referencia de hardware; BOM actual ~1-2.5 m, cerca o algo peor que AiM | `hardware/BOM.md`, `hardware/DECISIONS.md`, `hardware/CONTEXT.md` |
+| Competencia AiM Solo 2 | Referencia de hardware; BOM actual ~1-2.5 m, cerca o algo peor que AiM | `hardware/BOM-standard.md`, `hardware/DECISIONS.md`, `hardware/CONTEXT.md` |
 | Circuito 8 Horas (Zapopan) | Av. Las Torres, Paraisos del Colli; vuelta 1.33-1.6 km, ancho ~7 m, centro 20.6663,-103.4598 | `.cursor/skills/circuit-8h/`, `8horas/`, `docs/www/_dist/simm/circuit8h_*` |
 | Estrategia punto de referencia estatico | Ancla en punto conocido + mapeo con M5; mismo receptor y satelites comunes | `hardware/firmware/ANCHOR.md` |
 | Bot hermano | "Experto Electronica RiderLab" para dudas de electronica | Grok Bot |
