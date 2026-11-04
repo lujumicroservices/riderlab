@@ -22,6 +22,7 @@ ESP32 Basic = **solo 2.4 GHz**.
 
 ## Referencias
 
+- **Dos BOM.** **Pro** = partes sueltas + RTK ([BOM-pro.md](BOM-pro.md)), abierto el 1 oct 2026. **Standard** = stack M5/M9N ([BOM-standard.md](BOM-standard.md)), el del prototipo actual.
 - Comparación con **AiM Solo 2** cerrada el 26 Sep 2026. Números en el skill y en [comparacion-solo-2.pdf](comparacion-solo-2.pdf). Misma clase de sensor; línea esperada 1–2.5 m hasta medir en pista.
 
 ## Nube
@@ -36,6 +37,7 @@ ESP32 Basic = **solo 2.4 GHz**.
 
 ## Preguntas abiertas
 
+- BOM Pro: confirmar carrito **1 rover + 1 base**; ¿el LoRa aguanta la vuelta entera en FIXED?
 - Antena SparkFun vs incluida.
 - BLE live (fuera de este plan).
 
