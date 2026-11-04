@@ -125,7 +125,9 @@ class PushNotificationService {
     }
 
     messaging.onTokenRefresh.listen(_storeToken);
-    await syncToken();
+    // Not awaited: on iOS syncToken can wait for APNs, and main() awaits
+    // init() before the first frame.
+    unawaited(syncToken());
     _ready = true;
   }
 
@@ -140,6 +142,14 @@ class PushNotificationService {
       return;
     }
     try {
+      // iOS: getToken() throws `apns-token-not-set` until APNs has handed
+      // the device token to Firebase, which can take a few seconds after
+      // the permission prompt on first launch. onTokenRefresh stores the
+      // token later if APNs is slower than this wait.
+      if (Platform.isIOS && !await _waitForApnsToken()) {
+        PushDiagnostics.record(fn: 'fcm_token', skipped: 'no_apns_token');
+        return;
+      }
       final token = await FirebaseMessaging.instance.getToken();
       if (token == null || token.isEmpty) {
         PushDiagnostics.record(fn: 'fcm_token', skipped: 'no_token');
@@ -151,6 +161,15 @@ class PushNotificationService {
       debugPrint('FCM token: $e');
       PushDiagnostics.recordError('fcm_token', e);
     }
+  }
+
+  static Future<bool> _waitForApnsToken() async {
+    for (var i = 0; i < 10; i++) {
+      final apns = await FirebaseMessaging.instance.getAPNSToken();
+      if (apns != null && apns.isNotEmpty) return true;
+      await Future<void>.delayed(const Duration(seconds: 1));
+    }
+    return false;
   }
 
   Future<void> clearToken() async {

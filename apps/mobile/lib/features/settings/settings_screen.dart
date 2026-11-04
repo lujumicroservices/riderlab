@@ -101,8 +101,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     ref.invalidate(myRodadasProvider);
   }
 
-  TextStyle get _tileTitle =>
-      GoogleFonts.rajdhani(fontWeight: FontWeight.w600);
+  TextStyle get _tileTitle => GoogleFonts.rajdhani(fontWeight: FontWeight.w600);
 
   TextStyle get _tileSub =>
       GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12);
@@ -173,12 +172,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             color: AppTheme.lineHot.withValues(alpha: 0.14),
             borderRadius: BorderRadius.circular(12),
             child: ListTile(
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 4,
+              ),
               leading: const Icon(Icons.alt_route, color: AppTheme.lineHot),
               title: Text(l10n.gpsTrackPointsLabTile, style: _tileTitle),
               subtitle: Text(l10n.gpsTrackPointsLabHelp, style: _tileSub),
-              trailing: const Icon(Icons.chevron_right, color: AppTheme.lineHot),
+              trailing: const Icon(
+                Icons.chevron_right,
+                color: AppTheme.lineHot,
+              ),
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
@@ -201,11 +205,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 activeThumbColor: RideVizPalette.leanLeft,
                 onChanged: (v) async {
                   if (v) {
-                    final ok =
-                        await LocationPermissionGate.requestForRecording(
-                          context,
-                          offerBackground: true,
-                        );
+                    final ok = await LocationPermissionGate.requestForRecording(
+                      context,
+                      offerBackground: true,
+                    );
                     if (!ok || !context.mounted) return;
                   }
                   await ref
@@ -405,25 +408,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             title: l10n.labsSectionTitle,
             help: l10n.labsSectionHelp,
             children: [
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.memory, color: AppTheme.lineHot),
-                title: Text('M5 Logger', style: _tileTitle),
-                subtitle: Text(
-                  'Emparejar hardware / importar sesión SD',
-                  style: _tileSub,
+              if (AppDistribution.allowsMetricaLogger)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.memory, color: AppTheme.lineHot),
+                  title: Text('M5 Logger', style: _tileTitle),
+                  subtitle: Text(
+                    'Emparejar hardware / importar sesión SD',
+                    style: _tileSub,
+                  ),
+                  trailing: isPro
+                      ? const Icon(Icons.chevron_right)
+                      : const ProBadge(),
+                  onTap: () => openIfPro(context, ref, () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const LoggerHardwareScreen(),
+                      ),
+                    );
+                  }),
                 ),
-                trailing: isPro
-                    ? const Icon(Icons.chevron_right)
-                    : const ProBadge(),
-                onTap: () => openIfPro(context, ref, () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const LoggerHardwareScreen(),
-                    ),
-                  );
-                }),
-              ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(l10n.showForceStartArmed, style: _tileTitle),

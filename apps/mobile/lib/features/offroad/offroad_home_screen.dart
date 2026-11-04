@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/distribution.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../theme/offroad_theme.dart';
 import '../../widgets/mode_toggle.dart';
@@ -98,21 +99,23 @@ class OffroadHomeScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
-            _HomeAction(
-              icon: Icons.bluetooth_searching_rounded,
-              title: l10n.offroadMetricaTitle,
-              subtitle: l10n.offroadMetricaSubtitle,
-              onTap: () => openIfPro(
-                context,
-                ref,
-                () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const LoggerHardwareScreen(),
+            if (AppDistribution.allowsMetricaLogger) ...[
+              const SizedBox(height: 12),
+              _HomeAction(
+                icon: Icons.bluetooth_searching_rounded,
+                title: l10n.offroadMetricaTitle,
+                subtitle: l10n.offroadMetricaSubtitle,
+                onTap: () => openIfPro(
+                  context,
+                  ref,
+                  () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const LoggerHardwareScreen(),
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
           ],
         ),
       ),
