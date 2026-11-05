@@ -50,7 +50,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           # Fijo: misma versión que la PC de desarrollo (LUJU3), donde pasa flutter analyze.
-          flutter-version: 3.41.4
+          flutter-version: 3.47.1
           channel: stable
           cache: true
 

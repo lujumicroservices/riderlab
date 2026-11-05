@@ -169,6 +169,12 @@ Either path gives the same signed IPA:
       flutter build ipa --release --dart-define=DISTRIBUTION=appstore
       open build/ios/archive/Runner.xcarchive   # Organizer → Distribute → App Store Connect
 
+- **Xcode Cloud** (already connected to the repo, builds `master`):
+  `apps/mobile/ios/ci_scripts/ci_post_clone.sh` installs Flutter 3.47.1 and
+  generates the Flutter/CocoaPods files. In the workflow → Environment add
+  secret variables `MOBILE_ENV_IOS_B64` and `GOOGLE_SERVICE_INFO_PLIST_B64`
+  (`base64 -i <file> | pbcopy`). Build numbers are `CI_BUILD_NUMBER + 200`.
+
 - **GitHub Actions**: add the 6 secrets in IOS_TESTFLIGHT.md (none are loaded
   yet), then Actions → ios-testflight → Run workflow with `--ref ios/appstore-release`.
 
