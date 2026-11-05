@@ -85,6 +85,11 @@ class SupabaseBootstrap {
     return existing;
   }
 
+  /// `userId|name` last written by [_syncLinkedNameIfNeeded]. ensureSession()
+  /// runs before every cloud call, so without this the same name was written
+  /// to `profiles` on each one.
+  static String? _lastSyncedName;
+
   /// If already linked to Google, push name into profiles (fixes pre-sync users).
   static Future<void> _syncLinkedNameIfNeeded(User user) async {
     if (user.isAnonymous) return;
@@ -124,11 +129,14 @@ class SupabaseBootstrap {
       }
       name ??= user.email?.trim();
       if (name == null || name.isEmpty) return;
+      final key = '${user.id}|$name';
+      if (_lastSyncedName == key) return;
 
       await client.from('profiles').update({
         'display_name': name,
         'updated_at': DateTime.now().toUtc().toIso8601String(),
       }).eq('id', user.id);
+      _lastSyncedName = key;
       debugPrint('RiderLab synced linked profile name: $name');
     } catch (e) {
       debugPrint('RiderLab linked profile sync: $e');

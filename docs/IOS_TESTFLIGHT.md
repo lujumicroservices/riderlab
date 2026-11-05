@@ -1,6 +1,6 @@
 # RiderLab iOS → TestFlight desde GitHub Actions (sin Mac local)
 
-Flujo: `.github/workflows/ios-testflight.yml`. Corre en una Mac de GitHub (`macos-26`, Xcode estable, **Flutter 3.41.4 fijo**),
+Flujo: `.github/workflows/ios-testflight.yml`. Corre en una Mac de GitHub (`macos-26`, Xcode estable, **Flutter 3.47.1 fijo** (la misma con la que se compiló el build 101)),
 **solo a mano** (Actions → ios-testflight → Run workflow). Nunca corre en push.
 
 - `upload_to_testflight = false` (por defecto): compila, firma y deja el `.ipa` como artefacto (14 días).
