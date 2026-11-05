@@ -6,6 +6,21 @@ signing details are in [IOS_TESTFLIGHT.md](IOS_TESTFLIGHT.md).
 
 Release branch: `ios/appstore-release` · version **1.37.25 (101)**.
 
+## Status (2026-11-05)
+
+Done:
+- Build 1.37.25 (101) uploaded and processed; available in TestFlight (Nov 4).
+- App ID has Push Notifications + Sign in with Apple (present in the provisioning profile).
+- Supabase: **Apple provider enabled** (client id `com.rawthrottle.riderlab`);
+  `delete-account` with Apple token revocation deployed.
+- RevenueCat account and app created (no products yet).
+- Xcode Cloud post-clone script in the repo (needs its two secret variables).
+
+Open (in order): Paid Apps Agreement + bank + tax → Apple `.p8` key (APNs +
+Sign in with Apple) → Firebase APNs upload + Supabase `APPLE_*` secrets →
+subscriptions + RevenueCat products → listing, privacy, age rating, pricing →
+TestFlight test on iPhone → demo account + review notes + location video → submit.
+
 ## 0. Scope of iOS 1.0
 
 - In: street recording, Ride Lab, rodadas, friends, Family Watch, off-road
@@ -36,7 +51,7 @@ Release branch: `ios/appstore-release` · version **1.37.25 (101)**.
 
 - [ ] Firebase → Project settings → Cloud Messaging → iOS app → upload the
       APNs `.p8` (Key ID + Team ID).
-- [ ] Supabase → Authentication → Providers → **Apple** → Enable, Client IDs:
+- [x] Supabase → Authentication → Providers → **Apple** → Enable, Client IDs:
       `com.rawthrottle.riderlab` (native flow; no Services ID needed).
 - [ ] Supabase → Edge Functions → Secrets (Apple token revocation on account
       deletion, guideline 5.1.1(v)):
@@ -45,7 +60,7 @@ Release branch: `ios/appstore-release` · version **1.37.25 (101)**.
       APPLE_KEY_ID=<key id from step 2>
       APPLE_PRIVATE_KEY=<full .p8 contents, BEGIN/END lines included>
 
-- [ ] Deploy: `supabase functions deploy delete-account`.
+- [x] Deploy: `supabase functions deploy delete-account --remote=eabhnmlfsfibgwkspqwa` (CLI v3).
 
 ## 4. Subscriptions (App Store Connect → RiderLab → Subscriptions)
 
