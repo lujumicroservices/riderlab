@@ -231,7 +231,7 @@ Do not interact with the phone while riding; analysis is post-ride.
 
 ## 12. Submit and release
 
-- [ ] Version page → Build → select 1.37.25 (101).
+- [ ] Version page → Build → select 1.37.25 (102).
 - [ ] **In-App Purchases and Subscriptions** section → add both subscriptions
       (first subscriptions must be submitted with an app version).
 - [ ] Version Release → **Manually release this version**.
