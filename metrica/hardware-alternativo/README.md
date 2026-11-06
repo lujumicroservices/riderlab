@@ -8,7 +8,7 @@ El diseño vigente y sus fuentes quedan donde ya estaban. Esta línea no los mue
 
 Un dispositivo de telemetría de circuito para moto, con GPS, IMU y barómetro, pantalla exterior legible al sol y funcionamiento sin teléfono como objetivo. La carcasa propuesta es horizontal, **150 mm de ancho × 70 mm de alto**. La profundidad no está definida.
 
-Base aportada el 2026-11-06, todavía sin modelo cerrado ni hardware verificado: MCU de la familia **S32K3**, sensores GPS / IMU / barómetro de módulos **M5Stack**, y **batería custom**. La luz de carcasa es una cadena de **9** píxeles. En la llamada 21:59 el testigo GPS pasó el conteo de 8 a 9. Mapa, estados y pinout: [leds.md](leds.md).
+Base aportada el 2026-11-06, todavía sin modelo cerrado ni hardware verificado: MCU de la familia **S32K3**, sensores GPS / IMU / barómetro de módulos **M5Stack**, y **batería custom**. La luz de carcasa es una cadena de **105** píxeles lógicos. El conteo pasó de 8 a 9 en la llamada 21:59 (testigo GPS) y de 9 a 105 en la revisión 22:04 (matriz 10×10 en lugar de cuatro segmentos). Mapa, corona provisional y pinout: [leds.md](leds.md).
 
 La solución física puede incluir una PCB nueva. Lo que queda fuera es usar la PCB del prototipo estándar como diseño activo. Las MCPCB de aluminio de los LED son un candidato mecánico, no esa PCB y no un diseño ya validado.
 
@@ -16,14 +16,14 @@ La solución física puede incluir una PCB nueva. Lo que queda fuera es usar la 
 
 | Documento | Qué guarda |
 |-----------|------------|
-| [requisitos.md](requisitos.md) | Objetivos, base S32K3 y cadena de 9. Sin modelo cerrado. |
+| [requisitos.md](requisitos.md) | Objetivos, base S32K3 y cadena de 105. Sin modelo cerrado. |
 | [arquitectura.md](arquitectura.md) | Bloques con familia o procedencia, piezas todavía abiertas. |
-| [leds.md](leds.md) | Mapa 0–8, estados, bloques, conector de 3 vías y presupuesto. |
+| [leds.md](leds.md) | Mapa 0–104, matriz lógica, pinout y presupuesto de 105. |
 | [exclusiones-pcb-estandar.md](exclusiones-pcb-estandar.md) | Qué de la PCB estándar no entra como diseño activo. |
-| [hardware/README.md](hardware/README.md) | Pinout lógico, regulador y límites de lo que no se fabrica aún. |
-| [firmware/README.md](firmware/README.md) | Contrato de la cadena. Hoy no hay código. |
-| [mecanica/README.md](mecanica/README.md) | Dos conjuntos de luz, MCPCB candidata, difusores. |
-| [validacion/README.md](validacion/README.md) | Pruebas de las 9 zonas, de la electricidad y del producto. |
+| [hardware/README.md](hardware/README.md) | Pinout lógico, regulador, ramales y límites de lo que no se fabrica aún. |
+| [firmware/README.md](firmware/README.md) | Contrato de la trama fija. Hoy no hay código. |
+| [mecanica/README.md](mecanica/README.md) | Testigos, corona provisional y MCPCB candidata. |
+| [validacion/README.md](validacion/README.md) | Pruebas de los 105, de la geometría y de la electricidad. |
 
 ## Árbol inicial
 

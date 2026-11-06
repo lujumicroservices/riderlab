@@ -1,6 +1,6 @@
-# Mecánica — dos conjuntos de luz y carcasa
+# Mecánica — testigos, corona y carcasa
 
-No hay CAD, planos ni archivos de impresión. No hay un render en este cambio: la documentación no espera uno ni afirma que exista.
+No hay CAD, planos ni archivos de impresión. Un render conceptual lo produce el padre aparte. Este cambio no lo incluye y no afirma que el archivo ya esté en el repositorio.
 
 ## Envolvente propuesta
 
@@ -10,48 +10,52 @@ No hay CAD, planos ni archivos de impresión. No hay un render en este cambio: l
 | Ancho | 150 mm | Propuesta |
 | Alto | 70 mm | Propuesta |
 | Profundidad | — | No indicada |
+| Diámetro del anillo | — | No medido |
 
-Estas cotas acotan el volumen a estudiar. No son un diseño de carcasa cerrado ni el contorno de una PCB.
+Estas cotas acotan el volumen a estudiar. No fijan el pitch de 100 píxeles ni el contorno de una placa.
 
-## Dos conjuntos, lectura conservadora
-
-Juan describió la luz en dos zonas. La lectura conservadora, la que usa esta carpeta, son **dos conjuntos**:
+## Dos conjuntos
 
 | Conjunto | Qué lleva | Índices |
 |----------|-----------|---------|
-| Placa mecánica vertical, a la izquierda | Tres testigos, de arriba a abajo: poder, GPS, grabación | 0, 1, 2 |
-| Conjunto dona, centrado a la derecha | Cuatro segmentos de anillo y, en el centro, dos medios círculos (Wi-Fi y Bluetooth) | 3–6 y 7–8 |
+| Placa mecánica vertical, a la izquierda | Tres testigos, de arriba a abajo: poder, GPS, REC | 0, 1, 2 |
+| Anillo a la derecha, mismo tamaño de dona que el concepto anterior, con hueco central | 100 píxeles de la matriz lógica y, en el centro, dos medios círculos (Wi-Fi y Bluetooth) | 3–102 y 103–104 |
 
-«Placa» aquí es la pieza mecánica de los tres testigos, no la PCB estándar del prototipo. El orden alrededor de la dona y el lado de cada medio círculo no están fijados.
+«Placa» de la izquierda es la pieza mecánica de los tres testigos, no la PCB estándar.
 
-## MCPCB de aluminio, candidato
+## Corona, propuesta provisional
 
-Concepto pedido en la llamada 21:59: **MCPCB de aluminio pequeñas**, con los píxeles soldados, **atornilladas a la carcasa**.
+La revisión 22:04 pide una matriz de puntos 10×10 en el tamaño del anillo. La interpretación explícita, documentada como **propuesta provisional** y no como requisito físico cerrado, es:
 
-Es un candidato. No es un diseño de MCPCB validado y no aporta Gerbers.
+- Las coordenadas 10×10 son lógicas (`índice = 3 + 10·r + c`).
+- Los 100 píxeles se distribuyen en una **corona**, para dejar el hueco de los dos medios círculos.
+- No es una cuadrícula cartesiana de 10×10 a la que se le recortan esquinas o centro.
+
+El conflicto: ese recorte físico de una cuadrícula regular pierde puntos. No se afirma que convivan una cuadrícula completa y un hueco central. El mapeo físico (qué celda va en qué ángulo) está pendiente. No se cierra hasta tener package, pitch y diámetro medido.
+
+## MCPCB de aluminio, candidato de la matriz custom
+
+MCPCB de aluminio, con los píxeles soldados y atornilladas a la carcasa. Es un candidato para esta matriz, no la PCB estándar v2 y no un diseño validado. No hay Gerbers.
 
 El concepto incluye:
 
-- Capa dieléctrica entre cobre y aluminio, porque el núcleo conduce.
-- Montaje con tornillos que no pongan una red (VLED, DATA o un pad) en el aluminio ni en una carcasa metálica.
-- Un puente de las tres redes si la cadena de nueve cruza más de una MCPCB. El conector hacia el S32K3 sigue siendo el J_LED de tres vías descrito en [../leds.md](../leds.md).
+- Capa dieléctrica entre cobre y aluminio.
+- Tornillos que no pongan VLED, DATA o un pad en el aluminio ni en una carcasa metálica.
+- Separación térmica entre la matriz y la batería, y entre la matriz y el S32K3. El camino de calor candidato es el aluminio; cómo se separa no está cerrado.
+- Varios ramales VLED/GND de inyección. El conector de 3 vías no se da por suficiente sin corriente nominal. Ver [../leds.md](../leds.md).
 
-Cuántas MCPCB son, y si la dona va en una sola, queda abierto. Un reparto posible, no cerrado, es una tira izquierda de 3 píxeles y un grupo derecho de 6.
+Cuántas MCPCB son queda abierto. Un reparto posible, no cerrado, es una tira izquierda de 3 píxeles y una corona derecha con los 100 más los dos medios círculos.
 
 ## Óptica
 
-Nueve puntos no dibujan arcos ni medios círculos uniformes.
+Cien puntos en corona no dibujan un anillo continuo por sí solos. Los dos medios círculos necesitan guía o difusor y un tabique entre ellos. Los tres testigos son ventanas propias, aisladas del anillo.
 
-- Los cuatro sectores necesitan difusor o guía de luz por segmento, con pared óptica entre segmentos.
-- Los dos radios necesitan guía o difusor de medio círculo, con tabique entre ambos.
-- Los tres testigos de la izquierda son ventanas propias, aisladas de la dona, no arcos.
-
-El objetivo es **9 zonas**. Antes de subir el número de LED se valida un prototipo óptico con estas nueve.
+El prototipo óptico y de pitch se hace con el package real, dentro del anillo cuyo diámetro todavía hay que medir. No se adelanta un pitch numérico a partir de 150 mm × 70 mm.
 
 ## Pantalla y montaje en la moto
 
-La pantalla va al exterior y tiene que leerse al sol. Su posición respecto de los dos conjuntos de luz no está elegida. El anclaje a la moto, el paso de cables y la antena siguen abiertos. No se reutiliza el contorno de la PCB estándar como base mecánica.
+La pantalla va al exterior y tiene que leerse al sol. Su posición respecto de los testigos y del anillo no está elegida. El anclaje a la moto, el paso de cables y la antena siguen abiertos. No se reutiliza el contorno de la PCB estándar como base mecánica.
 
 ## Relación con la electrónica
 
-La forma final depende de la solución física de [../hardware/README.md](../hardware/README.md). Si más adelante hay una PCB del S32K3, su contorno tiene que caber en los 150 mm × 70 mm junto con la pantalla y estas MCPCB, o la envolvente se revisa. Esa revisión no está hecha.
+La forma final depende de [../hardware/README.md](../hardware/README.md). Si más adelante hay una PCB del S32K3, su contorno tiene que caber en los 150 mm × 70 mm junto con la pantalla y estas MCPCB, o la envolvente se revisa. Esa revisión no está hecha.
