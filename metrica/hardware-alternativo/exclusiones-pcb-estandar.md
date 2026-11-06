@@ -32,4 +32,6 @@ Tampoco se revive un BOM v1 del M5 ni se toma esa lista como atajo de la alterna
 
 ## Qué sí puede existir después
 
-La solución nueva y su BOM están por definir. Excluir la PCB estándar no significa que la alternativa vaya a fabricarse sin ninguna placa. Una PCB distinta, si más adelante se justifica, sería un diseño nuevo, con su propio esquema, layout y BOM, escritos en [hardware/](hardware/) cuando existan. Hoy ese espacio solo tiene el README.
+La solución nueva y su BOM están por definir. Excluir la PCB estándar no significa que la alternativa vaya a fabricarse sin ninguna placa. Una PCB distinta del S32K3, si más adelante se justifica, sería un diseño nuevo, con su propio esquema, layout y BOM, escritos en [hardware/](hardware/) cuando existan.
+
+Las MCPCB de aluminio pequeñas descritas en [leds.md](leds.md) y [mecanica/README.md](mecanica/README.md) son un candidato para soldar los nueve píxeles y atornillarlos a la carcasa. No son la PCB estándar, no están validadas y este repositorio no contiene sus Gerbers.

@@ -1,26 +1,29 @@
 # Métrica — hardware alternativo (sin la PCB estándar)
 
-Línea de diseño **aparte** del prototipo Métrica que ya existe. Esta carpeta es solo andamiaje: requisitos, arquitectura pendiente y espacios vacíos. No hay esquema, layout, firmware ni BOM de la alternativa.
+Línea de diseño **aparte** del prototipo Métrica que ya existe. Esta carpeta documenta requisitos, la arquitectura todavía abierta y el pinout provisional de la luz. No hay esquema, layout, firmware ni BOM de la alternativa.
 
 El diseño vigente y sus fuentes quedan donde ya estaban. Esta línea no los mueve, no los borra y no los sustituye.
 
 ## Qué se pide
 
-Un dispositivo de telemetría de circuito para moto, con GPS e IMU, pantalla exterior legible al sol y funcionamiento sin teléfono como objetivo. La carcasa propuesta es horizontal, **150 mm de ancho × 70 mm de alto**. La profundidad no está definida.
+Un dispositivo de telemetría de circuito para moto, con GPS, IMU y barómetro, pantalla exterior legible al sol y funcionamiento sin teléfono como objetivo. La carcasa propuesta es horizontal, **150 mm de ancho × 70 mm de alto**. La profundidad no está definida.
 
-La solución física de esta línea está por definir. Puede incluir una PCB nueva u otra forma de interconexión. Lo que queda fuera es **usar la PCB del prototipo estándar** como diseño activo.
+Base aportada el 2026-11-06, todavía sin modelo cerrado ni hardware verificado: MCU de la familia **S32K3**, sensores GPS / IMU / barómetro de módulos **M5Stack**, y **batería custom**. La luz de carcasa es una cadena de **9** píxeles. En la llamada 21:59 el testigo GPS pasó el conteo de 8 a 9. Mapa, estados y pinout: [leds.md](leds.md).
+
+La solución física puede incluir una PCB nueva. Lo que queda fuera es usar la PCB del prototipo estándar como diseño activo. Las MCPCB de aluminio de los LED son un candidato mecánico, no esa PCB y no un diseño ya validado.
 
 ## Mapa
 
 | Documento | Qué guarda |
 |-----------|------------|
-| [requisitos.md](requisitos.md) | Objetivos y restricciones ya dichas. Sin selección de partes. |
-| [arquitectura.md](arquitectura.md) | Bloques pendientes. MCU, sensores y pantalla sin amarrar. |
+| [requisitos.md](requisitos.md) | Objetivos, base S32K3 y cadena de 9. Sin modelo cerrado. |
+| [arquitectura.md](arquitectura.md) | Bloques con familia o procedencia, piezas todavía abiertas. |
+| [leds.md](leds.md) | Mapa 0–8, estados, bloques, conector de 3 vías y presupuesto. |
 | [exclusiones-pcb-estandar.md](exclusiones-pcb-estandar.md) | Qué de la PCB estándar no entra como diseño activo. |
-| [hardware/README.md](hardware/README.md) | Espacio de la solución física y del BOM futuro. |
-| [firmware/README.md](firmware/README.md) | Espacio de firmware. Hoy no hay código. |
-| [mecanica/README.md](mecanica/README.md) | Espacio de carcasa, pantalla exterior y montaje. |
-| [validacion/README.md](validacion/README.md) | Qué habrá que demostrar cuando exista un diseño. |
+| [hardware/README.md](hardware/README.md) | Pinout lógico, regulador y límites de lo que no se fabrica aún. |
+| [firmware/README.md](firmware/README.md) | Contrato de la cadena. Hoy no hay código. |
+| [mecanica/README.md](mecanica/README.md) | Dos conjuntos de luz, MCPCB candidata, difusores. |
+| [validacion/README.md](validacion/README.md) | Pruebas de las 9 zonas, de la electricidad y del producto. |
 
 ## Árbol inicial
 
@@ -29,6 +32,7 @@ metrica/hardware-alternativo/
 ├── README.md
 ├── requisitos.md
 ├── arquitectura.md
+├── leds.md
 ├── exclusiones-pcb-estandar.md
 ├── hardware/README.md
 ├── firmware/README.md
