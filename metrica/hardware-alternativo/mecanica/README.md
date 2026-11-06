@@ -1,61 +1,46 @@
-# Mecánica — testigos, corona y carcasa
+# Mecánica — concepto, sin encaje verificado
 
-No hay CAD, planos ni archivos de impresión. Un render conceptual lo produce el padre aparte. Este cambio no lo incluye y no afirma que el archivo ya esté en el repositorio.
+No hay CAD ni planos. La integración es **solo conceptual**. No se promete que el conjunto entre en 150 mm × 70 mm, y no hay un diseño mecánico verificado.
 
-## Envolvente propuesta
+Un render de frente y reverso lo produce el padre aparte. Este cambio no lo espera, no lo incluye y no lo usa para afirmar que el diseño encaja.
+
+## Referencia de volumen
 
 | Dato | Valor | Estado |
 |------|--------|--------|
 | Orientación | Horizontal | Propuesta |
-| Ancho | 150 mm | Propuesta |
-| Alto | 70 mm | Propuesta |
-| Profundidad | — | No indicada |
+| Ancho | 150 mm | Propuesta, no un encaje medido |
+| Alto | 70 mm | Propuesta, no un encaje medido |
+| Profundidad | — | Pendiente |
 | Diámetro del anillo | — | No medido |
 
-Estas cotas acotan el volumen a estudiar. No fijan el pitch de 100 píxeles ni el contorno de una placa.
-
-## Dos conjuntos
+## Dos conjuntos, en concepto
 
 | Conjunto | Qué lleva | Índices |
 |----------|-----------|---------|
-| Placa mecánica vertical, a la izquierda | Tres testigos, de arriba a abajo: poder, GPS, REC | 0, 1, 2 |
-| Anillo a la derecha, mismo tamaño de dona que el concepto anterior, con hueco central | 100 píxeles de la matriz lógica y, en el centro, dos medios círculos (Wi-Fi y Bluetooth) | 3–102 y 103–104 |
+| Columna izquierda | Tres testigos, de arriba a abajo: poder, GPS, REC | 0, 1, 2 |
+| Corona a la derecha, con hueco central | 64 píxeles lógicos y, en el centro, dos medios círculos (Wi-Fi y Bluetooth) | 3–66 y 67–68 |
 
-«Placa» de la izquierda es la pieza mecánica de los tres testigos, no la PCB estándar.
+La lectura de la 8×8 es lógica: coordenadas `índice = 3 + 8·r + c` repartidas en corona. No es una cuadrícula regular recortada hasta dejar 64. Recortar el cuadrado para abrir el hueco elimina puntos; no se afirman las dos geometrías. La disposición anular física está pendiente.
 
-## Corona, propuesta provisional
+La matriz de 100 de las 22:04 es antecedente. No es el dibujo vigente.
 
-La revisión 22:04 pide una matriz de puntos 10×10 en el tamaño del anillo. La interpretación explícita, documentada como **propuesta provisional** y no como requisito físico cerrado, es:
+## Medidas que hacen falta antes de hablar de encaje
 
-- Las coordenadas 10×10 son lógicas (`índice = 3 + 10·r + c`).
-- Los 100 píxeles se distribuyen en una **corona**, para dejar el hueco de los dos medios círculos.
-- No es una cuadrícula cartesiana de 10×10 a la que se le recortan esquinas o centro.
+- Profundidad de la carcasa.
+- Diámetro útil del anillo dentro del rectángulo de 150 mm × 70 mm.
+- Package y pitch real del LED, y si 64 puntos caben en esa corona dejando el hueco.
+- Contorno del módulo de sensores cuando el SKU esté confirmado. La ficha pública del M135, que es el módulo M5Stack que lista un NEO-M9N, publica 54,0 × 54,0 × 13,1 mm. Es referencia de catálogo, no una pieza colocada en esta carcasa. El SKU de esta línea no está confirmado.
+- Tamaño de la batería **custom**. No se usa la batería del stack M5, y sus medidas no se inventan.
 
-El conflicto: ese recorte físico de una cuadrícula regular pierde puntos. No se afirma que convivan una cuadrícula completa y un hueco central. El mapeo físico (qué celda va en qué ángulo) está pendiente. No se cierra hasta tener package, pitch y diámetro medido.
+Mientras esas cotas no existan, el concepto no pasa a diseño mecánico verificado.
 
-## MCPCB de aluminio, candidato de la matriz custom
+## MCPCB de aluminio, candidata de la corona
 
-MCPCB de aluminio, con los píxeles soldados y atornilladas a la carcasa. Es un candidato para esta matriz, no la PCB estándar v2 y no un diseño validado. No hay Gerbers.
+MCPCB de aluminio para la matriz custom, atornillada a la carcasa, con dieléctrico, tornillos que no cortocircuiten y separación térmica respecto de la batería y del S32K3. No es la PCB estándar v2 ni la PCB de soporte del S32K3, que sigue sin definir. No hay Gerbers.
 
-El concepto incluye:
+Los ramales VLED/GND y el límite del conector de 3 vías están en [../leds.md](../leds.md). Los 64 puntos no dibujan el anillo solos. Los dos medios círculos necesitan guía o difusor y un tabique. Los tres testigos son ventanas propias.
 
-- Capa dieléctrica entre cobre y aluminio.
-- Tornillos que no pongan VLED, DATA o un pad en el aluminio ni en una carcasa metálica.
-- Separación térmica entre la matriz y la batería, y entre la matriz y el S32K3. El camino de calor candidato es el aluminio; cómo se separa no está cerrado.
-- Varios ramales VLED/GND de inyección. El conector de 3 vías no se da por suficiente sin corriente nominal. Ver [../leds.md](../leds.md).
+## Pantalla y moto
 
-Cuántas MCPCB son queda abierto. Un reparto posible, no cerrado, es una tira izquierda de 3 píxeles y una corona derecha con los 100 más los dos medios círculos.
-
-## Óptica
-
-Cien puntos en corona no dibujan un anillo continuo por sí solos. Los dos medios círculos necesitan guía o difusor y un tabique entre ellos. Los tres testigos son ventanas propias, aisladas del anillo.
-
-El prototipo óptico y de pitch se hace con el package real, dentro del anillo cuyo diámetro todavía hay que medir. No se adelanta un pitch numérico a partir de 150 mm × 70 mm.
-
-## Pantalla y montaje en la moto
-
-La pantalla va al exterior y tiene que leerse al sol. Su posición respecto de los testigos y del anillo no está elegida. El anclaje a la moto, el paso de cables y la antena siguen abiertos. No se reutiliza el contorno de la PCB estándar como base mecánica.
-
-## Relación con la electrónica
-
-La forma final depende de [../hardware/README.md](../hardware/README.md). Si más adelante hay una PCB del S32K3, su contorno tiene que caber en los 150 mm × 70 mm junto con la pantalla y estas MCPCB, o la envolvente se revisa. Esa revisión no está hecha.
+La pantalla va al exterior y tiene que leerse al sol. Su posición no está elegida. El anclaje a la moto, los cables y la antena siguen abiertos. No se reutiliza el contorno de la PCB estándar.

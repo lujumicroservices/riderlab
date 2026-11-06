@@ -1,77 +1,66 @@
-# LEDs de carcasa — 105 píxeles lógicos
+# LEDs de carcasa — 69 píxeles lógicos
 
-Requisitos aportados el 2026-11-06. No hay cadena armada, ni MCPCB fabricada, ni medida de consumo, ni diámetro de anillo. El mapa de índices es el **mapa de trabajo** de la revisión 22:04. No es un prototipo verificado.
+Requisitos aportados el 2026-11-06. No hay cadena armada, ni MCPCB fabricada, ni medida de consumo, ni diámetro de anillo. El mapa vigente es el de la revisión **22:06**. No es un prototipo verificado y no promete que el conjunto quepa en la carcasa.
 
 Pinout, trama y presupuesto están en esta página. El contrato sin código está en [firmware/README.md](firmware/README.md). La carcasa está en [mecanica/README.md](mecanica/README.md).
 
-## Evolución 8 → 9 → 105
+## Evolución
 
 | Momento | Total | Qué cambió |
 |---------|------:|------------|
 | Pedido inicial del mismo día | 8 | Poder, grabación, cuatro segmentos, Wi-Fi y Bluetooth |
-| Llamada 21:59 | 9 | Testigo GPS entre poder (arriba) y grabación (abajo). Índices 0–8 |
-| Revisión 22:04 | **105** | Los cuatro segmentos pasan a una matriz lógica 10×10 (100). Se mantienen los 3 testigos y los 2 medios círculos |
+| Llamada 21:59 | 9 | Testigo GPS entre poder (arriba) y grabación (abajo) |
+| Revisión 22:04 | 105 | Matriz lógica 10×10 (100) en lugar de los cuatro segmentos |
+| Revisión 22:06 | **69** | La 10×10 queda superada. Corona lógica 8×8 (64). Siguen los 3 testigos y los 2 medios círculos |
 
-El total vigente es **105** píxeles lógicos, índices **0–104**. Los conteos 8 y 9 quedan como antecedente. Comprobación: 3 testigos + 100 de matriz + 2 medios círculos = 105.
+El total vigente es **69** píxeles lógicos, índices **0–68**. El conteo de 100 (y el de 105) es solo antecedente de las 22:04. Comprobación: 3 testigos + 64 de corona + 2 medios círculos = 69.
 
 ## Mapa de índices
 
-Un solo cable de datos. Orden de trabajo de la cadena: DIN del índice 0 hacia DOUT, subiendo el índice de uno en uno hasta el 104. Ese orden es el orden lógico del cable. El asiento físico de cada celda de la matriz es otra tabla y no existe todavía.
+Un solo cable de datos. Orden de trabajo de la cadena: DIN del índice 0 hacia DOUT, subiendo el índice hasta el 68. Ese orden es el orden lógico del cable. La disposición anular física de cada celda es otra tabla y no existe todavía.
 
 | Índice | Grupo | Función |
 |--------|--------|---------|
 | 0 | Testigo izquierdo, arriba | Poder. Fijo mientras el equipo está encendido. Parpadea durante el pareado Bluetooth |
 | 1 | Testigo izquierdo, en medio | GPS |
 | 2 | Testigo izquierdo, abajo | Grabación real de métricas (REC) |
-| 3–102 | Matriz lógica 10×10 | Partes del circuito reconocido. 100 píxeles |
-| 103 | Medio círculo central | Wi-Fi. Cambia de color |
-| 104 | Medio círculo central | Bluetooth. Cambia de color |
+| 3–66 | Corona lógica 8×8 | Partes del circuito reconocido. 64 píxeles |
+| 67 | Medio círculo central | Wi-Fi. Cambia de color |
+| 68 | Medio círculo central | Bluetooth. Cambia de color |
 
-El parpadeo del índice 0 durante el pareado no sustituye al índice 104. Cuál medio círculo queda a cada lado del centro no está fijado.
+El parpadeo del índice 0 durante el pareado no sustituye al índice 68. Cuál medio círculo queda a cada lado del centro no está fijado.
 
 ## Mapeo lógico (r, c) → índice
 
-Filas y columnas lógicas `r` y `c`, cada una de 0 a 9:
+Filas y columnas lógicas `r` y `c`, cada una de 0 a 7:
 
 ```text
-índice = 3 + 10·r + c
+índice = 3 + 8·r + c
 ```
 
 | r | c | índice | Comprueba |
 |--:|--:|-------:|-----------|
 | 0 | 0 | 3 | Primera celda |
-| 0 | 9 | 12 | Fin de la primera fila |
-| 1 | 0 | 13 | Inicio de la segunda fila |
-| 9 | 0 | 93 | Inicio de la última fila |
-| 9 | 9 | 102 | Última celda. 102 − 3 + 1 = 100 |
+| 0 | 7 | 10 | Fin de la primera fila |
+| 1 | 0 | 11 | Inicio de la segunda fila |
+| 7 | 0 | 59 | Inicio de la última fila |
+| 7 | 7 | 66 | Última celda. 66 − 3 + 1 = 64 |
 
-Este mapeo no dice dónde se suelda cada celda. El mapeo físico (índice o `(r, c)` → ángulo, radio, cara de la MCPCB y orden de fabricación si algún día difiere del índice) está pendiente.
+Este mapeo no dice dónde se suelda cada celda. El mapeo físico (índice o `(r, c)` → ángulo, radio y cara de la placa) está pendiente.
 
-## Propuesta provisional de corona
+## Propuesta de corona, no una cuadrícula recortada
 
-Para conservar el hueco central de los dos medios círculos, la lectura explícita ya comunicada es esta: **10×10 son coordenadas lógicas de 100 píxeles repartidos en una corona**, no una cuadrícula cartesiana de 10×10 recortada.
+La lectura explícita comunicada para la 8×8 es la misma que ya se había dicho para la 10×10: las coordenadas son **lógicas**. Los 64 píxeles se reparten en una corona para conservar el hueco de los dos medios círculos. No es una cuadrícula cartesiana de 8×8 recortada hasta dejar 64.
 
-Esa lectura es una **propuesta provisional**. No es un requisito físico cerrado y no fija el diámetro.
+Una cuadrícula física regular de 8×8 es un cuadrado de 64 puntos. Vaciarle el centro, o recortarla en dona, elimina celdas. Esas celdas ya no serían las 64 de la cuadrícula. Este documento no afirma que se hayan logrado a la vez las dos geometrías.
 
-La corona ocupa el mismo tamaño de anillo que la dona de cuatro segmentos que esta revisión reemplaza. Ese diámetro no se midió. El único volumen conocido sigue siendo la carcasa de 150 mm de ancho × 70 mm de alto, en horizontal. La profundidad tampoco está dada.
-
-## Conflicto geométrico
-
-Una cuadrícula física regular de 10×10 es un cuadrado de 100 puntos. Si se recorta en forma de dona, o si se vacía el centro para dejar el hueco, se pierden puntos. Lo que queda ya no son 100 celdas de esa cuadrícula.
-
-Por eso este documento no afirma que se hayan logrado a la vez las dos geometrías: cuadrícula cartesiana completa y anillo con hueco. La propuesta en uso es la corona de 100 píxeles con coordenadas lógicas. La cuadrícula recortada no se da por construida.
-
-La geometría final espera tres datos que hoy no están: el package del LED, el pitch real y el diámetro del anillo. Hasta esa validación no se cierra el dibujo.
+La propuesta no cierra el diámetro. El único volumen citado sigue siendo 150 mm de ancho × 70 mm de alto, en horizontal. La profundidad no está dada. Con eso no se promete que la corona, los testigos, la pantalla, el módulo y la batería quepan.
 
 ## Zonas y cinco colores
 
-Ya no hay cuatro segmentos fijos. Una zona es un conjunto configurable de celdas `(r, c)` del circuito reconocido. Cada zona puede mostrar cualquiera de estos cinco colores:
+Ya no hay cuatro segmentos fijos ni una matriz de 100. Una zona es un conjunto configurable de celdas `(r, c)` del circuito reconocido. Cada zona puede mostrar blanco, amarillo, verde, rojo o morado.
 
-blanco, amarillo, verde, rojo, morado.
-
-El mapa zona → celdas no está escrito y no hay algoritmo en este repositorio. No se copia una geometría de sectores del firmware heredado en `hardware/firmware/`.
-
-El color no declara un rendimiento: verde no significa tramo rápido y rojo no significa tramo lento mientras no exista esa especificación. La tabla estado → color queda abierta. Propuesta, no cerrada: con el circuito sin reconocer, las celdas 3–102 permanecen apagadas.
+El mapa zona → celdas no está escrito y no hay algoritmo en este repositorio. El color no declara un rendimiento. Propuesta, no cerrada: con el circuito sin reconocer, las celdas 3–66 permanecen apagadas.
 
 ## Tabla de estados
 
@@ -80,14 +69,15 @@ El color no declara un rendimiento: verde no significa tramo rápido y rojo no s
 | 0 | Fijo con el equipo encendido. Parpadeo solo durante el pareado Bluetooth | Color del fijo. Propuesta: blanco |
 | 1 | Testigo GPS en la columna izquierda | Estados de fix. Propuesta: apagado sin receptor, parpadeo sin fix, fijo con fix |
 | 2 | Encendido solo durante la grabación real. Un estado armado o en espera no lo enciende | Color. Propuesta: uno de la paleta, sin elegirlo |
-| 3–102 | Muestran la zona del circuito reconocido según el mapa configurable. Cinco colores posibles por zona | El mapa, la semántica del color y el caso sin circuito |
-| 103 | Medio círculo central. Cambia de color con Wi-Fi | Qué color es apagado, buscando o asociado. Propuesta: la misma paleta, sin asignar |
-| 104 | El otro medio círculo. Cambia de color con Bluetooth | Igual que el 103 |
+| 3–66 | Muestran la zona del circuito reconocido según el mapa configurable. Cinco colores posibles por zona | El mapa, la semántica del color y el caso sin circuito |
+| 67 | Medio círculo central. Cambia de color con Wi-Fi | Qué color es apagado, buscando o asociado. Propuesta: la misma paleta, sin asignar |
+| 68 | El otro medio círculo. Cambia de color con Bluetooth | Igual que el 67 |
 
 ## Bloques y conexiones
 
 ```text
-Batería custom (química, celdas y tensión por confirmar)
+Batería CUSTOM (no la batería del stack M5)
+  química, celdas y tamaño por confirmar
         │
         ▼
 Regulador de VLED
@@ -97,28 +87,28 @@ Regulador de VLED
         │     hacia testigos, corona y medios círculos
         └── GND común
 
-S32K3
+S32K3  (variante y PCB de soporte sin definir)
   LED_DATA  solo lógica, pad por confirmar
-  no alimenta los 105 LED
+  no alimenta los 69 LED
         │
         ├── resistencia serie (valor según la hoja de la pieza)
         └── level shifter si el VIH del LED no se cumple
                 │
                 ▼
-        DATA → DIN 0 → DOUT → … → DIN 104
+        DATA → DIN 0 → DOUT → … → DIN 68
 ```
 
-Los datos son un solo cable. La alimentación no viaja por ese cable. Con 105 píxeles el riel VLED/GND se inyecta en varios puntos para no depender de la caída de un único extremo. Cuántos ramales hacen falta sale del pitch y de la corriente ya limitada. Ese número no se inventa aquí.
+Los datos son un solo cable. La alimentación no viaja por ese cable. El riel VLED/GND se inyecta en varios puntos. Cuántos ramales hacen falta sale del pitch y de la corriente ya limitada.
 
 ## Conector provisional y pinout lógico
 
-El conector no es el pin del microcontrolador. `LED_DATA` es una salida lógica. Los 105 LED no se alimentan desde un GPIO, ni a brillo blanco pleno ni a ninguna otra escala: la corriente de luz sale del regulador.
+`LED_DATA` es una salida lógica. Los 69 LED no se alimentan desde un GPIO.
 
-J_LED de 3 vías (VLED, DATA, GND) sigue siendo el esquema conceptual de las tres redes a la entrada de la cadena. No se recomienda ese mismo conector como único camino de potencia mientras no tenga una corriente nominal por encima del ramal que deba llevar, con margen. Hace falta prever conectores o ramales de potencia adicionales. No se elige el part number.
+J_LED de 3 vías (VLED, DATA, GND) es el esquema conceptual de las tres redes a la entrada de la cadena. No se recomienda ese mismo conector como único camino de potencia mientras no tenga una corriente nominal por encima del ramal, con margen. Hacen falta ramales de potencia adicionales. No se elige el part number.
 
 | Pin conceptual | Red | Rol |
 |----------------|-----|-----|
-| 1 | VLED | Salida del regulador. No es un pad del S32K3 ni el positivo crudo de la batería |
+| 1 | VLED | Salida del regulador. No es un pad del S32K3 ni el positivo de la batería |
 | 2 | DATA | Único cable de datos, al DIN del índice 0 |
 | 3 | GND | Retorno común |
 
@@ -129,36 +119,30 @@ J_LED de 3 vías (VLED, DATA, GND) sigue siendo el esquema conceptual de las tre
 | VLED | Riel | Ramales de inyección | No sale de un GPIO |
 | GND | Común | Retorno de cada ramal y VSS | No es un GPIO de datos |
 
+La variante del S32K3 y la PCB que lo soporte no están definidas. Esta cadena no usa la PCB estándar.
+
 ## Trama fija, DMA y timing candidato
 
-105 es un largo fijo. El buffer de una trama no cambia de tamaño de un frame a otro. Se rellenan 105 ranuras lógicas y, el día que el orden físico de soldadura no coincida con el índice, se aplica una tabla de reordenación que hoy no existe.
+69 es un largo fijo. El buffer no cambia de tamaño entre frames. Si el orden de soldadura no coincide con el índice, la tabla de reordenación se aplica antes de la DMA. Esa tabla no existe.
 
-Candidatos de periférico en la familia S32K3, a confirmar en el derivado (hoja y manual NXP; no se elige pad ni instancia):
+Candidatos de periférico en la familia S32K3, a confirmar en la variante (no se elige pad ni instancia): LPSPI + DMA, eMIOS + DMA, o FlexIO si esa variante lo trae. El factor de codificación SPI no se fija aquí. Un bit-bang por GPIO no es el plan, y el GPIO no es la fuente de corriente.
 
-- LPSPI + DMA. Cada bit del LED se codifica como un patrón de varios bits SPI. El factor de codificación se valida en esa pieza; no se fija aquí.
-- eMIOS + DMA.
-- FlexIO, solo si el derivado lo trae.
-
-Un bit-bang por GPIO no es el plan: la trama dura milisegundos de flancos seguidos. El GPIO tampoco es la fuente de corriente de los LED.
-
-Timing de candidato, el habitual de 800 kbit/s (periodo de bit 1,25 µs). No es una medida de la pieza comprada. Hojas viejas y nuevas no comparten el reset: unas piden unos 50 µs y otras más de 280 µs. Manda la hoja que se compre.
+Timing de candidato, 800 kbit/s (1,25 µs por bit). No es una medida de la pieza. El reset lo marca la hoja comprada (hay fichas de unos 50 µs y otras de más de 280 µs).
 
 ```text
-t_datos_RGB  = 105 × 24 × 1,25 µs = 3,15 ms
-t_datos_RGBW = 105 × 32 × 1,25 µs = 4,20 ms
+t_datos_RGB  = 69 × 24 × 1,25 µs = 2,07 ms
+t_datos_RGBW = 69 × 32 × 1,25 µs = 2,76 ms
 t_trama      = t_datos + t_reset_de_la_hoja
 ```
 
-A 30 cuadros por segundo el hueco entre tramas es de unos 33 ms. Esos 3–4 ms de datos caben como orden de magnitud. No es un requisito de velocidad de refresco del producto.
-
 ## Familia de LED
 
-Una sola familia en los 105 píxeles, para un solo timing y un solo largo de trama:
+Una sola familia en los 69 píxeles:
 
 - RGB tipo WS2812 o SK6812.
-- RGBW tipo SK6812RGBW, si el blanco de la paleta tiene que ser un dado blanco.
+- RGBW tipo SK6812RGBW, si el blanco tiene que ser un dado blanco.
 
-El modelo, el package y la tensión quedan por la hoja de la pieza. No se mezclan familias.
+El modelo, el package y la tensión quedan por la hoja. No se mezclan familias. Cifras leídas en hojas públicas; no son intercambiables entre revisiones:
 
 | Hoja | VDD | VIH mínimo | Corriente que la hoja asocia al LED |
 |------|-----|------------|--------------------------------------|
@@ -168,64 +152,58 @@ El modelo, el package y la tensión quedan por la hoja de la pieza. No se mezcla
 | SK6812RGBW REV.01 (2015) | +3,5…+5,5 V | 3,4 V a VDD = 5,0 V | No publica corriente de trabajo por canal. IDD estático típico 1 mA. IOUT = 9 mA es condición de un tiempo, no el consumo del blanco |
 | SK6812RGBX posterior | +3,7…+5,5 V | 0,7×VDD (3,5 V si VDD = 5 V) | El código «6812» nombra una versión de 12 mA. La hoja pide resistencia serie del orden de 500 Ω en la entrada y la salida de datos |
 
-El riel de E/S del S32K3 no está elegido. En la hoja, `VDD_HV_A` opera de 2,97 V a 5,5 V, con típico 3,3 V o 5,0 V. Una salida a 3,3 V no garantiza el VIH de un LED alimentado a 5 V. El level shifter se prevé hasta que la pareja hoja LED + riel del derivado muestre margen. El lado alto del shifter sale de VLED y no debe reinyectar esa tensión con el riel apagado.
+Manda la hoja de la pieza que se compre. Hojas viejas del WS2812B piden un reset de unos 50 µs; hojas posteriores, más de 280 µs.
 
-Arranque: VLED dentro de la ventana de la hoja, DATA en bajo hasta ese momento, luego una trama conocida de 105 y el reset de esa hoja, y recién entonces el índice 0 fijo. Apagado en orden inverso. La hoja del S32K3 limita la corriente continua inyectada en un pin a unos pocos miliamperios (−2…+3 mA con `VDD_HV_A` ≥ 2,97 V, y −3…+3 mA si ≥ 3,6 V).
+El riel de E/S del S32K3 no está elegido (`VDD_HV_A` de familia: 2,97 V a 5,5 V, típico 3,3 V o 5,0 V). Una salida a 3,3 V no garantiza el VIH de un LED a 5 V. El level shifter se prevé hasta que la pareja hoja + riel muestre margen, y su lado alto no debe reinyectar VLED con el riel apagado.
 
-## Presupuesto de corriente (N = 105)
+Arranque: VLED dentro de la ventana, DATA en bajo hasta entonces, trama conocida de 69 más el reset de la hoja, y después el índice 0 fijo. Apagado en orden inverso. La hoja del S32K3 limita la corriente continua inyectada en un pin a unos pocos miliamperios (−2…+3 mA con `VDD_HV_A` ≥ 2,97 V, y −3…+3 mA si ≥ 3,6 V).
 
-No hay medición. La fórmula usa la hoja de la pieza que se compre y la escala global de brillo `s` (0 a 1) aplicada en firmware antes de armar la trama:
+## Presupuesto de corriente (N = 69)
+
+No hay medición. `s` es la escala global de brillo, de 0 a 1, aplicada antes de armar la trama:
 
 ```text
 I_pixel(s) = s × Σ (I_canal × nivel_canal / escala_plena) + I_reposo
-I_cadena(s) = 105 × I_pixel(s)
+I_cadena(s) = 69 × I_pixel(s)
 I_regulador ≥ I_cadena(s) × margen
 P_riel ≈ I_cadena(s) × VLED
 t_h ≈ C_pack_mAh / I_promedio_mA
 ```
 
-`I_promedio_mA` suma la cadena a la escala real, más MCU, pantalla, radios y sensores. Esos términos no están medidos. `C_pack_mAh` tampoco. Por eso no se publica una autonomía en horas.
+`C_pack_mAh` no existe: la batería es custom y no es la del stack M5. `I_promedio_mA` incluye la cadena a la escala real más MCU, pantalla, radios y sensores, ninguno medido. No se publica una autonomía en horas.
 
-El blanco pleno (`s = 1` en todos los canales) no es el punto de operación. Sirve para ver el tamaño del problema. Los ejemplos siguientes no son el consumo de Métrica.
+El blanco pleno (`s = 1`) no es el punto de operación.
 
 **Ejemplo A.** Supuesto conservador de un candidato RGB antiguo, 20 mA por canal. No es una medición ni un valor universal.
 
 ```text
 I_blanco = 3 × 20 mA = 60 mA
-I_cadena(s=1) = 105 × 60 mA = 6300 mA
+I_cadena(s=1) = 69 × 60 mA = 4140 mA
 ```
 
 **Ejemplo B.** Hojas WS2812B-V5 y V6 que caracterizan el brillo a 12 mA por canal. Es corriente de esa caracterización, no un máximo absoluto universal.
 
 ```text
 I_blanco = 3 × 12 mA = 36 mA
-I_cadena(s=1) = 105 × 36 mA = 3780 mA
+I_cadena(s=1) = 69 × 36 mA = 2484 mA
 ```
 
-Si además se supone VLED = 5 V, solo como aritmética y no como tensión elegida, el ejemplo B a `s = 1` disipa del orden de 3780 mA × 5 V = 18,9 W en el riel de LED. El ejemplo A, con el mismo supuesto, del orden de 31,5 W. Esa potencia es la razón del tope de brillo y de los ramales de inyección. No es una medida térmica de la carcasa.
+Si además se supone VLED = 5 V, solo como aritmética y no como tensión elegida, el ejemplo B a `s = 1` queda en 2484 mA × 5 V = 12,42 W en el riel. El ejemplo A, con el mismo supuesto, en 4140 mA × 5 V = 20,7 W. No son medidas térmicas de la carcasa. Por eso el tope de brillo y los ramales de inyección siguen en el concepto.
 
 **Ilustración de un tope, no una consigna.** Con el ejemplo B y `s = 0,1`:
 
 ```text
-I_cadena = 105 × 36 mA × 0,1 = 378 mA
+I_cadena = 69 × 36 mA × 0,1 = 248,4 mA
 ```
 
-El valor de `s` se elige cuando existan la hoja del LED, el regulador y un ensayo de temperatura. No queda fijado en 0,1.
+`s` se elige cuando existan la hoja del LED, el regulador y un ensayo de temperatura. No queda fijado en 0,1.
 
-**Ejemplo C.** RGBW. La REV.01 de 2015 no da la corriente de trabajo por canal. El término del blanco entra en la suma cuando exista la hoja. Un cuarto canal encendido junto con RGB sube el pico respecto del ejemplo B.
+**Ejemplo C.** RGBW. La REV.01 de 2015 del SK6812RGBW no da la corriente de trabajo por canal. El blanco entra en la suma cuando exista la hoja.
 
-El regulador se dimensiona a `I_cadena(s)` con margen de corriente, de caída en los ramales y de temperatura en la carcasa. La batería custom no se conecta directo a un LED tomado como 5 V. La topología (buck o boost) espera la tensión del pack. La autonomía en horas espera `C_pack_mAh` y la corriente media real.
+La separación térmica entre la corona, la batería custom y el S32K3 sigue abierta. El aluminio de la MCPCB candidata es el camino de calor propuesto, no un diseño térmico verificado.
 
 ## MCPCB de aluminio
 
-Candidato para la matriz custom de la corona y para los testigos: MCPCB de aluminio, píxeles soldados, atornilladas a la carcasa. No es la PCB estándar v2, no es su BOM EMS y no es un diseño de MCPCB validado. No hay Gerbers ni stackup en este repositorio.
+Candidato para la corona custom y para los testigos. No es la PCB estándar v2, no es la PCB de soporte del S32K3 (esa tampoco está definida) y no es un diseño validado. No hay Gerbers.
 
-El concepto tiene que resolver, antes de darse por bueno:
-
-- Capa dieléctrica entre el cobre y el aluminio.
-- Tornillos que no pongan VLED, DATA o un pad en el aluminio ni en una carcasa metálica.
-- Separación térmica entre el calor de la matriz y la batería, y entre la matriz y el S32K3. El aluminio es el camino de calor candidato; el modo de separarlo (otra placa, una ranura, un hueco de aire) no está cerrado.
-- Inyección de VLED y GND repartida en la corona, no un solo punto de entrada sin corriente nominal.
-- Aislamiento óptico entre los dos medios círculos, y entre esos medios círculos y la corona. Los 100 puntos no dibujan un anillo continuo por sí solos.
-
-El detalle de carcasa está en [mecanica/README.md](mecanica/README.md).
+Pendiente de esa candidata: dieléctrico entre cobre y aluminio, tornillos que no cortocircuiten, inyección repartida de VLED/GND, y aislamiento óptico entre los dos medios círculos y la corona. Los 64 puntos no dibujan un anillo continuo por sí solos.

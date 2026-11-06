@@ -34,4 +34,4 @@ Tampoco se revive un BOM v1 del M5 ni se toma esa lista como atajo de la alterna
 
 La solución nueva y su BOM están por definir. Excluir la PCB estándar no significa que la alternativa vaya a fabricarse sin ninguna placa. Una PCB distinta del S32K3, si más adelante se justifica, sería un diseño nuevo, con su propio esquema, layout y BOM, escritos en [hardware/](hardware/) cuando existan.
 
-Las MCPCB de aluminio descritas en [leds.md](leds.md) y [mecanica/README.md](mecanica/README.md) son un candidato para la matriz custom de 100 píxeles y para los testigos, atornilladas a la carcasa. No son la PCB estándar v2, no están validadas y este repositorio no contiene sus Gerbers.
+Las MCPCB de aluminio descritas en [leds.md](leds.md) y [mecanica/README.md](mecanica/README.md) son un candidato para la corona custom de 64 píxeles y para los testigos. No son la PCB estándar v2, no son la PCB de soporte del S32K3 (aún sin definir) y este repositorio no contiene sus Gerbers. La matriz de 100 píxeles quedó superada el mismo día y no se fabrica desde aquí.
