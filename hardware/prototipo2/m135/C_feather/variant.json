@@ -1,0 +1,156 @@
+{
+ "name": "C_feather",
+ "title": "C · 150 mm con ESP32 Feather V2 (cargador integrado)",
+ "cad": {
+  "PASS": {
+   "usb": [
+    -46,
+    16
+   ],
+   "pg7": [
+    -18,
+    12.5
+   ],
+   "vent_m12": [
+    12,
+    12.2
+   ],
+   "power": [
+    30,
+    12
+   ],
+   "sma": [
+    56,
+    6.6
+   ]
+  }
+ },
+ "geom": {
+  "D_B": 22.0,
+  "D_T": 32.0,
+  "PZ": 11.0
+ },
+ "display": {
+  "x": -36.0,
+  "y": -1.0
+ },
+ "buttons": {
+  "x": 14.0
+ },
+ "connectors": [
+  {
+   "kind": "usb",
+   "x": -46
+  },
+  {
+   "kind": "pg7",
+   "x": -18
+  },
+  {
+   "kind": "vent",
+   "x": 12
+  },
+  {
+   "kind": "power",
+   "x": 30
+  },
+  {
+   "kind": "sma",
+   "x": 56
+  }
+ ],
+ "parts": [
+  {
+   "type": "board",
+   "name": "feather",
+   "w": 52.3,
+   "h": 22.8,
+   "x": -35,
+   "y": 16,
+   "z": 6.0,
+   "mat": "pcb_black",
+   "chips": [
+    {
+     "name": "pico",
+     "size": [
+      10,
+      15,
+      2.4
+     ],
+     "dx": 8
+    },
+    {
+     "name": "usb",
+     "size": [
+      9,
+      7.5,
+      3
+     ],
+     "dx": -22
+    }
+   ],
+   "label": "ESP32 Feather V2 (con cargador)"
+  },
+  {
+   "type": "board",
+   "name": "microsd",
+   "w": 25.4,
+   "h": 22.8,
+   "x": -47,
+   "y": -8,
+   "z": 6.0,
+   "mat": "pcb_purple",
+   "chips": [
+    {
+     "name": "slot",
+     "size": [
+      14,
+      15,
+      1.8
+     ]
+    }
+   ],
+   "label": "microSD"
+  },
+  {
+   "type": "board",
+   "name": "pwrswitch",
+   "w": 17.8,
+   "h": 15.2,
+   "x": -24,
+   "y": -8,
+   "z": 6.0,
+   "mat": "pcb_blue",
+   "label": "Pololu power switch #2808"
+  },
+  {
+   "type": "block",
+   "name": "lipo",
+   "size": [
+    30,
+    51,
+    8
+   ],
+   "mat": "lipo_foil",
+   "bevel": 1.5,
+   "sticker": true,
+   "label": "LiPo 1S 1500 mAh",
+   "x": 6,
+   "y": 2.5,
+   "z": 0.5
+  },
+  {
+   "type": "m135",
+   "x": 49,
+   "y": 2,
+   "z": 4,
+   "sma_dx": 7
+  }
+ ],
+ "stacks": [
+  [
+   "vx_m135",
+   "vx_sma_in"
+  ]
+ ]
+}

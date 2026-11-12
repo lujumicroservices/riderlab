@@ -1,0 +1,271 @@
+{
+ "name": "B_profunda",
+ "title": "B · 150 mm, más profunda: LiPo debajo del M135",
+ "cad": {
+  "D_BOTTOM": 32.0,
+  "D_TOP": 42.0,
+  "Z_LOFT": 52.0,
+  "W_FRONT": 122.8,
+  "CH_FRONT": 17.4,
+  "WIN_X": -33.0,
+  "BTN_X": 15.0,
+  "PASS": {
+   "usb": [
+    -50,
+    16
+   ],
+   "pg7": [
+    -28,
+    12.5
+   ],
+   "power": [
+    -9,
+    12
+   ],
+   "vent_m12": [
+    12,
+    12.2
+   ],
+   "sma": [
+    50,
+    6.6
+   ]
+  }
+ },
+ "geom": {
+  "D_B": 32.0,
+  "D_T": 42.0,
+  "PZ": 11.0
+ },
+ "display": {
+  "x": -33.0,
+  "y": -1.0
+ },
+ "buttons": {
+  "x": 15.0
+ },
+ "connectors": [
+  {
+   "kind": "usb",
+   "x": -50
+  },
+  {
+   "kind": "pg7",
+   "x": -28
+  },
+  {
+   "kind": "power",
+   "x": -9
+  },
+  {
+   "kind": "vent",
+   "x": 12
+  },
+  {
+   "kind": "sma",
+   "x": 50
+  }
+ ],
+ "parts": [
+  {
+   "type": "board",
+   "name": "carrier",
+   "w": 56,
+   "h": 48,
+   "x": -34,
+   "y": 5.5,
+   "z": 3.8,
+   "mat": "perfboard",
+   "label": "Placa portadora (perfboard)"
+  },
+  {
+   "type": "board",
+   "name": "microsd",
+   "w": 25.4,
+   "h": 22.8,
+   "x": -48,
+   "y": 13,
+   "z": 7.0,
+   "mat": "pcb_purple",
+   "chips": [
+    {
+     "name": "slot",
+     "size": [
+      14,
+      15,
+      1.8
+     ]
+    }
+   ],
+   "label": "microSD (bajo la ESP32)",
+   "so_from": 4.6
+  },
+  {
+   "type": "board",
+   "name": "charger",
+   "w": 26,
+   "h": 17,
+   "x": -20,
+   "y": 10.5,
+   "z": 7.0,
+   "mat": "pcb_purple",
+   "chips": [
+    {
+     "name": "usb",
+     "size": [
+      9,
+      7,
+      3
+     ],
+     "dx": -9
+    }
+   ],
+   "label": "Cargador USB-C 4410 (bajo la ESP32)",
+   "so_from": 4.6
+  },
+  {
+   "type": "board",
+   "name": "pwrswitch",
+   "w": 17.8,
+   "h": 15.2,
+   "x": -52,
+   "y": -10,
+   "z": 7.0,
+   "mat": "pcb_blue",
+   "label": "Pololu power switch #2808",
+   "so_from": 4.6
+  },
+  {
+   "type": "board",
+   "name": "buckboost",
+   "w": 11.4,
+   "h": 16.5,
+   "x": -35,
+   "y": -10,
+   "z": 7.0,
+   "mat": "pcb_blue",
+   "chips": [
+    {
+     "name": "ic",
+     "size": [
+      4,
+      4,
+      1.2
+     ],
+     "mat": "tact_black"
+    }
+   ],
+   "label": "Buck-boost 3.3 V S7V8F3",
+   "so_from": 4.6
+  },
+  {
+   "type": "board",
+   "name": "d24",
+   "w": 12.7,
+   "h": 17.8,
+   "x": -19,
+   "y": -10,
+   "z": 7.0,
+   "mat": "pcb_blue",
+   "chips": [
+    {
+     "name": "coil",
+     "size": [
+      5,
+      5,
+      3
+     ],
+     "mat": "tact_black"
+    }
+   ],
+   "label": "Buck 12→5 V D24V10F5 (opcional)",
+   "so_from": 4.6
+  },
+  {
+   "type": "board",
+   "name": "esp32",
+   "w": 54.4,
+   "h": 27.9,
+   "x": -34,
+   "y": 13,
+   "z": 13.9,
+   "mat": "pcb_black",
+   "headers": true,
+   "so_from": 4.6,
+   "chips": [
+    {
+     "name": "mod",
+     "size": [
+      18,
+      25.5,
+      3.2
+     ],
+     "dx": 13.5
+    },
+    {
+     "name": "usb",
+     "size": [
+      9,
+      7.5,
+      3.0
+     ],
+     "dx": -24
+    }
+   ],
+   "label": "ESP32 DevKitC-VE (sobre la portadora)"
+  },
+  {
+   "type": "block",
+   "name": "lipo",
+   "size": [
+    30,
+    51,
+    8
+   ],
+   "mat": "lipo_foil",
+   "bevel": 1.5,
+   "sticker": true,
+   "label": "LiPo 1S 1500 mAh",
+   "x": 30,
+   "y": 4.5,
+   "z": 0.5
+  },
+  {
+   "type": "m135",
+   "x": 30,
+   "y": 2,
+   "z": 10,
+   "sma_dx": 20
+  }
+ ],
+ "stacks": [
+  [
+   "vx_carrier",
+   "vx_microsd"
+  ],
+  [
+   "vx_carrier",
+   "vx_charger"
+  ],
+  [
+   "vx_carrier",
+   "vx_pwrswitch"
+  ],
+  [
+   "vx_carrier",
+   "vx_buckboost"
+  ],
+  [
+   "vx_carrier",
+   "vx_d24"
+  ],
+  [
+   "vx_carrier",
+   "vx_esp32"
+  ],
+  [
+   "vx_m135",
+   "vx_sma_in"
+  ]
+ ]
+}

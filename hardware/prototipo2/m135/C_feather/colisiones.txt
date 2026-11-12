@@ -1,0 +1,12 @@
+C · 150 mm con ESP32 Feather V2 (cargador integrado)
+39 piezas revisadas, 10 colisiones
+  CARCASA  <->  vx_lipo
+  CARCASA  <->  vx_m135
+  CARCASA  <->  vx_m135__so.002
+  CARCASA  <->  vx_m135__so.003
+  CARCASA  <->  vx_m135__top
+  vx_btnboard  <->  vx_m135
+  vx_btnboard  <->  vx_m135__top
+  vx_feather  <->  vx_lipo
+  vx_m135  <->  vx_power_in
+  vx_microsd  <->  vx_usb_in

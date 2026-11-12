@@ -11,7 +11,8 @@ if (-not $key) { throw 'Could not read storage account key' }
 $files = @(
   @{ Local = 'docs\legal\delete-account.html'; Blob = 'legal/delete-account.html' },
   @{ Local = 'docs\legal\privacy.html'; Blob = 'legal/privacy.html' },
-  @{ Local = 'docs\legal\terms.html'; Blob = 'legal/terms.html' }
+  @{ Local = 'docs\legal\terms.html'; Blob = 'legal/terms.html' },
+  @{ Local = 'docs\legal\age.html'; Blob = 'legal/age.html' }
 )
 
 foreach ($f in $files) {

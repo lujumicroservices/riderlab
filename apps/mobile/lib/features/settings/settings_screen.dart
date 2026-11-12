@@ -167,6 +167,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const Align(alignment: Alignment.centerLeft, child: RiderAliasChip()),
           const SizedBox(height: 8),
           const AppVersionTile(),
+          // Experimental GPS / Circuito 8h lab: sideload pilots only, never
+          // in Play or App Store builds.
+          if (!AppDistribution.isStoreBuild) ...[
           const SizedBox(height: 12),
           Material(
             color: AppTheme.lineHot.withValues(alpha: 0.14),
@@ -192,6 +195,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               },
             ),
           ),
+          ],
           if (!signedIn) accountGroup,
           SettingsGroup(
             title: l10n.settingsShareSection,
@@ -438,6 +442,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     .read(forceStartArmedVisibleProvider.notifier)
                     .setVisible(v),
               ),
+              if (!AppDistribution.isStoreBuild)
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.alt_route, color: AppTheme.lineHot),

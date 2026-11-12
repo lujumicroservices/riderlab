@@ -1,0 +1,20 @@
+{
+ "res": [
+  1200,
+  800
+ ],
+ "labels": [
+  {
+   "text": "Pantalla + placa de botones en la tapa",
+   "x": 633.0706357955933,
+   "y": 587.1538162231445,
+   "side": "L"
+  },
+  {
+   "text": "Pasamuros en la pared inferior",
+   "x": 579.9342513084412,
+   "y": 703.4778714179993,
+   "side": "L"
+  }
+ ]
+}

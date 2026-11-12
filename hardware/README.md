@@ -18,3 +18,4 @@ No hace falta reabrir el chat viejo. El chat de origen está citado en `STATUS.m
 | [DECISIONS.md](DECISIONS.md) | Decisiones ya cerradas (no reabrir sin pedirlo) |
 | [firmware/](firmware/) | Bench / logger PlatformIO (Basic + M135) |
 | [TRACK_COMPARE.md](TRACK_COMPARE.md) | Protocolo teléfono vs logger en pista |
+| [PROTOTIPO_2.md](PROTOTIPO_2.md) | Caja 150×70×30 (ESP32 suelto + LiPo): distribución, pasamuros, energía, pruebas |

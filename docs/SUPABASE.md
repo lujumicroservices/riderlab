@@ -108,12 +108,10 @@ Public URL: `https://riderlab.rawthrottle.com.mx/auth/reset-password/`
 
 If an old deep-link recovery still opens the app, RiderLab shows **New password** via `PASSWORD_RECOVERY`.
 
-**Create an App Store / Play review user** (do not commit the password):
+**App Store / Play review user** (password stays in Play Console and App Store Connect — do not commit it):
 
-1. Authentication → Users → **Add user**
-2. Email like `review@riderlab.rawthrottle.com.mx`
-3. Auto-confirm the user
-4. Paste that email + password in Play Console **Sign in details** and App Store Connect **Demo account**
+1. Email: `riderlab.review@gmail.com` (Supabase user, auto-confirmed)
+2. Paste that email + password in Play Console **Sign in details** and App Store Connect **Demo account**
 
 Riders: first screen is sign-in (Google or email). Settings → Account signs out back to that screen.
 
