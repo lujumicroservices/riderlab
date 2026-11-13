@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/distribution.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/pro_entitlement_provider.dart';
 import '../../theme/app_theme.dart';
@@ -114,7 +115,7 @@ class ProUpsellBanner extends ConsumerWidget {
                   context,
                   ok
                       ? l10n.proUnlocked
-                      : (offersOwnProTrial
+                      : (AppDistribution.allowsPartnerCodes
                             ? l10n.proStoreNotReady
                             : l10n.proStoreNotReadyIos),
                 );

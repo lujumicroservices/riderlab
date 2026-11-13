@@ -471,8 +471,8 @@
       }
     }
   },
-  "startTrialHelp": "Toda cuenta con sesión inicia 30 días de Pro. Después, el detalle de Ride Lab es de pago. Un código de socio suma 90 días.",
-  "proStoreNotReady": "La compra aún no está en la tienda. Entra con tu cuenta para 30 días de Pro, o canjea un código de socio.",
+  "startTrialHelp": "El detalle de Ride Lab es parte de Pro, con suscripción mensual o anual. Un código de socio da 90 días.",
+  "proStoreNotReady": "No pudimos abrir la compra en la tienda. Intenta de nuevo más tarde o canjea un código de socio.",
   "proStoreNotReadyIos": "La suscripción Pro aún no está disponible en el App Store. Intenta más tarde.",
   "brakesProTeaser": "Mostrando {shown} de {total}. Desbloquea Pro para el historial completo de frenadas.",
   "@brakesProTeaser": {

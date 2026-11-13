@@ -52,10 +52,11 @@ bool get revenueCatConfigured => revenueCatApiKey.isNotEmpty;
 /// Contract: docs/APP_STORE.md
 const proMonthlyProductId = 'riderlab_pro_monthly';
 const proYearlyProductId = 'riderlab_pro_yearly';
-/// The no-card 30-day trial (RPC `start_pro_trial`) is offered on Android and
-/// sideload only. On iOS the trial must come from the App Store subscription
-/// (introductory offer), so the app never starts or advertises its own trial.
-bool get offersOwnProTrial => kIsWeb || !Platform.isIOS;
+/// The app no longer has its own no-card trial (removed 2026-11-13, server
+/// migration 20261113010000_remove_pro_trial). Pro comes only from a store
+/// subscription or a partner code; on Android a new user buys from day 1.
+/// Kept as a getter so the old trial paths stay off in one place.
+bool get offersOwnProTrial => false;
 
 /// Sideload, not signed in: keep the local Settings toggle for pilots.
 /// Never on iOS: App Store guideline 3.1.1 (Pro only via In-App Purchase).
@@ -106,7 +107,7 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
       try {
         final map = jsonDecode(raw);
         if (map is Map<String, dynamic>) {
-          state = ProEntitlementStatus.fromJson(map);
+          state = _merge(ProEntitlementStatus.fromJson(map));
           return;
         }
       } catch (_) {}
@@ -161,6 +162,15 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
   }
 
   ProEntitlementStatus _merge(ProEntitlementStatus server) {
+    // No app trial anymore: a cached or legacy `trial` period never unlocks.
+    if (server.isTrial) {
+      server = server.copyWith(
+        isPro: false,
+        daysLeft: 0,
+        clearSource: true,
+        clearEndsAt: true,
+      );
+    }
     if (_rcPro) {
       return server.copyWith(
         isPro: true,
@@ -268,11 +278,8 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
     }
   }
 
-  /// Present store packages (yearly first). If billing is off, start the
-  /// no-card 30-day trial instead of a dead checkout (not on iOS; see
-  /// [offersOwnProTrial]).
+  /// Present store packages (yearly first).
   Future<bool> purchasePro() async {
-    await startTrialIfEligible();
     if (state.isPro) return true;
     if (_rcReady) {
       try {
@@ -317,7 +324,7 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
 
   Future<void> toggle() => setPro(!state.isPro);
 
-  /// First sign-in starts a 30-day trial (server enforces one per account).
+  /// Disabled: there is no app trial anymore (see [offersOwnProTrial]).
   Future<void> startTrialIfEligible() async {
     if (!offersOwnProTrial) return;
     if (state.trialUsed && state.isPro) return;

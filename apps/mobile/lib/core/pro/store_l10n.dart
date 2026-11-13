@@ -53,18 +53,15 @@ class StoreL10n {
             'cancel it in $manage.';
   }
 
-  /// Trial help without partner-code wording (iOS).
+  /// Paywall help without partner-code wording (iOS). No app trial: any free
+  /// period is an App Store introductory offer shown in the store sheet.
   String get trialHelpStore => _es
-      ? 'Toda cuenta con sesión recibe 30 días de Pro gratis, sin tarjeta. '
-          'Después, el detalle de Ride Lab es de pago.'
-      : 'Every signed-in account gets 30 days of Pro free, no card needed. '
-          'After that, Ride Lab depth is paid.';
+      ? 'El detalle de Ride Lab es parte de Pro, con suscripción mensual o anual.'
+      : 'Ride Lab depth is part of Pro, with a monthly or yearly subscription.';
 
   String get storeNotReady => _es
-      ? 'La suscripción aún no está disponible. Entra con tu cuenta para '
-          '30 días de Pro gratis.'
-      : 'The subscription is not available yet. Sign in for a free 30-day '
-          'Pro trial.';
+      ? 'La suscripción aún no está disponible. Intenta de nuevo más tarde.'
+      : 'The subscription is not available yet. Please try again later.';
 
   /// Store builds have no ads SDK: the Free strip promotes Pro, not ad removal.
   String get freeStripLabel => 'PRO';

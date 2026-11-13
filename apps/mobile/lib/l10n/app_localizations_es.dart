@@ -1027,11 +1027,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get startTrialHelp =>
-      'Toda cuenta con sesión inicia 30 días de Pro. Después, el detalle de Ride Lab es de pago. Un código de socio suma 90 días.';
+      'El detalle de Ride Lab es parte de Pro, con suscripción mensual o anual. Un código de socio da 90 días.';
 
   @override
   String get proStoreNotReady =>
-      'La compra aún no está en la tienda. Entra con tu cuenta para 30 días de Pro, o canjea un código de socio.';
+      'No pudimos abrir la compra en la tienda. Intenta de nuevo más tarde o canjea un código de socio.';
 
   @override
   String get proStoreNotReadyIos =>

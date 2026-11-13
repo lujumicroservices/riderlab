@@ -1022,11 +1022,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get startTrialHelp =>
-      'Every signed-in account gets 30 days of Pro. After that, Ride Lab depth is paid. Partner codes add 90 days.';
+      'Ride Lab depth is part of Pro, with a monthly or yearly subscription. A partner code gives 90 days.';
 
   @override
   String get proStoreNotReady =>
-      'Paid upgrade is not in the store yet. Sign in for a 30-day Pro trial, or redeem a partner code.';
+      'Could not open the store checkout. Try again later or redeem a partner code.';
 
   @override
   String get proStoreNotReadyIos =>
