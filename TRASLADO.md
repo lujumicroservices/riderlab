@@ -1,7 +1,7 @@
 # Archivos que no van en git
 
 Para trabajar en otra computadora necesitas archivos que no están en git: claves, el keystore de firma y builds firmados.
-Están en Nextcloud, en `Proyectos/RiderLab/secretos/motoline-secretos.zip`. El zip contiene la carpeta `motoline-secretos/`, con las mismas rutas que en el repo.
+Están en Nextcloud (https://rtcloud.duckdns.org, usuario `juanv`), en `Proyectos/RiderLab/secretos/motoline-secretos.zip`. Subido el 19 nov 2026, SHA-256 `bb30d5e3…0631`. El zip contiene la carpeta `motoline-secretos/`, con las mismas rutas que en el repo.
 
 Nunca subas estos archivos a git. Ya están en `.gitignore`.
 
@@ -20,7 +20,9 @@ Nunca subas estos archivos a git. Ya están en `.gitignore`.
 ```bash
 git clone <repo> motoline && cd motoline
 git checkout android/play-no-trial
-# descarga motoline-secretos.zip de Nextcloud a ~/Downloads
+# descarga motoline-secretos.zip de Nextcloud a ~/Downloads (por la web, o con WebDAV:)
+# curl -u "$NEXTCLOUD_USER:$NEXTCLOUD_APP_PASSWORD" -o ~/Downloads/motoline-secretos.zip \
+#   https://rtcloud.duckdns.org/remote.php/dav/files/juanv/Proyectos/RiderLab/secretos/motoline-secretos.zip
 unzip ~/Downloads/motoline-secretos.zip -d /tmp
 (cd /tmp/motoline-secretos && shasum -a 256 -c SHA256SUMS)
 rsync -a --exclude SHA256SUMS /tmp/motoline-secretos/ ./
