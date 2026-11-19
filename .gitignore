@@ -76,3 +76,6 @@ __pycache__/
 supabase/scripts/_tmp_*
 8horas/
 hardware/captures/
+
+# Claude Code scratch screenshots
+Claude outputs/

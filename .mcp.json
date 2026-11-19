@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "blender": {
+      "type": "stdio",
+      "command": "/opt/homebrew/bin/uvx",
+      "args": ["--python", "3.11", "mcp-for-blender@2.2.7"],
+      "env": { "DISABLE_TELEMETRY": "true", "UV_PYTHON_PREFERENCE": "only-managed" }
+    }
+  }
+}
