@@ -2,6 +2,8 @@
 
 Hecho en la Mac de Juan. Al abrir el repo en otra máquina, partir de la rama `android/play-no-trial`.
 
+Los archivos que no van en git (`.env`, keystore, Firebase, AAB) están en Nextcloud. Cómo restaurarlos: `TRASLADO.md` en la raíz.
+
 ## Dónde quedó el código
 
 - Rama: `android/play-no-trial`.
