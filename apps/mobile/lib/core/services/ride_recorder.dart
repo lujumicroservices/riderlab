@@ -76,6 +76,22 @@ class ActiveRideSnapshot {
   List<RideStretch> get stretches => rideStretchesFrom(points);
 }
 
+/// Copy for the persistent recording / armed notifications.
+///
+/// The UI sets [RideRecorder.notificationText] from the app's l10n before
+/// starting or arming; these English defaults are only a fallback.
+class RideNotificationText {
+  const RideNotificationText({
+    this.title = 'RiderLab',
+    this.recording = 'Recording ride…',
+    this.armed = 'Armed — waiting to auto-start (screen can be locked)…',
+  });
+
+  final String title;
+  final String recording;
+  final String armed;
+}
+
 /// Offline-first recorder: GPS + lean IMU, flushed to SQLite in batches.
 ///
 /// Also owns the "arm for auto-start" flow: while armed (and not already
@@ -97,6 +113,14 @@ class RideRecorder {
 
   /// Fired after a ride is marked completed (stop or recover).
   final void Function(Ride ride)? onRideCompleted;
+
+  /// Localized notification copy for the foreground services.
+  RideNotificationText notificationText = const RideNotificationText();
+
+  Stream<Position> _watchPositions() => _location.watchPositions(
+    notificationTitle: notificationText.title,
+    notificationText: notificationText.recording,
+  );
 
   /// Fired once when auto-pause has been sitting still long enough.
   final void Function(String rideId)? onSuggestEnd;
@@ -433,7 +457,7 @@ class RideRecorder {
     );
     _startLeanSampleTimer();
 
-    _sub = _location.watchPositions().listen(
+    _sub = _watchPositions().listen(
       _onPosition,
       onError: (Object error, StackTrace stack) {
         unawaited(
@@ -671,7 +695,7 @@ class RideRecorder {
     _startLeanSampleTimer();
 
     await _sub?.cancel();
-    _sub = _location.watchPositions().listen(
+    _sub = _watchPositions().listen(
       _onPosition,
       onError: (Object error, StackTrace stack) {
         unawaited(
@@ -728,6 +752,8 @@ class RideRecorder {
 
     final started = await ArmForegroundService.start(
       onData: _onArmForegroundData,
+      title: notificationText.title,
+      text: notificationText.armed,
     );
     if (!started) {
       _armed = false;
@@ -939,17 +965,12 @@ class RideRecorder {
     _startLeanSampleTimer();
 
     await ArmForegroundService.updateNotification(
-      title: 'RiderLab',
-      text: 'Recording ride…',
+      title: notificationText.title,
+      text: notificationText.recording,
     );
 
     try {
-      _sub = _location
-          .watchPositions(
-            notificationTitle: 'RiderLab',
-            notificationText: 'High-precision recording…',
-          )
-          .listen(
+      _sub = _watchPositions().listen(
             _onPosition,
             onError: (Object error, StackTrace stack) {
               debugPrint('RiderLab ride GPS: $error');

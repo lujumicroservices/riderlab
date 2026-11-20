@@ -129,7 +129,7 @@ class RoutesScreen extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            '${l10n.cloudUnavailable}: $err',
+                            l10n.cloudUnavailable,
                             style: GoogleFonts.rajdhani(
                               color: AppTheme.mist,
                               fontSize: 13,
@@ -147,7 +147,7 @@ class RoutesScreen extends ConsumerWidget {
                 padding: EdgeInsets.all(24),
                 child: Center(child: CircularProgressIndicator()),
               ),
-              error: (e, _) => Text('$e'),
+              error: (e, _) => Text(context.l10n.userFacingError(e)),
               data: (routes) {
                 if (routes.isEmpty) {
                   return Text(
@@ -300,7 +300,7 @@ class RoutesScreen extends ConsumerWidget {
       showAppSnack(context, l10n.routeCreated);
     } catch (e) {
       if (!context.mounted) return;
-      showAppSnackError(context, '$e');
+      showAppSnackError(context, context.l10n.userFacingError(e));
     }
   }
 }

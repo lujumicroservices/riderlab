@@ -225,7 +225,7 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
       ),
       body: overview.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, _) => Center(child: Text(context.l10n.userFacingError(e))),
         data: (rodada) {
           if (rodada == null) {
             return Center(child: Text(l10n.rodadaNotFound));
@@ -278,7 +278,7 @@ class _RodadaDetailScreenState extends ConsumerState<RodadaDetailScreen>
       );
     } catch (e) {
       if (!mounted) return;
-      showAppSnackError(context, '$e');
+      showAppSnackError(context, context.l10n.userFacingError(e));
     }
   }
 

@@ -1541,8 +1541,116 @@ abstract class AppLocalizations {
   /// No description provided for @armAutoRide.
   ///
   /// In es, this message translates to:
-  /// **'Empezar a Rodar'**
+  /// **'Empezar a rodar'**
   String get armAutoRide;
+
+  /// No description provided for @rideHoldToFinishHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Mantén presionado para terminar'**
+  String get rideHoldToFinishHint;
+
+  /// No description provided for @rideFinishShort.
+  ///
+  /// In es, this message translates to:
+  /// **'Terminar'**
+  String get rideFinishShort;
+
+  /// No description provided for @rideBackHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Para salir, mantén presionado Terminar'**
+  String get rideBackHint;
+
+  /// No description provided for @rideSavedToast.
+  ///
+  /// In es, this message translates to:
+  /// **'Recorrido guardado'**
+  String get rideSavedToast;
+
+  /// No description provided for @rideSessionCancelledNoMotion.
+  ///
+  /// In es, this message translates to:
+  /// **'Sesión cancelada: no hubo movimiento'**
+  String get rideSessionCancelledNoMotion;
+
+  /// No description provided for @rideHudLeanSetting.
+  ///
+  /// In es, this message translates to:
+  /// **'Fijando 0°'**
+  String get rideHudLeanSetting;
+
+  /// No description provided for @ridePermsIntro.
+  ///
+  /// In es, this message translates to:
+  /// **'RiderLab graba tu línea GPS mientras ruedas, también con la pantalla apagada y el teléfono en el soporte. La ubicación se usa solo mientras grabas o esperas para arrancar, y se detiene al terminar. Una notificación queda visible mientras tanto.\n\nAhora te pediremos:'**
+  String get ridePermsIntro;
+
+  /// No description provided for @ridePermsStepLocation.
+  ///
+  /// In es, this message translates to:
+  /// **'Ubicación: elige «Mientras se usa la app».'**
+  String get ridePermsStepLocation;
+
+  /// No description provided for @ridePermsStepBackground.
+  ///
+  /// In es, this message translates to:
+  /// **'Pantalla apagada: en la siguiente pantalla elige «Permitir todo el tiempo».'**
+  String get ridePermsStepBackground;
+
+  /// No description provided for @ridePermsStepNotifications.
+  ///
+  /// In es, this message translates to:
+  /// **'Notificaciones: para mostrar que estás grabando.'**
+  String get ridePermsStepNotifications;
+
+  /// No description provided for @ridePermsStepBattery.
+  ///
+  /// In es, this message translates to:
+  /// **'Batería: permite que RiderLab funcione sin restricciones para que Android no detenga la grabación.'**
+  String get ridePermsStepBattery;
+
+  /// No description provided for @ridePermsBackgroundTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Un paso más'**
+  String get ridePermsBackgroundTitle;
+
+  /// No description provided for @ridePermsBackgroundBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Para grabar con la pantalla apagada, Android abrirá los ajustes de ubicación de RiderLab. Elige «Permitir todo el tiempo» y regresa con Atrás.'**
+  String get ridePermsBackgroundBody;
+
+  /// No description provided for @ridePermsBackgroundLimited.
+  ///
+  /// In es, this message translates to:
+  /// **'Con la pantalla apagada la grabación puede pausarse. Puedes cambiarlo en Ajustes.'**
+  String get ridePermsBackgroundLimited;
+
+  /// No description provided for @ridePermsLocationOffTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'La ubicación del teléfono está apagada'**
+  String get ridePermsLocationOffTitle;
+
+  /// No description provided for @ridePermsDeniedBodyAndroid.
+  ///
+  /// In es, this message translates to:
+  /// **'RiderLab necesita tu ubicación para grabar tu línea. En Ajustes → Permisos → Ubicación elige «Permitir solo mientras se usa la app» o «Permitir todo el tiempo».'**
+  String get ridePermsDeniedBodyAndroid;
+
+  /// No description provided for @rideNotifRecording.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabando recorrido…'**
+  String get rideNotifRecording;
+
+  /// No description provided for @rideNotifArmed.
+  ///
+  /// In es, this message translates to:
+  /// **'Lista: arranca y se graba sola. Puedes bloquear la pantalla.'**
+  String get rideNotifArmed;
 
   /// No description provided for @disarmAutoRide.
   ///
@@ -1760,6 +1868,180 @@ abstract class AppLocalizations {
   /// **'Ajustes'**
   String get settings;
 
+  /// No description provided for @settingsHubProfileGuest.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin sesión iniciada'**
+  String get settingsHubProfileGuest;
+
+  /// No description provided for @settingsHubProfileSignInHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Toca para iniciar sesión'**
+  String get settingsHubProfileSignInHint;
+
+  /// No description provided for @settingsHubChipFree.
+  ///
+  /// In es, this message translates to:
+  /// **'Free'**
+  String get settingsHubChipFree;
+
+  /// No description provided for @settingsHubChipPro.
+  ///
+  /// In es, this message translates to:
+  /// **'Pro'**
+  String get settingsHubChipPro;
+
+  /// No description provided for @settingsHubProFree.
+  ///
+  /// In es, this message translates to:
+  /// **'Plan gratis'**
+  String get settingsHubProFree;
+
+  /// No description provided for @settingsHubProActive.
+  ///
+  /// In es, this message translates to:
+  /// **'Activo'**
+  String get settingsHubProActive;
+
+  /// No description provided for @settingsHubProActiveUntil.
+  ///
+  /// In es, this message translates to:
+  /// **'Activo hasta {date}'**
+  String settingsHubProActiveUntil(String date);
+
+  /// No description provided for @settingsHubRecording.
+  ///
+  /// In es, this message translates to:
+  /// **'Grabación'**
+  String get settingsHubRecording;
+
+  /// No description provided for @settingsHubSoundOn.
+  ///
+  /// In es, this message translates to:
+  /// **'Sonido del modo activado'**
+  String get settingsHubSoundOn;
+
+  /// No description provided for @settingsHubSoundOff.
+  ///
+  /// In es, this message translates to:
+  /// **'Sonido del modo desactivado'**
+  String get settingsHubSoundOff;
+
+  /// No description provided for @settingsHubRodadas.
+  ///
+  /// In es, this message translates to:
+  /// **'Rodadas y privacidad'**
+  String get settingsHubRodadas;
+
+  /// No description provided for @settingsHubShareLiveOn.
+  ///
+  /// In es, this message translates to:
+  /// **'Compartes tu ubicación en rodadas'**
+  String get settingsHubShareLiveOn;
+
+  /// No description provided for @settingsHubShareLiveOff.
+  ///
+  /// In es, this message translates to:
+  /// **'No compartes tu ubicación en rodadas'**
+  String get settingsHubShareLiveOff;
+
+  /// No description provided for @settingsHubShareHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Aplican a todas tus rodadas. Tu grupo y tu familia solo ven dónde vas si activas estas opciones.'**
+  String get settingsHubShareHelp;
+
+  /// No description provided for @settingsHubFamilyLinkBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu familia puede seguirte sin tener la app: en En vivo toca Compartir y mándales el link. Puedes reenviar el mismo link cuando quieras.'**
+  String get settingsHubFamilyLinkBody;
+
+  /// No description provided for @settingsHubData.
+  ///
+  /// In es, this message translates to:
+  /// **'Datos y sincronización'**
+  String get settingsHubData;
+
+  /// No description provided for @settingsHubDataSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Respalda tus recorridos en la nube'**
+  String get settingsHubDataSub;
+
+  /// No description provided for @settingsHubLastSync.
+  ///
+  /// In es, this message translates to:
+  /// **'Última sincronización: {time}'**
+  String settingsHubLastSync(String time);
+
+  /// No description provided for @settingsHubAccessories.
+  ///
+  /// In es, this message translates to:
+  /// **'Accesorios'**
+  String get settingsHubAccessories;
+
+  /// No description provided for @settingsHubAccessoriesSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Cámara GoPro y M5 Logger'**
+  String get settingsHubAccessoriesSub;
+
+  /// No description provided for @settingsHubAccessoriesSubCameraOnly.
+  ///
+  /// In es, this message translates to:
+  /// **'Cámara GoPro'**
+  String get settingsHubAccessoriesSubCameraOnly;
+
+  /// No description provided for @settingsHubM5LoggerSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Emparejar el equipo o importar una sesión de la SD'**
+  String get settingsHubM5LoggerSub;
+
+  /// No description provided for @settingsHubLegal.
+  ///
+  /// In es, this message translates to:
+  /// **'Legal y ayuda'**
+  String get settingsHubLegal;
+
+  /// No description provided for @settingsHubLegalSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Términos, privacidad y normas de la comunidad'**
+  String get settingsHubLegalSub;
+
+  /// No description provided for @settingsHubLab.
+  ///
+  /// In es, this message translates to:
+  /// **'Laboratorio'**
+  String get settingsHubLab;
+
+  /// No description provided for @settingsHubLabSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Funciones en prueba'**
+  String get settingsHubLabSub;
+
+  /// No description provided for @settingsHubStaff.
+  ///
+  /// In es, this message translates to:
+  /// **'Staff'**
+  String get settingsHubStaff;
+
+  /// No description provided for @settingsHubStaffSub.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver como otro usuario, reportes y códigos de socio'**
+  String get settingsHubStaffSub;
+
+  /// No description provided for @settingsHubStoreUnavailable.
+  ///
+  /// In es, this message translates to:
+  /// **'La tienda no está disponible en este momento. Revisa tu conexión e intenta de nuevo más tarde.'**
+  String get settingsHubStoreUnavailable;
+
   /// No description provided for @proUnlock.
   ///
   /// In es, this message translates to:
@@ -1811,7 +2093,7 @@ abstract class AppLocalizations {
   /// No description provided for @proToggleHelp.
   ///
   /// In es, this message translates to:
-  /// **'Desbloqueo temporal hasta conectar la tienda. Apágalo para ver la versión gratis.'**
+  /// **'Solo en versiones de prueba: activa Pro en este teléfono. Apágalo para ver la versión gratis.'**
   String get proToggleHelp;
 
   /// No description provided for @proTrialDaysLeft.
@@ -1829,8 +2111,62 @@ abstract class AppLocalizations {
   /// No description provided for @proExpiredKeepLab.
   ///
   /// In es, this message translates to:
-  /// **'Se acabó tu Pro — conserva el zoom de segmento y el detalle de curvas.'**
+  /// **'Tu Pro terminó. Suscríbete para recuperar el zoom de tramo y el detalle de curvas.'**
   String get proExpiredKeepLab;
+
+  /// No description provided for @proStoreOnlyBuild.
+  ///
+  /// In es, this message translates to:
+  /// **'Las suscripciones solo están disponibles en la versión de Google Play / App Store. Si tienes un código de socio, canjéalo aquí.'**
+  String get proStoreOnlyBuild;
+
+  /// No description provided for @proStoreOnlyBuildNoCodes.
+  ///
+  /// In es, this message translates to:
+  /// **'Las suscripciones solo están disponibles en la versión de la tienda. Intenta de nuevo más tarde.'**
+  String get proStoreOnlyBuildNoCodes;
+
+  /// No description provided for @proRestoreFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos restaurar tus compras. Revisa tu conexión e intenta de nuevo.'**
+  String get proRestoreFailed;
+
+  /// No description provided for @proFeatureHardware.
+  ///
+  /// In es, this message translates to:
+  /// **'Conecta el logger Métrica y tu cámara GoPro'**
+  String get proFeatureHardware;
+
+  /// No description provided for @proFeatureCamera.
+  ///
+  /// In es, this message translates to:
+  /// **'Controla tu cámara GoPro desde la app'**
+  String get proFeatureCamera;
+
+  /// No description provided for @proSubscriptionFooter.
+  ///
+  /// In es, this message translates to:
+  /// **'Pro es una suscripción mensual o anual que se renueva automáticamente. Cancela cuando quieras desde tu tienda.'**
+  String get proSubscriptionFooter;
+
+  /// No description provided for @proPartnerCodeHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Un código de socio da 90 días de Pro.'**
+  String get proPartnerCodeHint;
+
+  /// No description provided for @authHaveAccount.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya tengo cuenta'**
+  String get authHaveAccount;
+
+  /// No description provided for @authNoAccount.
+  ///
+  /// In es, this message translates to:
+  /// **'¿No tienes cuenta? Crear cuenta'**
+  String get authNoAccount;
 
   /// No description provided for @partnerProCode.
   ///
@@ -2189,7 +2525,7 @@ abstract class AppLocalizations {
   /// No description provided for @authGateBody.
   ///
   /// In es, this message translates to:
-  /// **'RiderLab necesita una cuenta. Usa Google o correo y contraseña — el modo invitado está apagado. Así también entra la revisión de las tiendas.'**
+  /// **'RiderLab necesita una cuenta para guardar tus recorridos. Entra con Google o con tu correo.'**
   String get authGateBody;
 
   /// No description provided for @signInWith.
@@ -2735,7 +3071,7 @@ abstract class AppLocalizations {
   /// No description provided for @rideDeckHelp.
   ///
   /// In es, this message translates to:
-  /// **'Toca una vez, pon el teléfono en el bolsillo o en el tanque, quédate quieto. Cuando sientas vibrar y un beep, el 0° quedó guardado y el recorrido arranca — no vuelves a tocar.'**
+  /// **'Pon el teléfono en el soporte, vertical, con la moto derecha y quieta. Toca «Sostener vertical 4 s» y no muevas la moto 4 segundos. Al vibrar, el 0° queda guardado y el recorrido arranca.'**
   String get rideDeckHelp;
 
   /// No description provided for @startRideNow.
@@ -2891,7 +3227,7 @@ abstract class AppLocalizations {
   /// No description provided for @freezeThenArmHelp.
   ///
   /// In es, this message translates to:
-  /// **'Toca una vez, coloca el teléfono, quédate quieto. Un vibrar y un beep confirman que el 0° quedó guardado. Luego bloquea la pantalla — al arrancar se inicia el recorrido. No vuelves a tocar.'**
+  /// **'Pon el teléfono en el soporte, vertical, con la moto derecha y quieta. Toca «Sostener vertical 4 s» y no muevas la moto 4 segundos. Al vibrar, el 0° queda guardado: bloquea la pantalla y arranca; el recorrido empieza solo.'**
   String get freezeThenArmHelp;
 
   /// No description provided for @armAutoRouteArmed.
@@ -2911,6 +3247,126 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'No se pudieron cargar recorridos: {error}'**
   String couldNotLoadRides(String error);
+
+  /// No description provided for @homeDiscardRecoveredTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Descartar recorrido?'**
+  String get homeDiscardRecoveredTitle;
+
+  /// No description provided for @homeDiscardRecoveredBody.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Borrar el recorrido del {date}? No se puede deshacer.'**
+  String homeDiscardRecoveredBody(String date);
+
+  /// No description provided for @homeSaveRecoveredError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo guardar la línea. Intenta de nuevo.'**
+  String get homeSaveRecoveredError;
+
+  /// No description provided for @homeRideMaxSpeed.
+  ///
+  /// In es, this message translates to:
+  /// **'máx. {speed} km/h'**
+  String homeRideMaxSpeed(String speed);
+
+  /// No description provided for @homeRideMaxLean.
+  ///
+  /// In es, this message translates to:
+  /// **'incl. {lean}°'**
+  String homeRideMaxLean(String lean);
+
+  /// No description provided for @homeNavRodadas.
+  ///
+  /// In es, this message translates to:
+  /// **'Rodadas'**
+  String get homeNavRodadas;
+
+  /// No description provided for @homeNavFriends.
+  ///
+  /// In es, this message translates to:
+  /// **'Amigos'**
+  String get homeNavFriends;
+
+  /// No description provided for @homeModeStreet.
+  ///
+  /// In es, this message translates to:
+  /// **'Calle'**
+  String get homeModeStreet;
+
+  /// No description provided for @homeModeTrack.
+  ///
+  /// In es, this message translates to:
+  /// **'Pista'**
+  String get homeModeTrack;
+
+  /// No description provided for @homeModeSemantics.
+  ///
+  /// In es, this message translates to:
+  /// **'Modo de la app: {mode}. Toca para cambiar entre Calle y Pista.'**
+  String homeModeSemantics(String mode);
+
+  /// No description provided for @homeModeLockedHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Termina o desarma el recorrido para cambiar de modo.'**
+  String get homeModeLockedHint;
+
+  /// No description provided for @rideDetailAppBarTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Ride Lab'**
+  String get rideDetailAppBarTitle;
+
+  /// No description provided for @rideDetailAppBarTitleSegment.
+  ///
+  /// In es, this message translates to:
+  /// **'Tramo'**
+  String get rideDetailAppBarTitleSegment;
+
+  /// No description provided for @rideDetailNoScore.
+  ///
+  /// In es, this message translates to:
+  /// **'—'**
+  String get rideDetailNoScore;
+
+  /// No description provided for @rideDetailVisibilityPrivate.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo yo'**
+  String get rideDetailVisibilityPrivate;
+
+  /// No description provided for @rideDetailVisibilityFriends.
+  ///
+  /// In es, this message translates to:
+  /// **'Amigos'**
+  String get rideDetailVisibilityFriends;
+
+  /// No description provided for @rideDetailVisibilityPublic.
+  ///
+  /// In es, this message translates to:
+  /// **'Todos'**
+  String get rideDetailVisibilityPublic;
+
+  /// No description provided for @rideDetailVisibilityPrivateHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Oculto para otros pilotos'**
+  String get rideDetailVisibilityPrivateHelp;
+
+  /// No description provided for @rideDetailVisibilityFriendsHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Visible para tus amigos aceptados'**
+  String get rideDetailVisibilityFriendsHelp;
+
+  /// No description provided for @rideDetailVisibilityPublicHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Visible para todos en RiderLab'**
+  String get rideDetailVisibilityPublicHelp;
 
   /// No description provided for @rodadasTitle.
   ///
@@ -3881,7 +4337,7 @@ abstract class AppLocalizations {
   /// No description provided for @autoArmOnRodadaStartHelp.
   ///
   /// In es, this message translates to:
-  /// **'Una sola vez cuando la rodada pase a en vivo. Si cancelas, arma después con Empezar a Rodar.'**
+  /// **'Una sola vez cuando la rodada pase a en vivo. Si cancelas, arma después con Empezar a rodar.'**
   String get autoArmOnRodadaStartHelp;
 
   /// No description provided for @autoShareFamilyOnRodada.
@@ -5039,7 +5495,7 @@ abstract class AppLocalizations {
   /// No description provided for @resumeMotionDetection.
   ///
   /// In es, this message translates to:
-  /// **'Resumir detección'**
+  /// **'Reanudar detección'**
   String get resumeMotionDetection;
 
   /// No description provided for @sessionArmedHelp.
@@ -6465,7 +6921,7 @@ abstract class AppLocalizations {
   /// No description provided for @locationServicesOff.
   ///
   /// In es, this message translates to:
-  /// **'Activa la ubicación para grabar tu línea.'**
+  /// **'Activa la ubicación del teléfono para grabar tu línea.'**
   String get locationServicesOff;
 
   /// No description provided for @locationPermissionDenied.
@@ -6479,6 +6935,168 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Activa la ubicación en Ajustes e inténtalo de nuevo.'**
   String get locationPermissionDeniedForever;
+
+  /// No description provided for @errNoConnection.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin conexión. Revisa tu internet e intenta de nuevo.'**
+  String get errNoConnection;
+
+  /// No description provided for @errTimeout.
+  ///
+  /// In es, this message translates to:
+  /// **'Tardó demasiado en responder. Revisa tu conexión e intenta de nuevo.'**
+  String get errTimeout;
+
+  /// No description provided for @errServer.
+  ///
+  /// In es, this message translates to:
+  /// **'El servidor tuvo un problema. Intenta de nuevo en un momento.'**
+  String get errServer;
+
+  /// No description provided for @errSignInRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicia sesión para continuar.'**
+  String get errSignInRequired;
+
+  /// No description provided for @errSessionExpired.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu sesión expiró. Inicia sesión de nuevo.'**
+  String get errSessionExpired;
+
+  /// No description provided for @errNotAllowed.
+  ///
+  /// In es, this message translates to:
+  /// **'No tienes permiso para hacer esto.'**
+  String get errNotAllowed;
+
+  /// No description provided for @errPermissionDenied.
+  ///
+  /// In es, this message translates to:
+  /// **'Falta un permiso. Actívalo en Ajustes e intenta de nuevo.'**
+  String get errPermissionDenied;
+
+  /// No description provided for @errNotFound.
+  ///
+  /// In es, this message translates to:
+  /// **'No se encontró. Puede que se haya borrado.'**
+  String get errNotFound;
+
+  /// No description provided for @errRideAlreadyRecording.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya hay un recorrido grabándose.'**
+  String get errRideAlreadyRecording;
+
+  /// No description provided for @errRecordingWhileImpersonating.
+  ///
+  /// In es, this message translates to:
+  /// **'La grabación está apagada mientras ves como otro piloto.'**
+  String get errRecordingWhileImpersonating;
+
+  /// No description provided for @errGeneric.
+  ///
+  /// In es, this message translates to:
+  /// **'Algo salió mal. Intenta de nuevo.'**
+  String get errGeneric;
+
+  /// No description provided for @copyLoggerIntro.
+  ///
+  /// In es, this message translates to:
+  /// **'Hardware post-rodada: microSD en pista, Wi‑Fi en paddock. Empareja el Basic con tu cuenta o importa una carpeta de sesión.'**
+  String get copyLoggerIntro;
+
+  /// No description provided for @copyLoggerPairSection.
+  ///
+  /// In es, this message translates to:
+  /// **'Emparejar'**
+  String get copyLoggerPairSection;
+
+  /// No description provided for @copyLoggerGenerateCode.
+  ///
+  /// In es, this message translates to:
+  /// **'Generar código'**
+  String get copyLoggerGenerateCode;
+
+  /// No description provided for @copyLoggerCodeMinted.
+  ///
+  /// In es, this message translates to:
+  /// **'Código: {code} (15 min). Reclámalo desde el logger.'**
+  String copyLoggerCodeMinted(String code);
+
+  /// No description provided for @copyLoggerClaimButton.
+  ///
+  /// In es, this message translates to:
+  /// **'Reclamar código → PAIR serial'**
+  String get copyLoggerClaimButton;
+
+  /// No description provided for @copyLoggerClaimTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Reclamar código de emparejamiento'**
+  String get copyLoggerClaimTitle;
+
+  /// No description provided for @copyLoggerCodeLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Código'**
+  String get copyLoggerCodeLabel;
+
+  /// No description provided for @copyLoggerCodeHint.
+  ///
+  /// In es, this message translates to:
+  /// **'8 caracteres'**
+  String get copyLoggerCodeHint;
+
+  /// No description provided for @copyLoggerClaim.
+  ///
+  /// In es, this message translates to:
+  /// **'Reclamar'**
+  String get copyLoggerClaim;
+
+  /// No description provided for @copyLoggerPairCopied.
+  ///
+  /// In es, this message translates to:
+  /// **'Comando PAIR copiado. Pégalo en el monitor USB del Basic.'**
+  String get copyLoggerPairCopied;
+
+  /// No description provided for @copyLoggerImportSection.
+  ///
+  /// In es, this message translates to:
+  /// **'Importar sesión'**
+  String get copyLoggerImportSection;
+
+  /// No description provided for @copyLoggerImportHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Carpeta con manifest.json + gnss.ndjson (desde la microSD).'**
+  String get copyLoggerImportHelp;
+
+  /// No description provided for @copyLoggerPickFolder.
+  ///
+  /// In es, this message translates to:
+  /// **'Elegir carpeta de sesión'**
+  String get copyLoggerPickFolder;
+
+  /// No description provided for @copyLoggerPickFolderTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Carpeta de sesión del logger (manifest + gnss.ndjson)'**
+  String get copyLoggerPickFolderTitle;
+
+  /// No description provided for @copyLoggerImported.
+  ///
+  /// In es, this message translates to:
+  /// **'Importada: {points} pts · {title}'**
+  String copyLoggerImported(int points, String title);
+
+  /// No description provided for @copyLoggerImportFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo importar la sesión. Revisa que la carpeta tenga manifest.json y gnss.ndjson con puntos.'**
+  String get copyLoggerImportFailed;
 
   /// No description provided for @locationDisclosureTitle.
   ///
@@ -6801,7 +7419,7 @@ abstract class AppLocalizations {
   /// No description provided for @modeToggleSemantics.
   ///
   /// In es, this message translates to:
-  /// **'Cambiar entre modo calle (ON) y off-road (OFF)'**
+  /// **'Cambiar entre modo Calle y Pista'**
   String get modeToggleSemantics;
 
   /// No description provided for @offroadBrandTag.

@@ -116,7 +116,7 @@ class FamilyCircleScreen extends ConsumerWidget {
             const SizedBox(height: 8),
             watching.when(
               loading: () => const LinearProgressIndicator(),
-              error: (e, _) => Text('$e'),
+              error: (e, _) => Text(context.l10n.userFacingError(e)),
               data: (list) {
                 if (list.isEmpty) {
                   return Text(
@@ -162,7 +162,7 @@ class FamilyCircleScreen extends ConsumerWidget {
             const SizedBox(height: 8),
             contacts.when(
               loading: () => const LinearProgressIndicator(),
-              error: (e, _) => Text('$e'),
+              error: (e, _) => Text(context.l10n.userFacingError(e)),
               data: (list) {
                 if (list.isEmpty) {
                   return Text(
@@ -295,7 +295,7 @@ class FamilyCircleScreen extends ConsumerWidget {
       ref.invalidate(trustedContactsProvider);
     } catch (e) {
       if (!context.mounted) return;
-      showAppSnackError(context, '$e');
+      showAppSnackError(context, context.l10n.userFacingError(e));
     }
   }
 }

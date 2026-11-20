@@ -173,7 +173,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
               const SizedBox(height: 8),
               searchAsync.when(
                 loading: () => const LinearProgressIndicator(),
-                error: (e, _) => Text('$e'),
+                error: (e, _) => Text(context.l10n.userFacingError(e)),
                 data: (hits) {
                   if (hits.isEmpty) {
                     return Text(
@@ -201,7 +201,10 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                                 );
                               } catch (e) {
                                 if (!context.mounted) return;
-                                showAppSnackError(context, '$e');
+                                showAppSnackError(
+                                  context,
+                                  context.l10n.userFacingError(e),
+                                );
                               }
                             },
                             child: Text(l10n.addFriend),
@@ -391,7 +394,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
           .read(riderAliasProvider.notifier)
           .setAlias(_nameController.text);
       if (!mounted) return;
-      showAppSnackError(context, '$e');
+      showAppSnackError(context, context.l10n.userFacingError(e));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -493,7 +496,7 @@ class _FriendTile extends ConsumerWidget {
       showAppSnack(context, messageForInviteResult(l10n, result));
     } catch (e) {
       if (!context.mounted) return;
-      showAppSnackError(context, '$e');
+      showAppSnackError(context, context.l10n.userFacingError(e));
     }
   }
 }
@@ -517,7 +520,7 @@ class FriendRidesScreen extends ConsumerWidget {
       ),
       body: ridesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, _) => Center(child: Text(context.l10n.userFacingError(e))),
         data: (rides) {
           if (rides.isEmpty) {
             return Center(

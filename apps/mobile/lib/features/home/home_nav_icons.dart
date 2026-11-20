@@ -13,6 +13,7 @@ class HomeNavIconButton extends StatelessWidget {
     this.asset,
     this.icon,
     this.color = AppTheme.mist,
+    this.label,
   }) : assert(asset != null || icon != null);
 
   final String tooltip;
@@ -22,19 +23,66 @@ class HomeNavIconButton extends StatelessWidget {
   final IconData? icon;
   final Color color;
 
+  /// Short visible caption under the glyph (e.g. "Amigos").
+  final String? label;
+
   static const double hit = 52;
 
   @override
   Widget build(BuildContext context) {
-    final button = IconButton(
-      tooltip: tooltip,
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(minWidth: hit, minHeight: hit),
-      onPressed: onPressed,
-      icon: icon != null
-          ? Icon(icon, size: 28, color: color)
-          : AppAssetIcon(asset: asset!, size: 34, color: color),
-    );
+    final caption = label;
+    final Widget button;
+    if (caption == null) {
+      button = IconButton(
+        tooltip: tooltip,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(minWidth: hit, minHeight: hit),
+        onPressed: onPressed,
+        icon: icon != null
+            ? Icon(icon, size: 28, color: color)
+            : AppAssetIcon(asset: asset!, size: 34, color: color),
+      );
+    } else {
+      button = Semantics(
+        button: true,
+        label: tooltip,
+        excludeSemantics: true,
+        child: Tooltip(
+          message: tooltip,
+          child: InkWell(
+            onTap: onPressed,
+            borderRadius: BorderRadius.circular(12),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: hit, minHeight: hit),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    icon != null
+                        ? Icon(icon, size: 26, color: color)
+                        : AppAssetIcon(asset: asset!, size: 30, color: color),
+                    const SizedBox(height: 2),
+                    Text(
+                      caption,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: color,
+                        height: 1.1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     final id = semanticId;
     if (id == null) return button;
     return DemoTarget(id: id, child: button);
@@ -90,10 +138,6 @@ class AppMotoIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppAssetIcon(
-      asset: AppAssetIcon.lean,
-      size: size,
-      color: color,
-    );
+    return AppAssetIcon(asset: AppAssetIcon.lean, size: size, color: color);
   }
 }

@@ -9,6 +9,7 @@ class ProEntitlementStatus {
     this.daysLeft = 0,
     this.trialUsed = false,
     this.partnerUsed = false,
+    this.paidLapsed = false,
     this.localOverride = false,
   });
 
@@ -21,12 +22,20 @@ class ProEntitlementStatus {
   final int daysLeft;
   final bool trialUsed;
   final bool partnerUsed;
+
+  /// The store reports a `pro` subscription that existed and is no longer
+  /// active (RevenueCat `entitlements.all` but not `active`).
+  final bool paidLapsed;
   final bool localOverride;
 
   bool get isTrial => isPro && source == 'trial';
   bool get isPartner => isPro && source == 'partner';
   bool get isPaid => isPro && source == 'revenuecat';
-  bool get expiredAfterGrant => !isPro && (trialUsed || partnerUsed);
+
+  /// True only when a real grant lapsed: a partner code or a paid store
+  /// subscription. The old no-card trial (`trialUsed`) does not count: those
+  /// riders are plain Free, with no "your Pro ended" message.
+  bool get expiredAfterGrant => !isPro && (partnerUsed || paidLapsed);
 
   ProEntitlementStatus copyWith({
     bool? isPro,
@@ -35,6 +44,7 @@ class ProEntitlementStatus {
     int? daysLeft,
     bool? trialUsed,
     bool? partnerUsed,
+    bool? paidLapsed,
     bool? localOverride,
     bool clearSource = false,
     bool clearEndsAt = false,
@@ -46,6 +56,7 @@ class ProEntitlementStatus {
       daysLeft: daysLeft ?? this.daysLeft,
       trialUsed: trialUsed ?? this.trialUsed,
       partnerUsed: partnerUsed ?? this.partnerUsed,
+      paidLapsed: paidLapsed ?? this.paidLapsed,
       localOverride: localOverride ?? this.localOverride,
     );
   }
@@ -64,17 +75,19 @@ class ProEntitlementStatus {
       daysLeft: days is int ? days : int.tryParse('$days') ?? 0,
       trialUsed: json['trial_used'] == true,
       partnerUsed: json['partner_used'] == true,
+      paidLapsed: json['paid_lapsed'] == true,
     );
   }
 
   Map<String, dynamic> toCacheJson() => {
-        'is_pro': isPro,
-        'source': source,
-        'ends_at': endsAt?.toUtc().toIso8601String(),
-        'days_left': daysLeft,
-        'trial_used': trialUsed,
-        'partner_used': partnerUsed,
-      };
+    'is_pro': isPro,
+    'source': source,
+    'ends_at': endsAt?.toUtc().toIso8601String(),
+    'days_left': daysLeft,
+    'trial_used': trialUsed,
+    'partner_used': partnerUsed,
+    'paid_lapsed': paidLapsed,
+  };
 }
 
 class ProRpcResult {

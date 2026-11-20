@@ -10,11 +10,9 @@ extension GpsWarmupL10n on AppLocalizations {
       GpsWarmupPhase.searching => gpsLookingSatellites,
       GpsWarmupPhase.locking =>
         meters == null ? gpsWarming : gpsWarmingAcc(meters),
-      GpsWarmupPhase.ready =>
-        meters == null ? gpsReady : gpsReadyAcc(meters),
-      GpsWarmupPhase.timeout => meters == null
-          ? gpsStartKeepSky
-          : gpsStartWithAcc(meters),
+      GpsWarmupPhase.ready => meters == null ? gpsReady : gpsReadyAcc(meters),
+      GpsWarmupPhase.timeout =>
+        meters == null ? gpsStartKeepSky : gpsStartWithAcc(meters),
     };
   }
 
@@ -25,14 +23,5 @@ extension GpsWarmupL10n on AppLocalizations {
       LocationPermissionDenyReason.deniedForever =>
         locationPermissionDeniedForever,
     };
-  }
-
-  String userFacingError(Object error) {
-    if (error is LocationDeniedException) {
-      return locationDeniedText(error.reason);
-    }
-    final text = '$error';
-    if (text.contains('Rolling to next lap')) return gpsRollingNextLap;
-    return text;
   }
 }

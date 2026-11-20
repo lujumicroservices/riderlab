@@ -286,6 +286,24 @@
   "curvaOpenMap": "Full map",
   "curvaZoomLab": "Zoom Ride Lab",
   "armAutoRide": "Start Rolling",
+  "rideHoldToFinishHint": "Press and hold to finish",
+  "rideFinishShort": "Finish",
+  "rideBackHint": "To exit, press and hold Finish",
+  "rideSavedToast": "Ride saved",
+  "rideSessionCancelledNoMotion": "Session cancelled: no movement",
+  "rideHudLeanSetting": "Setting 0°",
+  "ridePermsIntro": "RiderLab records your GPS line while you ride, also with the screen off and the phone on the mount. Location is used only while you record or wait to start, and stops when you finish. A notification stays visible meanwhile.\n\nNext we'll ask for:",
+  "ridePermsStepLocation": "Location: choose \"While using the app\".",
+  "ridePermsStepBackground": "Screen off: on the next screen choose \"Allow all the time\".",
+  "ridePermsStepNotifications": "Notifications: to show that you're recording.",
+  "ridePermsStepBattery": "Battery: let RiderLab run unrestricted so Android doesn't stop the recording.",
+  "ridePermsBackgroundTitle": "One more step",
+  "ridePermsBackgroundBody": "To record with the screen off, Android will open RiderLab's location settings. Choose \"Allow all the time\", then come back with Back.",
+  "ridePermsBackgroundLimited": "With the screen off, recording may pause. You can change this in Settings.",
+  "ridePermsLocationOffTitle": "Phone location is off",
+  "ridePermsDeniedBodyAndroid": "RiderLab needs your location to record your line. In Settings → Permissions → Location choose \"Allow only while using the app\" or \"Allow all the time\".",
+  "rideNotifRecording": "Recording ride…",
+  "rideNotifArmed": "Ready: start riding and it records on its own. You can lock the screen.",
   "disarmAutoRide": "Cancel auto-start",
   "waitingForMotion": "Armed",
   "armedBannerBody": "Armed: recording starts when you move. Stopping puts the session on hold.",
@@ -322,6 +340,49 @@
   "pro": "PRO",
   "free": "Free",
   "settings": "Settings",
+  "settingsHubProfileGuest": "Not signed in",
+  "settingsHubProfileSignInHint": "Tap to sign in",
+  "settingsHubChipFree": "Free",
+  "settingsHubChipPro": "Pro",
+  "settingsHubProFree": "Free plan",
+  "settingsHubProActive": "Active",
+  "settingsHubProActiveUntil": "Active until {date}",
+  "@settingsHubProActiveUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsHubRecording": "Recording",
+  "settingsHubSoundOn": "Mode sound on",
+  "settingsHubSoundOff": "Mode sound off",
+  "settingsHubRodadas": "Group rides and privacy",
+  "settingsHubShareLiveOn": "You share your location on group rides",
+  "settingsHubShareLiveOff": "You don't share your location on group rides",
+  "settingsHubShareHelp": "These apply to all your group rides. Your group and your family only see where you are if you turn these on.",
+  "settingsHubFamilyLinkBody": "Your family can follow you without the app: in Live, tap Share and send them the link. You can resend the same link anytime.",
+  "settingsHubData": "Data and sync",
+  "settingsHubDataSub": "Back up your rides to the cloud",
+  "settingsHubLastSync": "Last sync: {time}",
+  "@settingsHubLastSync": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsHubAccessories": "Accessories",
+  "settingsHubAccessoriesSub": "GoPro camera and M5 Logger",
+  "settingsHubAccessoriesSubCameraOnly": "GoPro camera",
+  "settingsHubM5LoggerSub": "Pair the device or import an SD card session",
+  "settingsHubLegal": "Legal and help",
+  "settingsHubLegalSub": "Terms, privacy and community guidelines",
+  "settingsHubLab": "Lab",
+  "settingsHubLabSub": "Features in testing",
+  "settingsHubStaff": "Staff",
+  "settingsHubStaffSub": "View as another rider, reports and partner codes",
+  "settingsHubStoreUnavailable": "The store isn't available right now. Check your connection and try again later.",
   "proUnlock": "RiderLab Pro",
   "proUnlockBody": "Pick any stretch, full corner detail, and the full brake list.",
   "proFeatureSegment": "Zoom any part of the ride",
@@ -330,7 +391,7 @@
   "upgradeToPro": "Upgrade to Pro",
   "proUnlocked": "Pro is active",
   "proToggleDev": "Pro unlocked",
-  "proToggleHelp": "Temporary unlock until store billing is ready. Turn off to see the free version.",
+  "proToggleHelp": "Test builds only: turns on Pro on this phone. Turn it off to see the free version.",
   "proTrialDaysLeft": "Pro trial · {days} days left",
   "@proTrialDaysLeft": {
     "placeholders": {
@@ -347,7 +408,16 @@
       }
     }
   },
-  "proExpiredKeepLab": "Your Pro access ended — keep segment zoom and full corners.",
+  "proExpiredKeepLab": "Your Pro ended. Subscribe to get stretch zoom and full corner detail back.",
+  "proStoreOnlyBuild": "Subscriptions are only available in the Google Play / App Store version. If you have a partner code, redeem it here.",
+  "proStoreOnlyBuildNoCodes": "Subscriptions are only available in the store version. Please try again later.",
+  "proRestoreFailed": "Could not restore your purchases. Check your connection and try again.",
+  "proFeatureHardware": "Connect the Métrica logger and your GoPro camera",
+  "proFeatureCamera": "Control your GoPro camera from the app",
+  "proSubscriptionFooter": "Pro is a monthly or yearly subscription that renews automatically. Cancel anytime from your store account.",
+  "proPartnerCodeHint": "A partner code gives 90 days of Pro.",
+  "authHaveAccount": "I already have an account",
+  "authNoAccount": "Don't have an account? Create one",
   "partnerProCode": "Partner Pro code",
   "partnerProCodeHint": "Paste your code",
   "partnerProCodeHelp": "A personal code from a RiderLab partner. Not a rodada invite.",
@@ -424,7 +494,7 @@
   "accountSignedIn": "Signed in",
   "accountSignedInBody": "Your account is linked. Sign out returns you to the sign-in screen.",
   "authGateTitle": "Sign in to ride",
-  "authGateBody": "RiderLab needs an account. Use Google or email and password — guest mode is off. This is also how store review signs in.",
+  "authGateBody": "RiderLab needs an account to save your rides. Sign in with Google or your email.",
   "signInWith": "Sign in with {provider}",
   "@signInWith": {
     "placeholders": {
@@ -563,7 +633,7 @@
   "labAdventureCameraZonesPlaceStop": "Next tap: Stop ■ for this pair",
   "labAdventureCameraZonesPairs": "Pairs",
   "rideDeckTitle": "Start ride",
-  "rideDeckHelp": "Tap once, put the phone in a pocket or on the tank, stay still. When you feel a buzz and beep, 0° is saved and the ride starts — you won’t tap again.",
+  "rideDeckHelp": "Put the phone on the mount, upright, with the bike straight and still. Tap “Hold upright 4s” and keep the bike still for 4 seconds. When it buzzes, 0° is saved and the ride starts.",
   "startRideNow": "Start ride now",
   "labAdventureCameraZoneStart": "Start",
   "labAdventureCameraZoneStop": "Stop",
@@ -589,7 +659,7 @@
   "labAdventureCameraScenarioAggressiveBody": "ON: Adventure camera · Aggressive riding auto-record · cameras in the group.\nOFF: Record with ride · Map start/stop zones · Follow auto-pause.",
   "labAdventureCameraScenarioAggressiveApply": "Apply aggressive-only setup",
   "armAutoNoRouteHint": "Ready — when you roll, a ride starts in the garage.",
-  "freezeThenArmHelp": "Tap once, put the phone in place, stay still. A buzz and beep means 0° is saved. Then lock the screen — rolling starts the ride. You won’t tap again.",
+  "freezeThenArmHelp": "Put the phone on the mount, upright, with the bike straight and still. Tap “Hold upright 4s” and keep the bike still for 4 seconds. When it buzzes, 0° is saved: lock the screen and ride off; recording starts on its own.",
   "armAutoRouteArmed": "Ready — rolling starts the ride",
   "armAutoRouteArmedNamed": "Ready for “{name}” — the ride will be saved on that route",
   "@armAutoRouteArmedNamed": {
@@ -607,6 +677,54 @@
       }
     }
   },
+  "homeDiscardRecoveredTitle": "Discard ride?",
+  "homeDiscardRecoveredBody": "Delete the ride from {date}? This can't be undone.",
+  "@homeDiscardRecoveredBody": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeSaveRecoveredError": "Couldn't save the line. Try again.",
+  "homeRideMaxSpeed": "max {speed} km/h",
+  "@homeRideMaxSpeed": {
+    "placeholders": {
+      "speed": {
+        "type": "String"
+      }
+    }
+  },
+  "homeRideMaxLean": "lean {lean}°",
+  "@homeRideMaxLean": {
+    "placeholders": {
+      "lean": {
+        "type": "String"
+      }
+    }
+  },
+  "homeNavRodadas": "Rodadas",
+  "homeNavFriends": "Friends",
+  "homeModeStreet": "Street",
+  "homeModeTrack": "Track",
+  "homeModeSemantics": "App mode: {mode}. Tap to switch between Street and Track.",
+  "@homeModeSemantics": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "homeModeLockedHint": "Finish or disarm the ride to switch modes.",
+  "rideDetailAppBarTitle": "Ride Lab",
+  "rideDetailAppBarTitleSegment": "Segment",
+  "rideDetailNoScore": "—",
+  "rideDetailVisibilityPrivate": "Only me",
+  "rideDetailVisibilityFriends": "Friends",
+  "rideDetailVisibilityPublic": "Everyone",
+  "rideDetailVisibilityPrivateHelp": "Hidden from other riders",
+  "rideDetailVisibilityFriendsHelp": "Visible to accepted friends",
+  "rideDetailVisibilityPublicHelp": "Visible to everyone in RiderLab",
   "rodadasTitle": "Rodadas",
   "rodadasHomeSubtitle": "Create a group ride · invite · share live GPS",
   "friendsHelp": "Search riders, send friend requests, and invite accepted friends to a rodada.",
@@ -1925,9 +2043,53 @@
   },
   "gpsStartKeepSky": "Starting — keep sky view open for a better lock",
   "gpsRollingNextLap": "Rolling to next lap…",
-  "locationServicesOff": "Turn on location services to record your line.",
+  "locationServicesOff": "Turn on your phone's location to record your line.",
   "locationPermissionDenied": "Location permission is needed to draw your line.",
   "locationPermissionDeniedForever": "Enable location in Settings, then try again.",
+  "errNoConnection": "No connection. Check your internet and try again.",
+  "errTimeout": "That took too long. Check your connection and try again.",
+  "errServer": "The server had a problem. Try again in a moment.",
+  "errSignInRequired": "Sign in to continue.",
+  "errSessionExpired": "Your session expired. Sign in again.",
+  "errNotAllowed": "You don't have permission to do that.",
+  "errPermissionDenied": "A permission is missing. Enable it in Settings and try again.",
+  "errNotFound": "Not found. It may have been deleted.",
+  "errRideAlreadyRecording": "A ride is already recording.",
+  "errRecordingWhileImpersonating": "Recording is off while viewing as another rider.",
+  "errGeneric": "Something went wrong. Try again.",
+  "copyLoggerIntro": "Post-ride hardware: microSD on track, Wi‑Fi in the paddock. Pair the Basic with your account or import a session folder.",
+  "copyLoggerPairSection": "Pair",
+  "copyLoggerGenerateCode": "Generate code",
+  "copyLoggerCodeMinted": "Code: {code} (15 min). Claim it from the logger.",
+  "@copyLoggerCodeMinted": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "copyLoggerClaimButton": "Claim code → serial PAIR",
+  "copyLoggerClaimTitle": "Claim pair code",
+  "copyLoggerCodeLabel": "Code",
+  "copyLoggerCodeHint": "8 characters",
+  "copyLoggerClaim": "Claim",
+  "copyLoggerPairCopied": "PAIR command copied. Paste it into the Basic's USB monitor.",
+  "copyLoggerImportSection": "Import session",
+  "copyLoggerImportHelp": "Folder with manifest.json + gnss.ndjson (from the microSD).",
+  "copyLoggerPickFolder": "Choose session folder",
+  "copyLoggerPickFolderTitle": "Logger session folder (manifest + gnss.ndjson)",
+  "copyLoggerImported": "Imported: {points} pts · {title}",
+  "@copyLoggerImported": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "copyLoggerImportFailed": "Couldn't import the session. Check the folder has manifest.json and gnss.ndjson with points.",
   "locationDisclosureTitle": "Location for ride recording",
   "locationDisclosureBody": "RiderLab records your GPS line during an active ride.\n\n• Location is used only while you are recording\n• A persistent notification stays visible while recording\n• Recording continues with the screen locked or the phone in your pocket\n• Location stops when you end the ride\n\nNext, your phone will ask for location permission. Choose Allow all the time (or Always allow) so recording works with the screen off.",
   "locationDisclosureContinue": "Continue",
@@ -2038,7 +2200,7 @@
   "termsAcceptBody": "By using RiderLab you agree to the Terms of use and Privacy policy.\n\nDo not use the phone while riding. Radio and photos must stay about riding with your group. Sexual content, hate, harassment, spam, or illegal posts can get you banned.\n\nOpen the full documents below. You can read them again later in Settings.",
   "termsAcceptAgree": "I agree",
   "termsAcceptDecline": "Not now",
-  "modeToggleSemantics": "Switch between street (ON) and off-road (OFF) mode",
+  "modeToggleSemantics": "Switch between Street and Track mode",
   "offroadBrandTag": "OFF-ROAD",
   "offroadHomeTitle": "My circuits",
   "offroadHomeSubtitle": "Tracks mapped with Métrica",

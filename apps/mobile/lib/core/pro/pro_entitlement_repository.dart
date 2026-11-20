@@ -18,8 +18,6 @@ class ProEntitlementRepository {
 
   Future<ProRpcResult> status() => _rpc('my_pro_status');
 
-  Future<ProRpcResult> startTrial() => _rpc('start_pro_trial');
-
   Future<ProRpcResult> redeem(String code) {
     return _rpc(
       'redeem_partner_code',
@@ -28,16 +26,10 @@ class ProEntitlementRepository {
   }
 
   Future<ProRpcResult> staffCreateCode({String? label}) {
-    return _rpc(
-      'staff_create_partner_code',
-      params: {'p_label': label},
-    );
+    return _rpc('staff_create_partner_code', params: {'p_label': label});
   }
 
-  Future<ProRpcResult> _rpc(
-    String name, {
-    Map<String, dynamic>? params,
-  }) async {
+  Future<ProRpcResult> _rpc(String name, {Map<String, dynamic>? params}) async {
     final client = _supabase;
     if (client == null || client.auth.currentUser == null) {
       return const ProRpcResult(ok: false, error: 'not_authenticated');

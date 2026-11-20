@@ -118,7 +118,7 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
     } catch (e) {
       if (!context.mounted) return;
       Navigator.of(context).pop();
-      showAppSnackError(context, '$e');
+      showAppSnackError(context, context.l10n.userFacingError(e));
     }
   }
 
@@ -131,8 +131,10 @@ class AdventureCameraSettingsSection extends ConsumerWidget {
 
     return hydrated.when(
       loading: () => const SizedBox.shrink(),
-      error: (e, _) =>
-          Text('$e', style: const TextStyle(color: AppTheme.signal)),
+      error: (e, _) => Text(
+        context.l10n.userFacingError(e),
+        style: const TextStyle(color: AppTheme.signal),
+      ),
       data: (hub) {
         final enabled = hub.isLabEnabled;
         final status = statusAsync.asData?.value ?? hub.status;
@@ -630,7 +632,9 @@ class _StatusLine extends StatelessWidget {
           if (status.message != null && status.message!.isNotEmpty) ...[
             const SizedBox(height: 4),
             Text(
-              status.message!,
+              status.phase == AdventureCameraPhase.error
+                  ? context.l10n.userFacingError(status.message!)
+                  : status.message!,
               style: TextStyle(
                 color: status.phase == AdventureCameraPhase.error
                     ? AppTheme.signal

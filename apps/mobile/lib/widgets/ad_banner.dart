@@ -2,23 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../core/distribution.dart';
 import '../core/pro/store_l10n.dart';
 import '../l10n/l10n_ext.dart';
 import '../providers/pro_entitlement_provider.dart';
 import '../theme/app_theme.dart';
 import '../theme/ride_viz_palette.dart';
 
-/// Banner slot for Free users. Hidden when Pro is active.
-/// Placeholder until AdMob (or another network) is wired.
-/// Do not pitch “no ads” as a Pro benefit until a real ads SDK is live
-/// (see docs/FREE_VS_PRO.md). Copy here upgrades Ride Lab, not ad removal.
+/// Bottom strip for Free users. Hidden when Pro is active.
+/// No ads SDK ships in any build, so the strip is a neutral Pro promo on every
+/// channel: never an "Ad" label and never "remove ads with Pro"
+/// (docs/FREE_VS_PRO.md, principle 5).
 class FreeAdBanner extends ConsumerWidget {
-  const FreeAdBanner({
-    super.key,
-    this.onUpgrade,
-    this.compact = false,
-  });
+  const FreeAdBanner({super.key, this.onUpgrade, this.compact = false});
 
   final VoidCallback? onUpgrade;
   final bool compact;
@@ -28,9 +23,6 @@ class FreeAdBanner extends ConsumerWidget {
     if (ref.watch(isProProvider)) return const SizedBox.shrink();
 
     final l10n = context.l10n;
-    // Store builds ship no ads SDK: never show an "Ad" placeholder or a
-    // "remove ads" pitch there (App Store 2.3 / Play policy).
-    final storeBuild = AppDistribution.isStoreBuild;
     final store = StoreL10n.of(context);
     final height = compact ? 50.0 : 56.0;
 
@@ -43,12 +35,8 @@ class FreeAdBanner extends ConsumerWidget {
           width: double.infinity,
           decoration: BoxDecoration(
             border: Border(
-              top: BorderSide(
-                color: AppTheme.mist.withValues(alpha: 0.08),
-              ),
-              bottom: BorderSide(
-                color: AppTheme.mist.withValues(alpha: 0.08),
-              ),
+              top: BorderSide(color: AppTheme.mist.withValues(alpha: 0.08)),
+              bottom: BorderSide(color: AppTheme.mist.withValues(alpha: 0.08)),
             ),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -61,7 +49,7 @@ class FreeAdBanner extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  storeBuild ? store.freeStripLabel : l10n.adPlaceholder,
+                  store.freeStripLabel,
                   style: GoogleFonts.rajdhani(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
@@ -73,7 +61,7 @@ class FreeAdBanner extends ConsumerWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  storeBuild ? store.freeStripBody : l10n.removeAdsWithPro,
+                  store.freeStripBody,
                   style: GoogleFonts.rajdhani(
                     fontSize: 13,
                     color: AppTheme.mist,

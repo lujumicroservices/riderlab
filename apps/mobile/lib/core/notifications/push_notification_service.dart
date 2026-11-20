@@ -61,7 +61,12 @@ class PushNotificationService {
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const iosInit = DarwinInitializationSettings();
+    // Defaults would prompt for permission on iOS at cold start.
+    const iosInit = DarwinInitializationSettings(
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
+    );
     await _local.initialize(
       const InitializationSettings(android: androidInit, iOS: iosInit),
       onDidReceiveNotificationResponse: _onLocalResponse,
@@ -104,10 +109,11 @@ class PushNotificationService {
         importance: Importance.high,
       ),
     );
-    await androidPlugin?.requestNotificationsPermission();
-
+    // No permission prompt at cold start: the first-ride flow
+    // (LocationPermissionGate) asks for notifications with context and then
+    // calls [onNotificationPermissionGranted]. Users who already granted keep
+    // receiving pushes; the FCM token does not depend on the prompt.
     final messaging = FirebaseMessaging.instance;
-    await messaging.requestPermission(alert: true, badge: true, sound: true);
 
     FirebaseMessaging.onMessage.listen(_onForeground);
     FirebaseMessaging.onMessageOpenedApp.listen(_onOpened);
@@ -129,6 +135,23 @@ class PushNotificationService {
     // init() before the first frame.
     unawaited(syncToken());
     _ready = true;
+  }
+
+  /// Call after the user granted notifications in our own flow. FCM's
+  /// request no longer prompts at that point (the OS already has an answer);
+  /// it just registers the grant, then the token is synced again.
+  Future<void> onNotificationPermissionGranted() async {
+    if (!_ready || kIsWeb) return;
+    try {
+      await FirebaseMessaging.instance.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+    } catch (e) {
+      debugPrint('FCM permission: $e');
+    }
+    unawaited(syncToken());
   }
 
   Future<void> syncToken() async {

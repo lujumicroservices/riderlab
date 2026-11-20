@@ -331,7 +331,10 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
       _place(LatLng(pos.latitude, pos.longitude), title: l10n.rodadaMyLocation);
     } catch (e) {
       if (!mounted) return;
-      showAppSnackError(context, l10n.locationFailed('$e'));
+      showAppSnackError(
+        context,
+        l10n.locationFailed(context.l10n.userFacingError(e)),
+      );
     }
   }
 
@@ -433,7 +436,7 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
       if (!mounted) return;
       setState(() {
         _saving = false;
-        _error = '$e';
+        _error = context.l10n.userFacingError(e);
       });
     }
   }
@@ -781,7 +784,7 @@ class _CreateRodadaScreenState extends ConsumerState<CreateRodadaScreen>
                 const SizedBox(height: 8),
                 friendsAsync.when(
                   loading: () => const LinearProgressIndicator(),
-                  error: (e, _) => Text('$e'),
+                  error: (e, _) => Text(context.l10n.userFacingError(e)),
                   data: (friends) {
                     if (friends.isEmpty) {
                       return Text(

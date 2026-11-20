@@ -5,20 +5,29 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/ride_viz_palette.dart';
 
-/// Compact legend for the high-contrast speed color scale.
+/// Compact one-line legend for the speed color scale: `0 ▬▬▬ 250 km/h`.
 class SpeedColorLegend extends StatelessWidget {
   const SpeedColorLegend({super.key});
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    final style = GoogleFonts.rajdhani(
+      fontSize: 11,
+      height: 1,
+      color: AppTheme.steel,
+      fontWeight: FontWeight.w600,
+    );
+    return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
+        Text('0', style: style),
+        const SizedBox(width: 6),
         ClipRRect(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(3),
           child: SizedBox(
-            height: 8,
+            width: 96,
+            height: 6,
             child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -30,28 +39,10 @@ class SpeedColorLegend extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 6),
-        Row(
-          children: [
-            Text(
-              '0',
-              style: GoogleFonts.rajdhani(fontSize: 10, color: AppTheme.steel),
-            ),
-            const Spacer(),
-            Text(
-              l10n.speedLegendScale,
-              style: GoogleFonts.rajdhani(fontSize: 9, color: AppTheme.steel),
-            ),
-            const Spacer(),
-            Text(
-              RideVizPalette.speedCapKmh.toStringAsFixed(0),
-              style: GoogleFonts.rajdhani(
-                fontSize: 10,
-                color: AppTheme.mist,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
+        const SizedBox(width: 6),
+        Text(
+          '${RideVizPalette.speedCapKmh.toStringAsFixed(0)} ${l10n.kmh}',
+          style: style.copyWith(color: AppTheme.mist),
         ),
       ],
     );

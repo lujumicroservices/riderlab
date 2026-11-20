@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/lean_lab/lean_lab_service.dart';
 import '../../core/models/ride.dart';
-import '../../l10n/gps_warmup_l10n.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
 import '../../widgets/app_snack.dart';
@@ -29,9 +28,9 @@ Future<void> holdRodadaCaptureAndReturn(
   }
 
   recorder.setMotionDetectionHeld(true);
-  ref.read(armedSessionNavProvider.notifier).hudClosed(
-        stillRecording: recorder.isRecording || recorder.isArmed,
-      );
+  ref
+      .read(armedSessionNavProvider.notifier)
+      .hudClosed(stillRecording: recorder.isRecording || recorder.isArmed);
 
   final navigator = Navigator.of(context);
   Route<dynamic>? remaining;

@@ -64,7 +64,9 @@ class _ReportSheetState extends ConsumerState<_ReportSheet> {
       showAppSnack(context, l10n.ugcReportThanks);
     } catch (e) {
       if (!mounted) return;
-      final msg = isUgcBannedError(e) ? l10n.ugcBanned : '$e';
+      final msg = isUgcBannedError(e)
+          ? l10n.ugcBanned
+          : context.l10n.userFacingError(e);
       showAppSnack(context, msg);
     } finally {
       if (mounted) setState(() => _busy = false);

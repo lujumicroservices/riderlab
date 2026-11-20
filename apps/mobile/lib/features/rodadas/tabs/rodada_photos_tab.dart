@@ -115,7 +115,7 @@ class RodadaPhotosTab extends ConsumerWidget {
               error: (e, _) => ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(24),
-                children: [Text('$e')],
+                children: [Text(context.l10n.userFacingError(e))],
               ),
               data: (list) {
                 if (list.isEmpty) {
@@ -200,7 +200,10 @@ class RodadaPhotosTab extends ConsumerWidget {
       );
     } catch (e) {
       if (!context.mounted) return;
-      showAppSnackError(context, isUgcBannedError(e) ? l10n.ugcBanned : '$e');
+      showAppSnackError(
+        context,
+        isUgcBannedError(e) ? l10n.ugcBanned : context.l10n.userFacingError(e),
+      );
     }
   }
 
@@ -261,7 +264,7 @@ class RodadaPhotosTab extends ConsumerWidget {
       );
     } catch (e) {
       if (!context.mounted) return;
-      showAppSnackError(context, '$e');
+      showAppSnackError(context, context.l10n.userFacingError(e));
     }
   }
 
@@ -286,7 +289,7 @@ class RodadaPhotosTab extends ConsumerWidget {
       );
     } catch (e) {
       if (!context.mounted) return;
-      showAppSnackError(context, '$e');
+      showAppSnackError(context, context.l10n.userFacingError(e));
     }
   }
 }
@@ -349,7 +352,7 @@ class _PhotoViewer extends ConsumerWidget {
       ),
       body: url.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, _) => Center(child: Text(context.l10n.userFacingError(e))),
         data: (u) => InteractiveViewer(
           child: Center(child: Image.network(u, fit: BoxFit.contain)),
         ),

@@ -188,7 +188,8 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
     final last = widget.points.last;
     final here = LatLng(last.latitude, last.longitude);
     final heading = _courseDeg(widget.points);
-    final moved = _lastFollowAt == null ||
+    final moved =
+        _lastFollowAt == null ||
         haversineMeters(
               _lastFollowAt!.latitude,
               _lastFollowAt!.longitude,
@@ -237,17 +238,18 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
       return;
     }
 
-    final hasFocus = widget.focusStartIndex != null &&
+    final hasFocus =
+        widget.focusStartIndex != null &&
         widget.focusEndIndex != null &&
         points.length >= 2;
-    final focusLo =
-        hasFocus ? widget.focusStartIndex!.clamp(0, points.length - 1) : 0;
+    final focusLo = hasFocus
+        ? widget.focusStartIndex!.clamp(0, points.length - 1)
+        : 0;
     final focusHi = hasFocus
         ? widget.focusEndIndex!.clamp(focusLo, points.length - 1)
         : points.length - 1;
 
-    final fitPoints =
-        hasFocus ? points.sublist(focusLo, focusHi + 1) : points;
+    final fitPoints = hasFocus ? points.sublist(focusLo, focusHi + 1) : points;
     final street = widget.streetLine;
     _bounds = LatLngBounds.fromPoints([
       for (final p in fitPoints) LatLng(p.latitude, p.longitude),
@@ -267,18 +269,11 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
     if (street.length >= 2) {
       if (hasFocus) {
         polylines.addAll(
-          _plainSegments(
-            points.sublist(focusLo, focusHi + 1),
-            dimmed: true,
-          ),
+          _plainSegments(points.sublist(focusLo, focusHi + 1), dimmed: true),
         );
       }
       polylines.add(
-        Polyline(
-          points: street,
-          color: AppTheme.line,
-          strokeWidth: 6,
-        ),
+        Polyline(points: street, color: AppTheme.line, strokeWidth: 6),
       );
     } else if (hasFocus && widget.dimOutsideFocus) {
       if (focusLo > 0) {
@@ -371,10 +366,7 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
                 decoration: BoxDecoration(
                   color: AppTheme.asphalt,
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: const Color(0xFFFFC107),
-                    width: 2,
-                  ),
+                  border: Border.all(color: const Color(0xFFFFC107), width: 2),
                 ),
                 child: const Icon(
                   Icons.signal_cellular_connected_no_internet_0_bar,
@@ -524,9 +516,7 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
     if (segment.length < 2) return const [];
     return [
       Polyline(
-        points: [
-          for (final p in segment) LatLng(p.latitude, p.longitude),
-        ],
+        points: [for (final p in segment) LatLng(p.latitude, p.longitude)],
         color: AppTheme.steel.withValues(alpha: dimmed ? 0.35 : 0.7),
         strokeWidth: dimmed ? 3 : 4,
       ),
@@ -553,7 +543,8 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
       );
     }
 
-    final hasFocus = widget.focusStartIndex != null &&
+    final hasFocus =
+        widget.focusStartIndex != null &&
         widget.focusEndIndex != null &&
         points.length >= 2;
 
@@ -602,11 +593,7 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
           point: LatLng(last.latitude, last.longitude),
           width: 32,
           height: 32,
-          child: const Icon(
-            Icons.navigation,
-            size: 28,
-            color: AppTheme.line,
-          ),
+          child: const Icon(Icons.navigation, size: 28, color: AppTheme.line),
         ),
       );
     }
@@ -625,14 +612,14 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
         interactionOptions: InteractionOptions(
           flags: widget.followRider
               ? (InteractiveFlag.pinchZoom |
-                  InteractiveFlag.doubleTapZoom |
-                  InteractiveFlag.scrollWheelZoom)
+                    InteractiveFlag.doubleTapZoom |
+                    InteractiveFlag.scrollWheelZoom)
               : widget.interactive
               ? InteractiveFlag.all
               : widget.allowZoom
               ? (InteractiveFlag.pinchZoom |
-                  InteractiveFlag.doubleTapZoom |
-                  InteractiveFlag.scrollWheelZoom)
+                    InteractiveFlag.doubleTapZoom |
+                    InteractiveFlag.scrollWheelZoom)
               : InteractiveFlag.none,
         ),
         initialCameraFit: widget.followRider
@@ -669,17 +656,17 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
         Positioned.fill(child: map),
         if (widget.interactive && !widget.followRider) myLocationOverlay(_map),
         if (widget.layers.showLegend)
+          // Compact corner chip so the legend covers little of the line.
           Positioned(
-            left: 12,
-            right: 12,
-            bottom: 12,
+            left: 8,
+            bottom: 8,
             child: DecoratedBox(
               decoration: const BoxDecoration(
                 color: Color(0xCC1A1C1E),
-                borderRadius: BorderRadius.all(Radius.circular(10)),
+                borderRadius: BorderRadius.all(Radius.circular(8)),
               ),
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                padding: const EdgeInsets.fromLTRB(8, 5, 8, 5),
                 child: widget.layers.showRoadKindContrast
                     ? _RoadKindLegend(
                         l10nRecta: l10n.recta,
@@ -703,10 +690,7 @@ class _PilotLineMapState extends State<PilotLineMap> with LiveGpsMapMixin {
 }
 
 class _RoadKindLegend extends StatelessWidget {
-  const _RoadKindLegend({
-    required this.l10nRecta,
-    required this.l10nCurva,
-  });
+  const _RoadKindLegend({required this.l10nRecta, required this.l10nCurva});
 
   final String l10nRecta;
   final String l10nCurva;
@@ -714,23 +698,23 @@ class _RoadKindLegend extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget item(Color c, String label) => Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 14,
-              height: 4,
-              decoration: BoxDecoration(
-                color: c,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: const TextStyle(color: AppTheme.steel, fontSize: 11),
-            ),
-          ],
-        );
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 14,
+          height: 4,
+          decoration: BoxDecoration(
+            color: c,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: const TextStyle(color: AppTheme.steel, fontSize: 11),
+        ),
+      ],
+    );
 
     return Wrap(
       spacing: 12,

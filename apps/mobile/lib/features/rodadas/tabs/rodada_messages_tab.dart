@@ -62,7 +62,10 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
       }
     } catch (e) {
       if (!mounted) return;
-      showAppSnackError(context, isUgcBannedError(e) ? l10n.ugcBanned : '$e');
+      showAppSnackError(
+        context,
+        isUgcBannedError(e) ? l10n.ugcBanned : context.l10n.userFacingError(e),
+      );
     } finally {
       if (mounted) setState(() => _sending = false);
     }
@@ -80,7 +83,9 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
       if (!mounted) return;
       showAppSnackError(
         context,
-        isUgcBannedError(e) ? context.l10n.ugcBanned : '$e',
+        isUgcBannedError(e)
+            ? context.l10n.ugcBanned
+            : context.l10n.userFacingError(e),
       );
     }
   }
@@ -134,7 +139,7 @@ class _RodadaMessagesTabState extends ConsumerState<RodadaMessagesTab> {
               error: (e, _) => ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(24),
-                children: [Text('$e')],
+                children: [Text(context.l10n.userFacingError(e))],
               ),
               data: (list) {
                 if (list.isEmpty) {

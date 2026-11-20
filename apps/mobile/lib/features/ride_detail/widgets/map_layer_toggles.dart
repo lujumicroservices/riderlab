@@ -34,17 +34,15 @@ class MapLayerOptions {
     bool? showPlayhead,
     bool? showLegend,
     bool? showGpsGaps,
-  }) =>
-      MapLayerOptions(
-        showSpeedColors: showSpeedColors ?? this.showSpeedColors,
-        showRoadKindContrast:
-            showRoadKindContrast ?? this.showRoadKindContrast,
-        showBrakes: showBrakes ?? this.showBrakes,
-        showStartEnd: showStartEnd ?? this.showStartEnd,
-        showPlayhead: showPlayhead ?? this.showPlayhead,
-        showLegend: showLegend ?? this.showLegend,
-        showGpsGaps: showGpsGaps ?? this.showGpsGaps,
-      );
+  }) => MapLayerOptions(
+    showSpeedColors: showSpeedColors ?? this.showSpeedColors,
+    showRoadKindContrast: showRoadKindContrast ?? this.showRoadKindContrast,
+    showBrakes: showBrakes ?? this.showBrakes,
+    showStartEnd: showStartEnd ?? this.showStartEnd,
+    showPlayhead: showPlayhead ?? this.showPlayhead,
+    showLegend: showLegend ?? this.showLegend,
+    showGpsGaps: showGpsGaps ?? this.showGpsGaps,
+  );
 }
 
 /// Compact chip row to show/hide map layers.
@@ -61,16 +59,28 @@ class MapLayerToggles extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    // Fade the right edge so a cut-off chip reads as "scroll for more".
+    return ShaderMask(
+      blendMode: BlendMode.dstIn,
+      shaderCallback: (rect) => const LinearGradient(
+        colors: [Colors.white, Colors.white, Colors.transparent],
+        stops: [0, 0.86, 1],
+      ).createShader(rect),
+      child: _row(l10n),
+    );
+  }
+
+  Widget _row(AppLocalizations l10n) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.only(right: 32),
       child: Row(
         children: [
           _chip(
             label: l10n.mapLayerSpeed,
             selected: options.showSpeedColors,
             color: RideVizPalette.speedMid,
-            onSelected: (v) =>
-                onChanged(options.copyWith(showSpeedColors: v)),
+            onSelected: (v) => onChanged(options.copyWith(showSpeedColors: v)),
           ),
           _chip(
             label: l10n.mapLayerRoadKind,

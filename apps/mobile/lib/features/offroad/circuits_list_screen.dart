@@ -28,7 +28,7 @@ class CircuitsListScreen extends ConsumerWidget {
           itemBuilder: (context, i) => _CircuitCard(circuit: list[i]),
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, _) => Center(child: Text(context.l10n.userFacingError(e))),
       ),
     );
   }

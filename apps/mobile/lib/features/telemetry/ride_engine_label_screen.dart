@@ -68,7 +68,7 @@ class _RideEngineLabelScreenState extends ConsumerState<RideEngineLabelScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      showAppSnackError(context, '$e');
+      showAppSnackError(context, context.l10n.userFacingError(e));
       setState(() => _saving = false);
     }
   }

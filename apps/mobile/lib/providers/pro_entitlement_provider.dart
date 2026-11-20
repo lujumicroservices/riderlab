@@ -4,6 +4,7 @@ import 'dart:io' show Platform;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
@@ -37,8 +38,8 @@ String get revenueCatApiKey {
     final platformKey = kIsWeb
         ? ''
         : Platform.isIOS
-            ? read('REVENUECAT_API_KEY_IOS')
-            : read('REVENUECAT_API_KEY_ANDROID');
+        ? read('REVENUECAT_API_KEY_IOS')
+        : read('REVENUECAT_API_KEY_ANDROID');
     return platformKey.isNotEmpty ? platformKey : read('REVENUECAT_API_KEY');
   } catch (_) {
     return '';
@@ -52,11 +53,29 @@ bool get revenueCatConfigured => revenueCatApiKey.isNotEmpty;
 /// Contract: docs/APP_STORE.md
 const proMonthlyProductId = 'riderlab_pro_monthly';
 const proYearlyProductId = 'riderlab_pro_yearly';
-/// The app no longer has its own no-card trial (removed 2026-11-13, server
-/// migration 20261113010000_remove_pro_trial). Pro comes only from a store
-/// subscription or a partner code; on Android a new user buys from day 1.
-/// Kept as a getter so the old trial paths stay off in one place.
-bool get offersOwnProTrial => false;
+
+// No app trial: removed 2026-11-13 (server migration
+// 20261113010000_remove_pro_trial). Pro comes only from a store subscription
+// or a partner code; on Android a new user subscribes from day 1.
+
+/// Outcome of a store purchase or restore, so the UI can tell a user cancel
+/// apart from a real failure and never fail silently.
+enum ProPurchaseResult {
+  /// Pro is active.
+  success,
+
+  /// The user closed the store sheet. Not an error.
+  cancelled,
+
+  /// No store billing in this build (sideload, or no RevenueCat key).
+  notConfigured,
+
+  /// Store reachable but no packages / nothing to restore.
+  unavailable,
+
+  /// Store or network error.
+  failed,
+}
 
 /// Sideload, not signed in: keep the local Settings toggle for pilots.
 /// Never on iOS: App Store guideline 3.1.1 (Pro only via In-App Purchase).
@@ -69,10 +88,11 @@ bool get allowLocalProToggle {
 }
 
 final proEntitlementProvider =
-    StateNotifierProvider<ProEntitlementController, ProEntitlementStatus>(
-        (ref) {
-  return ProEntitlementController(ref);
-});
+    StateNotifierProvider<ProEntitlementController, ProEntitlementStatus>((
+      ref,
+    ) {
+      return ProEntitlementController(ref);
+    });
 
 final isProProvider = Provider<bool>((ref) {
   return ref.watch(proEntitlementProvider).isPro;
@@ -91,6 +111,10 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
 
   bool _rcReady = false;
   bool _rcPro = false;
+  bool _rcLapsed = false;
+
+  /// True when RevenueCat is configured and initialized (store billing on).
+  bool get storeBillingReady => _rcReady;
 
   Future<void> _bootstrap() async {
     await _loadCache();
@@ -131,9 +155,7 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
   Future<void> _initRevenueCat() async {
     try {
       final key = revenueCatApiKey;
-      await Purchases.setLogLevel(
-        kDebugMode ? LogLevel.debug : LogLevel.info,
-      );
+      await Purchases.setLogLevel(kDebugMode ? LogLevel.debug : LogLevel.info);
       await Purchases.configure(PurchasesConfiguration(key));
       _rcReady = true;
       final uid = SupabaseBootstrap.permanentUserId;
@@ -159,6 +181,8 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
 
   void _applyRevenueCat(CustomerInfo info) {
     _rcPro = info.entitlements.active.containsKey(revenueCatProEntitlement);
+    final pro = info.entitlements.all[revenueCatProEntitlement];
+    _rcLapsed = !_rcPro && pro != null && !pro.isActive;
   }
 
   ProEntitlementStatus _merge(ProEntitlementStatus server) {
@@ -175,7 +199,11 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
       return server.copyWith(
         isPro: true,
         source: 'revenuecat',
+        paidLapsed: false,
       );
+    }
+    if (_rcReady) {
+      server = server.copyWith(paidLapsed: _rcLapsed);
     }
     if (allowLocalProToggle && server.localOverride) {
       return server.copyWith(isPro: true, source: 'local');
@@ -183,7 +211,7 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
     return server;
   }
 
-  /// Pull server periods (and RevenueCat if configured). Optionally start trial.
+  /// Pull server periods (and RevenueCat if configured).
   Future<void> refresh({bool fromStoreOnly = false}) async {
     if (_rcReady && !fromStoreOnly) {
       try {
@@ -200,7 +228,7 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
 
     if (!fromStoreOnly) {
       final remote = await _repo.status();
-      if (remote.ok || remote.status.isPro || remote.status.trialUsed) {
+      if (remote.ok || remote.status.isPro) {
         state = _merge(remote.status);
         await _persist();
       } else if (_rcPro) {
@@ -211,14 +239,11 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
       state = _merge(state);
       await _persist();
     }
-
-    if (!fromStoreOnly) {
-      await startTrialIfEligible();
-    }
   }
 
   Future<void> onSignedOut() async {
     _rcPro = false;
+    _rcLapsed = false;
     state = allowLocalProToggle
         ? const ProEntitlementStatus()
         : ProEntitlementStatus.empty;
@@ -226,17 +251,35 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
   }
 
   /// Returns true when an active Pro entitlement was restored.
-  Future<bool> restorePurchases() async {
-    if (!_rcReady) return false;
+  /// UI should prefer `restoreProPurchases` (widgets/pro_upsell.dart).
+  Future<bool> restorePurchases() async =>
+      await restore() == ProPurchaseResult.success;
+
+  /// Restore store purchases. [ProPurchaseResult.unavailable] means the
+  /// store answered but there was nothing to restore.
+  Future<ProPurchaseResult> restore() async {
+    if (!_rcReady) return ProPurchaseResult.notConfigured;
     try {
       final info = await Purchases.restorePurchases();
       _applyRevenueCat(info);
       await refresh(fromStoreOnly: true);
-      return _rcPro;
+      return _rcPro ? ProPurchaseResult.success : ProPurchaseResult.unavailable;
     } catch (e) {
       debugPrint('RevenueCat restore failed: $e');
-      return false;
+      return _errorResult(e);
     }
+  }
+
+  ProPurchaseResult _errorResult(Object e) {
+    if (e is PlatformException) {
+      try {
+        final code = PurchasesErrorHelper.getErrorCode(e);
+        if (code == PurchasesErrorCode.purchaseCancelledError) {
+          return ProPurchaseResult.cancelled;
+        }
+      } catch (_) {}
+    }
+    return ProPurchaseResult.failed;
   }
 
   /// Current RevenueCat offering (monthly + annual packages), or null.
@@ -251,19 +294,21 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
     }
   }
 
-  /// Buy one store package picked in the paywall. Returns true when Pro.
-  Future<bool> purchasePackage(Package package) async {
-    if (!_rcReady) return state.isPro;
+  /// Buy one store package picked in the paywall.
+  Future<ProPurchaseResult> purchasePackage(Package package) async {
+    if (state.isPro) return ProPurchaseResult.success;
+    if (!_rcReady) return ProPurchaseResult.notConfigured;
     try {
       final purchase = await Purchases.purchase(
         PurchaseParams.package(package),
       );
       _applyRevenueCat(purchase.customerInfo);
       await refresh(fromStoreOnly: true);
-      return state.isPro;
+      return state.isPro ? ProPurchaseResult.success : ProPurchaseResult.failed;
     } catch (e) {
       debugPrint('RevenueCat purchase failed: $e');
-      return state.isPro;
+      if (state.isPro) return ProPurchaseResult.success;
+      return _errorResult(e);
     }
   }
 
@@ -278,32 +323,21 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
     }
   }
 
-  /// Present store packages (yearly first).
-  Future<bool> purchasePro() async {
-    if (state.isPro) return true;
-    if (_rcReady) {
-      try {
-        final offerings = await Purchases.getOfferings();
-        final current = offerings.current;
-        final package = current?.annual ??
-            current?.monthly ??
-            current?.availablePackages.firstOrNull;
-        if (package == null) {
-          debugPrint('RevenueCat: no packages in current offering');
-          return state.isPro;
-        }
-        final purchase = await Purchases.purchase(
-          PurchaseParams.package(package),
-        );
-        _applyRevenueCat(purchase.customerInfo);
-        await refresh(fromStoreOnly: true);
-        return state.isPro;
-      } catch (e) {
-        debugPrint('RevenueCat purchase failed: $e');
-        return state.isPro;
-      }
+  /// Buy the default package (yearly first) without a plan picker.
+  /// UI should open `showProUpsellSheet` instead, which shows the price.
+  Future<ProPurchaseResult> purchasePro() async {
+    if (state.isPro) return ProPurchaseResult.success;
+    if (!_rcReady) return ProPurchaseResult.notConfigured;
+    final current = await currentOffering();
+    final package =
+        current?.annual ??
+        current?.monthly ??
+        current?.availablePackages.firstOrNull;
+    if (package == null) {
+      debugPrint('RevenueCat: no packages in current offering');
+      return ProPurchaseResult.unavailable;
     }
-    return state.isPro;
+    return purchasePackage(package);
   }
 
   /// Local toggle — sideload without a signed-in cloud session only.
@@ -324,19 +358,8 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
 
   Future<void> toggle() => setPro(!state.isPro);
 
-  /// Disabled: there is no app trial anymore (see [offersOwnProTrial]).
-  Future<void> startTrialIfEligible() async {
-    if (!offersOwnProTrial) return;
-    if (state.trialUsed && state.isPro) return;
-    if (SupabaseBootstrap.permanentUser == null) return;
-    final result = await _repo.startTrial();
-    if (result.ok || result.status.trialUsed || result.status.isPro) {
-      state = _merge(result.status);
-      await _persist();
-    }
-  }
-
-  Future<void> onRideCompleted() => startTrialIfEligible();
+  /// Hook kept for the ride recorder. There is no app trial to start anymore.
+  Future<void> onRideCompleted() async {}
 
   Future<ProRpcResult> redeemPartnerCode(String code) async {
     if (!AppDistribution.allowsPartnerCodes) {

@@ -69,7 +69,7 @@ class _RouteCompareScreenState extends ConsumerState<RouteCompareScreen> {
       ),
       body: ridesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, _) => Center(child: Text(context.l10n.userFacingError(e))),
         data: (all) {
           final rides = _completed(all);
           if (rides.length < 2) {

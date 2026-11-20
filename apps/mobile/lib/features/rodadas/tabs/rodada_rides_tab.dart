@@ -62,7 +62,7 @@ class RodadaRidesTab extends ConsumerWidget {
               error: (e, _) => ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(24),
-                children: [Text('$e')],
+                children: [Text(context.l10n.userFacingError(e))],
               ),
               data: (list) {
                 if (list.isEmpty) {
@@ -138,7 +138,7 @@ class RodadaRidesTab extends ConsumerWidget {
       showAppSnack(context, l10n.rideLinkedToRodada);
     } catch (e) {
       if (!context.mounted) return;
-      showAppSnackError(context, '$e');
+      showAppSnackError(context, context.l10n.userFacingError(e));
     }
   }
 }
@@ -163,7 +163,7 @@ class _RodadaRideTrackScreen extends ConsumerWidget {
       ),
       body: track.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, _) => Center(child: Text(context.l10n.userFacingError(e))),
         data: (pts) {
           if (pts.isEmpty) {
             return Center(child: Text(l10n.noTrackPoints));

@@ -259,7 +259,7 @@ Future<RidePhoto?> pickAndSaveRidePhoto({
     );
     if (!context.mounted) return null;
     if (showSnackbars) {
-      showAppSnackError(context, '$e');
+      showAppSnackError(context, context.l10n.userFacingError(e));
     }
     return null;
   }

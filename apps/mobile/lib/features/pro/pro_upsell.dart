@@ -4,12 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../core/distribution.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/pro_entitlement_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/ride_viz_palette.dart';
-import '../../widgets/app_snack.dart';
+import '../../widgets/pro_upsell.dart';
 
 /// Commercial / Pro upsell banner shown over locked curva detail, etc.
 class ProUpsellBanner extends ConsumerWidget {
@@ -106,20 +105,8 @@ class ProUpsellBanner extends ConsumerWidget {
             ),
             SizedBox(height: compact ? 10 : 14),
             FilledButton(
-              onPressed: () async {
-                final ok = await ref
-                    .read(proEntitlementProvider.notifier)
-                    .purchasePro();
-                if (!context.mounted) return;
-                showAppSnack(
-                  context,
-                  ok
-                      ? l10n.proUnlocked
-                      : (AppDistribution.allowsPartnerCodes
-                            ? l10n.proStoreNotReady
-                            : l10n.proStoreNotReadyIos),
-                );
-              },
+              // The sheet shows price, plan and terms before any purchase.
+              onPressed: () => showProUpsellSheet(context, ref),
               style: FilledButton.styleFrom(
                 backgroundColor: RideVizPalette.leanLeft,
                 foregroundColor: AppTheme.asphalt,
@@ -137,71 +124,56 @@ class ProUpsellBanner extends ConsumerWidget {
   }
 }
 
-/// Free: show content ~500ms, then commercial banner on top.
+/// Free: a static, blurred and dimmed preview of [child] with a lock and the
+/// Pro banner on top, from the first frame (no reveal-then-blur).
 /// Pro: content stays fully open.
-class ProTeaserGate extends ConsumerStatefulWidget {
+class ProTeaserGate extends ConsumerWidget {
   const ProTeaserGate({
     super.key,
     required this.child,
     required this.bannerTitle,
     required this.bannerBody,
-    this.teaserMs = 500,
+    this.teaserMs = 0,
   });
 
   final Widget child;
   final String bannerTitle;
   final String bannerBody;
+
+  /// Ignored: kept so existing callers compile. The lock shows immediately.
   final int teaserMs;
 
   @override
-  ConsumerState<ProTeaserGate> createState() => _ProTeaserGateState();
-}
-
-class _ProTeaserGateState extends ConsumerState<ProTeaserGate> {
-  bool _showBanner = false;
-
-  @override
-  void initState() {
-    super.initState();
-    Future<void>.delayed(Duration(milliseconds: widget.teaserMs), () {
-      if (!mounted) return;
-      if (!ref.read(isProProvider)) {
-        setState(() => _showBanner = true);
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isPro = ref.watch(isProProvider);
-    if (isPro) return widget.child;
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (ref.watch(isProProvider)) return child;
 
     return Stack(
       fit: StackFit.expand,
       children: [
-        widget.child,
-        if (_showBanner) ...[
-          Positioned.fill(
-            child: ClipRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-                child: Container(
-                  color: AppTheme.asphalt.withValues(alpha: 0.55),
-                ),
-              ),
+        // Preview only: blurred, dimmed and not interactive.
+        IgnorePointer(
+          child: ExcludeSemantics(
+            child: ImageFiltered(
+              imageFilter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+              child: child,
             ),
           ),
-          Positioned(
-            left: 16,
-            right: 16,
-            top: 12,
-            child: ProUpsellBanner(
-              title: widget.bannerTitle,
-              body: widget.bannerBody,
-              compact: true,
-            ),
+        ),
+        Positioned.fill(
+          child: IgnorePointer(
+            child: ColoredBox(color: AppTheme.asphalt.withValues(alpha: 0.55)),
           ),
-        ],
+        ),
+        Positioned(
+          left: 16,
+          right: 16,
+          top: 12,
+          child: ProUpsellBanner(
+            title: bannerTitle,
+            body: bannerBody,
+            compact: true,
+          ),
+        ),
       ],
     );
   }

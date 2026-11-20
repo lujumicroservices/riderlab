@@ -87,6 +87,6 @@ Future<void> showRideRenameDialog(
     );
   } catch (e) {
     if (!context.mounted) return;
-    showAppSnackError(context, '$e');
+    showAppSnackError(context, context.l10n.userFacingError(e));
   }
 }

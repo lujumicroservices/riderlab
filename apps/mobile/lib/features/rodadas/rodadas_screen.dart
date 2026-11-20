@@ -69,7 +69,11 @@ class RodadasScreen extends ConsumerWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(24),
-                      child: Text(l10n.couldNotLoadRodadas('$e')),
+                      child: Text(
+                        l10n.couldNotLoadRodadas(
+                          context.l10n.userFacingError(e),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -189,7 +193,10 @@ class RodadasScreen extends ConsumerWidget {
       await openRodadaDetail(context, rodadaId: id, promptShareInvite: true);
     } catch (e) {
       if (!context.mounted) return;
-      showAppSnackError(context, l10n.joinFailed('$e'));
+      showAppSnackError(
+        context,
+        l10n.joinFailed(context.l10n.userFacingError(e)),
+      );
     }
   }
 }

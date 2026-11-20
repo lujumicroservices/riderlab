@@ -204,7 +204,9 @@ class _BikePickerScreenState extends ConsumerState<BikePickerScreen> {
                           ),
                           title: Text(
                             selected.label,
-                            style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+                            style: GoogleFonts.exo2(
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                           subtitle: Text(
                             selected.subtitle,
@@ -235,10 +237,13 @@ class _BikePickerScreenState extends ConsumerState<BikePickerScreen> {
         if (_query.trim().isNotEmpty) {
           return [
             for (final n in names)
-              _tile(n, onTap: () {
-                setState(() => _make = n);
-                _setStep(_BikePickStep.year);
-              }),
+              _tile(
+                n,
+                onTap: () {
+                  setState(() => _make = n);
+                  _setStep(_BikePickStep.year);
+                },
+              ),
           ];
         }
         final pinned = [
@@ -252,27 +257,37 @@ class _BikePickerScreenState extends ConsumerState<BikePickerScreen> {
         return [
           if (pinned.isNotEmpty && _query.trim().isEmpty) ...[
             _Header(l10n.bikePopularMakes),
-            for (final n in pinned) _tile(n, onTap: () {
-              setState(() => _make = n);
-              _setStep(_BikePickStep.year);
-            }),
+            for (final n in pinned)
+              _tile(
+                n,
+                onTap: () {
+                  setState(() => _make = n);
+                  _setStep(_BikePickStep.year);
+                },
+              ),
             const SizedBox(height: 8),
             _Header(l10n.bikeAllMakes),
           ],
           for (final n in rest)
-            _tile(n, onTap: () {
-              setState(() => _make = n);
-              _setStep(_BikePickStep.year);
-            }),
+            _tile(
+              n,
+              onTap: () {
+                setState(() => _make = n);
+                _setStep(_BikePickStep.year);
+              },
+            ),
         ];
       case _BikePickStep.year:
         final years = catalog.yearsFor(_make ?? '', query: _query);
         return [
           for (final y in years)
-            _tile('$y', onTap: () {
-              setState(() => _year = y);
-              _setStep(_BikePickStep.model);
-            }),
+            _tile(
+              '$y',
+              onTap: () {
+                setState(() => _year = y);
+                _setStep(_BikePickStep.model);
+              },
+            ),
         ];
       case _BikePickStep.model:
         final models = catalog.modelsFor(
@@ -284,16 +299,16 @@ class _BikePickerScreenState extends ConsumerState<BikePickerScreen> {
           for (final n in models)
             _tile(n, onTap: () => _choose(_make!, _year!, n)),
           const SizedBox(height: 8),
-          _tile(
-            l10n.bikeCustomModel,
-            onTap: _customModel,
-            muted: true,
-          ),
+          _tile(l10n.bikeCustomModel, onTap: _customModel, muted: true),
         ];
     }
   }
 
-  Widget _tile(String label, {required VoidCallback onTap, bool muted = false}) {
+  Widget _tile(
+    String label, {
+    required VoidCallback onTap,
+    bool muted = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Material(
@@ -315,7 +330,11 @@ class _BikePickerScreenState extends ConsumerState<BikePickerScreen> {
                     ),
                   ),
                 ),
-                const Icon(Icons.chevron_right, color: AppTheme.steel, size: 20),
+                const Icon(
+                  Icons.chevron_right,
+                  color: AppTheme.steel,
+                  size: 20,
+                ),
               ],
             ),
           ),

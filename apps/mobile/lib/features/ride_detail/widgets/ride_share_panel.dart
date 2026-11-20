@@ -11,7 +11,6 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/ride_providers.dart';
 import '../../../providers/social_providers.dart';
 import '../../../theme/app_theme.dart';
-import '../../../widgets/visibility_selector.dart';
 
 /// Assign route + visibility (Only me / Friends / Everyone).
 /// Updates local DB immediately; cloud sync is fire-and-forget so toggles feel instant.
@@ -36,10 +35,7 @@ class RideSharePanel extends ConsumerWidget {
         children: [
           Text(
             l10n.shareRideTitle,
-            style: GoogleFonts.exo2(
-              fontWeight: FontWeight.w700,
-              fontSize: 16,
-            ),
+            style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 16),
           ),
           const SizedBox(height: 4),
           Text(
@@ -51,7 +47,7 @@ class RideSharePanel extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 10),
-          VisibilitySelector(
+          _LocalizedVisibilitySelector(
             value: ride.visibility,
             onChanged: (v) => _setVisibility(ref, v),
           ),
@@ -65,42 +61,44 @@ class RideSharePanel extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 6),
-            ref.watch(routesListProvider).when(
-              loading: () => const LinearProgressIndicator(),
-              error: (_, _) => Text(
-                l10n.cloudUnavailable,
-                style: const TextStyle(color: AppTheme.steel, fontSize: 12),
-              ),
-              data: (routes) {
-                return DropdownButtonFormField<String?>(
-                  key: ValueKey('route-${ride.id}-${ride.routeId}'),
-                  initialValue: ride.routeId,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: AppTheme.asphalt,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
+            ref
+                .watch(routesListProvider)
+                .when(
+                  loading: () => const LinearProgressIndicator(),
+                  error: (_, _) => Text(
+                    l10n.cloudUnavailable,
+                    style: const TextStyle(color: AppTheme.steel, fontSize: 12),
                   ),
-                  hint: Text(l10n.noRouteAssigned),
-                  items: [
-                    DropdownMenuItem<String?>(
-                      value: null,
-                      child: Text(l10n.noRouteAssigned),
-                    ),
-                    for (final r in routes)
-                      DropdownMenuItem<String?>(
-                        value: r.id,
-                        child: Text(r.name),
+                  data: (routes) {
+                    return DropdownButtonFormField<String?>(
+                      key: ValueKey('route-${ride.id}-${ride.routeId}'),
+                      initialValue: ride.routeId,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: AppTheme.asphalt,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
                       ),
-                  ],
-                  onChanged: (routeId) {
-                    unawaited(_setRoute(ref, routeId));
+                      hint: Text(l10n.noRouteAssigned),
+                      items: [
+                        DropdownMenuItem<String?>(
+                          value: null,
+                          child: Text(l10n.noRouteAssigned),
+                        ),
+                        for (final r in routes)
+                          DropdownMenuItem<String?>(
+                            value: r.id,
+                            child: Text(r.name),
+                          ),
+                      ],
+                      onChanged: (routeId) {
+                        unawaited(_setRoute(ref, routeId));
+                      },
+                    );
                   },
-                );
-              },
-            ),
+                ),
             const SizedBox(height: 8),
             Align(
               alignment: Alignment.centerLeft,
@@ -160,10 +158,9 @@ class RideSharePanel extends ConsumerWidget {
       ),
     );
     if (ok != true || !context.mounted) return;
-    final route = await ref.read(routeServiceProvider).createRoute(
-          name: ctrl.text,
-          visibility: ShareVisibility.friends,
-        );
+    final route = await ref
+        .read(routeServiceProvider)
+        .createRoute(name: ctrl.text, visibility: ShareVisibility.friends);
     final updated = ride.copyWith(
       routeId: route.id,
       visibility: ShareVisibility.friends,
@@ -173,5 +170,59 @@ class RideSharePanel extends ConsumerWidget {
     ref.invalidate(routesListProvider);
     ref.invalidate(rideProvider(ride.id));
     ref.invalidate(overlappingPeersProvider(ride.id));
+  }
+}
+
+/// Localized 3-way visibility control (Solo yo / Amigos / Todos).
+class _LocalizedVisibilitySelector extends StatelessWidget {
+  const _LocalizedVisibilitySelector({
+    required this.value,
+    required this.onChanged,
+  });
+
+  final ShareVisibility value;
+  final ValueChanged<ShareVisibility> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    String label(ShareVisibility v) => switch (v) {
+      ShareVisibility.private => l10n.rideDetailVisibilityPrivate,
+      ShareVisibility.friends => l10n.rideDetailVisibilityFriends,
+      ShareVisibility.public => l10n.rideDetailVisibilityPublic,
+    };
+    String help(ShareVisibility v) => switch (v) {
+      ShareVisibility.private => l10n.rideDetailVisibilityPrivateHelp,
+      ShareVisibility.friends => l10n.rideDetailVisibilityFriendsHelp,
+      ShareVisibility.public => l10n.rideDetailVisibilityPublicHelp,
+    };
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SegmentedButton<ShareVisibility>(
+          segments: [
+            for (final v in ShareVisibility.values)
+              ButtonSegment(
+                value: v,
+                label: Text(label(v), style: GoogleFonts.exo2(fontSize: 12)),
+                tooltip: help(v),
+              ),
+          ],
+          selected: {value},
+          onSelectionChanged: (set) {
+            if (set.isEmpty) return;
+            onChanged(set.first);
+          },
+          style: const ButtonStyle(
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          help(value),
+          style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
+        ),
+      ],
+    );
   }
 }
