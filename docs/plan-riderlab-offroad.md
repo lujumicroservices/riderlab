@@ -10,7 +10,7 @@ Este documento no cambia código. Describe qué ya está en el repo, qué vive f
 | Mapper de dos perímetros (borrador, no en `master`) | Draft PR **#3**, rama `cursor/offroad-circuit-map-6189`, base `exp/gps-track-points`. Lógica en `packages/ride_core` (`offroad_circuit.dart`) y pantalla en `apps/mobile/lib/features/circuit_map/` |
 | Build **Circuito 8h** (borrador) | Draft PR **#4**, rama `exp/gps-track-points`. Paquete `com.rawthrottle.riderlab.c8h`, launcher Circuito 8h. No sustituye el APK de RiderLab |
 | Skill de pista, sectores aún sin nombres del piloto | Draft PR **#1**, `mx-pilot/` |
-| BOM Standard: M5Stack Basic Core v2.7 + módulo GNSS M135 (NEO-M9N, IMU BMI270, barómetro BMP280 en el módulo) | `hardware/BOM.md`, `DECISIONS.md`, `STATUS.md` (19 sep 2026). Precisión de línea esperada ~1–2.5 m, 10–25 Hz. El barómetro va en el módulo; la decisión cerrada es que no es requisito de producto |
+| BOM Standard: M5Stack Basic Core v2.7 + módulo GNSS M135 (NEO-M9N, IMU BMI270, barómetro BMP280 en el módulo) | `hardware/BOM-standard.md`, `DECISIONS.md`, `STATUS.md` (19 sep 2026). Precisión de línea esperada ~1–2.5 m, 10–25 Hz. El barómetro va en el módulo; la decisión cerrada es que no es requisito de producto |
 | BOM Pro RTK, partes sueltas, ZED-F9P L1/L2 + base de paddock | Draft PR **#6**. ~$495/rover + ~$443 la base. Centímetros solo con RTK fixed |
 | Comparación con AiM Solo 2 | Draft PR **#5**. Misma clase de sensor; el Solo 2 es el lap timer terminado |
 | Firmware **Métrica** 0.6.x-circuit, archivo RLC1, suavizado, sectores y crops | Sin versionar, en la PC de Juan. Tag de circuito embebido `embedded-20261009-suave`, build **0.6.2-circuit.2**. Este plan lo cita; no lo importa |
