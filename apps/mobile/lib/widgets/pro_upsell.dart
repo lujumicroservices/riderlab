@@ -44,6 +44,7 @@ void showProPurchaseResult(
   final String? message = switch (result) {
     ProPurchaseResult.success => l10n.proUnlocked,
     ProPurchaseResult.cancelled => null,
+    ProPurchaseResult.pending => l10n.proPurchasePending,
     ProPurchaseResult.notConfigured => proStoreUnavailableMessage(context),
     ProPurchaseResult.unavailable =>
       restore ? s.restoredNone : s.plansUnavailable,

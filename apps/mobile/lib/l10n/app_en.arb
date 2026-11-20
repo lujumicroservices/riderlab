@@ -382,12 +382,10 @@
   "settingsHubLabSub": "Features in testing",
   "settingsHubStaff": "Staff",
   "settingsHubStaffSub": "View as another rider, reports and partner codes",
-  "settingsHubStoreUnavailable": "The store isn't available right now. Check your connection and try again later.",
   "proUnlock": "RiderLab Pro",
   "proUnlockBody": "Pick any stretch, full corner detail, and the full brake list.",
   "proFeatureSegment": "Zoom any part of the ride",
   "proFeatureBrakes": "Full braking details (not just a preview)",
-  "proFeatureNoAds": "No advertising banners",
   "upgradeToPro": "Upgrade to Pro",
   "proUnlocked": "Pro is active",
   "proToggleDev": "Pro unlocked",
@@ -737,7 +735,6 @@
   "familyShareFromCircle": "Share link now",
   "familyRodadaTipTitle": "Family link?",
   "familyRodadaTipBody": "Pack = rodada map in the app. Family without the app = share from Live (same link can be resent).",
-  "familyRodadaTipCta": "Open family circle",
   "familyWatchScreenTitle": "Notify family",
   "familyWatchScreenHelp": "Share a link so they can see you on the map. They don’t need RiderLab.",
   "familyNotEmergency": "This does not call emergency services (not 911).",
@@ -769,7 +766,6 @@
   "familyRiderFallback": "Rider",
   "familyNotifyToggle": "Notify family",
   "familyNotifyHelp": "Creates a link and opens the share sheet so you can send it (they don’t need the app).",
-  "familyNotifyHelpRodada": "Notify family/friends outside the pack. You can resend the same link to more people.",
   "familyNotifyStart": "Share",
   "familyWatchActive": "Family can see you",
   "familyWatchInactive": "You are not sharing",
@@ -778,7 +774,6 @@
   "familyOk": "All good",
   "familyStopped": "Stopped",
   "familySos": "Need help",
-  "familyShareLink": "Resend link",
   "familyShareAgain": "Send to another",
   "familyShareAgainHint": "You can send the same link to more people; earlier recipients keep working.",
   "familyRotateLink": "New link",
@@ -1151,6 +1146,10 @@
       }
     }
   },
+  "invitePushReasonSession": "your session expired; sign in again",
+  "invitePushReasonService": "the notification service did not respond",
+  "invitePushReasonUnknown": "unknown error",
+  "visibilityMenuTooltip": "Visibility",
   "rodadaCodeBanner": "code {code}",
   "@rodadaCodeBanner": {
     "placeholders": {
@@ -1160,8 +1159,6 @@
     }
   },
   "meetup": "Meetup",
-  "yourSharing": "Your sharing",
-  "sharingDefaultsHelp": "Off until you turn it on. When the rodada starts, RiderLab uses whatever you enabled below.",
   "notRodadaMember": "You are not a member.",
   "shareLocationOnRoute": "Share location with the pack",
   "shareLocationEvery5Min": "Every 5 min while the rodada is live",
@@ -1483,7 +1480,6 @@
   "leanLabTitle": "Lean Lab",
   "labsSectionTitle": "Tests / new features",
   "labsSectionHelp": "Experimental tools. Not part of the daily ride flow.",
-  "settingsRideSection": "Ride",
   "settingsShareSection": "Group rides and sharing",
   "settingsShareSectionHelp": "These apply to every rodada. Pack live share and family use these switches.",
   "settingsLegalSection": "Legal",
@@ -2725,5 +2721,12 @@
   "offroadAdviceSpacingDense": "Points are packed closer than 1 m. That is GPS noise, not the shape of the edge.",
   "offroadAdviceNeedElevation": "Altitude is missing. Jumps and climbs need it. Phone GPS height is rough; a barometer is better.",
   "offroadAdviceAlignLandmark": "Once it closes, line the finish up with a post or a painted mark you can see on the satellite photo. Phone GPS often sits several meters off the picture.",
-  "offroadAdviceWalkAgain": "One pass is a sketch. Walk each edge again and keep the pass that sits on the tape or the rut, not an average of the two."
+  "offroadAdviceWalkAgain": "One pass is a sketch. Walk each edge again and keep the pass that sits on the tape or the rut, not an average of the two.",
+  "proPurchasePending": "Your payment is pending. Pro turns on as soon as the store confirms it.",
+  "armNeedsAlwaysTitle": "It may not record with the screen locked",
+  "armNeedsAlwaysBody": "Auto-start begins recording with the screen locked. Without \"Allow all the time\" for location, Android may not give it GPS. Pick it in Settings → Permissions → Location, or continue and keep the screen on until it starts.",
+  "armContinueAnyway": "Continue anyway",
+  "socialNotifTitle": "Rodada alerts",
+  "socialNotifBody": "Turn on notifications to know when you are invited to a rodada or when it starts.",
+  "errArmBackgroundGps": "Could not start background GPS. Allow notifications and remove the battery restriction for RiderLab in Settings, then try again."
 }

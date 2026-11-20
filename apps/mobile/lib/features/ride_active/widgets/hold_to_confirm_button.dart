@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart' show kTouchSlop;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -80,8 +81,11 @@ class _HoldToConfirmButtonState extends State<HoldToConfirmButton>
     widget.onConfirmed?.call();
   }
 
-  void _down(PointerDownEvent _) {
+  Offset? _downAt;
+
+  void _down(PointerDownEvent e) {
     if (!_enabled) return;
+    _downAt = e.position;
     _pressed = true;
     _fired = false;
     HapticFeedback.selectionClick();
@@ -89,7 +93,20 @@ class _HoldToConfirmButtonState extends State<HoldToConfirmButton>
     setState(() {});
   }
 
+  /// A finger that travels is a scroll, not a hold: drop the hold silently so
+  /// dragging a list across this button can never end the session.
+  void _move(PointerMoveEvent e) {
+    final start = _downAt;
+    if (!_pressed || _fired || start == null) return;
+    if ((e.position - start).distance <= kTouchSlop) return;
+    _pressed = false;
+    _downAt = null;
+    _progress.animateBack(0, duration: const Duration(milliseconds: 120));
+    if (mounted) setState(() {});
+  }
+
   void _up(PointerEvent _) {
+    _downAt = null;
     if (!_pressed) return;
     _pressed = false;
     if (!_fired) {
@@ -124,6 +141,7 @@ class _HoldToConfirmButtonState extends State<HoldToConfirmButton>
       child: Listener(
         behavior: HitTestBehavior.opaque,
         onPointerDown: _down,
+        onPointerMove: _move,
         onPointerUp: _up,
         onPointerCancel: _up,
         child: ConstrainedBox(

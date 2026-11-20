@@ -2036,12 +2036,6 @@ abstract class AppLocalizations {
   /// **'Ver como otro usuario, reportes y códigos de socio'**
   String get settingsHubStaffSub;
 
-  /// No description provided for @settingsHubStoreUnavailable.
-  ///
-  /// In es, this message translates to:
-  /// **'La tienda no está disponible en este momento. Revisa tu conexión e intenta de nuevo más tarde.'**
-  String get settingsHubStoreUnavailable;
-
   /// No description provided for @proUnlock.
   ///
   /// In es, this message translates to:
@@ -2065,12 +2059,6 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Detalle completo de frenadas (no solo una vista previa)'**
   String get proFeatureBrakes;
-
-  /// No description provided for @proFeatureNoAds.
-  ///
-  /// In es, this message translates to:
-  /// **'Sin banners publicitarios'**
-  String get proFeatureNoAds;
 
   /// No description provided for @upgradeToPro.
   ///
@@ -3440,12 +3428,6 @@ abstract class AppLocalizations {
   /// **'Pack = mapa de la rodada en la app. Familia sin app = compartir desde En vivo (mismo link se puede reenviar).'**
   String get familyRodadaTipBody;
 
-  /// No description provided for @familyRodadaTipCta.
-  ///
-  /// In es, this message translates to:
-  /// **'Ver círculo familiar'**
-  String get familyRodadaTipCta;
-
   /// No description provided for @familyWatchScreenTitle.
   ///
   /// In es, this message translates to:
@@ -3590,12 +3572,6 @@ abstract class AppLocalizations {
   /// **'Genera un link y abre el menú de compartir para mandárselo a tu familiar (no necesitan la app).'**
   String get familyNotifyHelp;
 
-  /// No description provided for @familyNotifyHelpRodada.
-  ///
-  /// In es, this message translates to:
-  /// **'Avisa a familia/amigos fuera del pack. Puedes reenviar el mismo link a más personas.'**
-  String get familyNotifyHelpRodada;
-
   /// No description provided for @familyNotifyStart.
   ///
   /// In es, this message translates to:
@@ -3643,12 +3619,6 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Necesito ayuda'**
   String get familySos;
-
-  /// No description provided for @familyShareLink.
-  ///
-  /// In es, this message translates to:
-  /// **'Reenviar link'**
-  String get familyShareLink;
 
   /// No description provided for @familyShareAgain.
   ///
@@ -4514,6 +4484,30 @@ abstract class AppLocalizations {
   /// **'Invitados en la app. Notificaciones: {ok} enviadas, {failed} fallidas ({reason})'**
   String invitePushSummary(int ok, int failed, String reason);
 
+  /// No description provided for @invitePushReasonSession.
+  ///
+  /// In es, this message translates to:
+  /// **'tu sesión expiró; vuelve a iniciar sesión'**
+  String get invitePushReasonSession;
+
+  /// No description provided for @invitePushReasonService.
+  ///
+  /// In es, this message translates to:
+  /// **'el servicio de notificaciones no respondió'**
+  String get invitePushReasonService;
+
+  /// No description provided for @invitePushReasonUnknown.
+  ///
+  /// In es, this message translates to:
+  /// **'error desconocido'**
+  String get invitePushReasonUnknown;
+
+  /// No description provided for @visibilityMenuTooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Visibilidad'**
+  String get visibilityMenuTooltip;
+
   /// No description provided for @rodadaCodeBanner.
   ///
   /// In es, this message translates to:
@@ -4525,18 +4519,6 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Encuentro'**
   String get meetup;
-
-  /// No description provided for @yourSharing.
-  ///
-  /// In es, this message translates to:
-  /// **'Qué compartes'**
-  String get yourSharing;
-
-  /// No description provided for @sharingDefaultsHelp.
-  ///
-  /// In es, this message translates to:
-  /// **'Apagado hasta que lo actives. Al iniciar la rodada, RiderLab usa lo que hayas marcado abajo.'**
-  String get sharingDefaultsHelp;
 
   /// No description provided for @notRodadaMember.
   ///
@@ -5437,12 +5419,6 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Lab de inclinación'**
   String get leanLabTitle;
-
-  /// No description provided for @settingsRideSection.
-  ///
-  /// In es, this message translates to:
-  /// **'Recorrido'**
-  String get settingsRideSection;
 
   /// No description provided for @settingsShareSection.
   ///
@@ -8987,6 +8963,48 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Un solo paseo es un borrador. Vuelve a caminar cada borde y quédate con el que cae sobre la cinta o la rodada, no con un promedio de los dos.'**
   String get offroadAdviceWalkAgain;
+
+  /// No description provided for @proPurchasePending.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu pago está pendiente. Pro se activa en cuanto la tienda lo confirme.'**
+  String get proPurchasePending;
+
+  /// No description provided for @armNeedsAlwaysTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Con la pantalla bloqueada puede no grabar'**
+  String get armNeedsAlwaysTitle;
+
+  /// No description provided for @armNeedsAlwaysBody.
+  ///
+  /// In es, this message translates to:
+  /// **'El arranque automático empieza a grabar con la pantalla bloqueada. Sin \"Permitir todo el tiempo\" en Ubicación, Android puede no darle GPS. Elígelo en Ajustes → Permisos → Ubicación, o continúa y deja la pantalla encendida hasta que arranque.'**
+  String get armNeedsAlwaysBody;
+
+  /// No description provided for @armContinueAnyway.
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar así'**
+  String get armContinueAnyway;
+
+  /// No description provided for @socialNotifTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Avisos de rodadas'**
+  String get socialNotifTitle;
+
+  /// No description provided for @socialNotifBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Activa las notificaciones para enterarte cuando te inviten a una rodada o cuando empiece.'**
+  String get socialNotifBody;
+
+  /// No description provided for @errArmBackgroundGps.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo iniciar el GPS en segundo plano. Permite las notificaciones y quita la restricción de batería para RiderLab en Ajustes, y vuelve a intentarlo.'**
+  String get errArmBackgroundGps;
 }
 
 class _AppLocalizationsDelegate

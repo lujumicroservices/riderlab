@@ -71,26 +71,91 @@ class LocationPermissionGate {
   static const _prefBatteryAsked = 'ride_battery_optimization_asked';
 
   static bool _warnedLimited = false;
+  static bool _autoStartAccepted = false;
 
   static bool get _isIos => !kIsWeb && Platform.isIOS;
   static bool get _isAndroid => !kIsWeb && Platform.isAndroid;
+
+  /// Arm-for-auto-start begins recording while the screen is locked. On
+  /// Android a location service started from the background may get no GPS
+  /// without "Allow all the time", so the rider is told before arming and can
+  /// open Settings or continue anyway. True when arming may proceed.
+  static Future<bool> confirmAutoStartWithoutBackground(
+    BuildContext context,
+  ) async {
+    if (!_isAndroid) return true;
+    if (await Geolocator.checkPermission() == LocationPermission.always) {
+      return true;
+    }
+    // Asked once per app session: the rider already chose to go without it.
+    if (_autoStartAccepted) return true;
+    if (!context.mounted) return false;
+    final l10n = context.l10n;
+    final proceed = await _showDisclosure(
+      context,
+      title: l10n.armNeedsAlwaysTitle,
+      body: l10n.armNeedsAlwaysBody,
+      cancelLabel: l10n.locationOpenSettings,
+      confirmLabel: l10n.armContinueAnyway,
+      icon: Icons.lock_clock,
+    );
+    if (!proceed) {
+      await openAppSettings();
+      return false;
+    }
+    _autoStartAccepted = true;
+    return true;
+  }
+
+  /// Social entry points (Rodadas, Friends): riders who never record still
+  /// need notifications for invites and "rodada started". Asks once, with
+  /// context, sharing the "asked" flag with the first-ride flow.
+  static Future<void> askNotificationsForSocial(BuildContext context) async {
+    if (kIsWeb) return;
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool(_prefNotifAsked) ?? false) return;
+    if (await _notificationsGranted()) return;
+    if (!context.mounted) return;
+    final l10n = context.l10n;
+    final accepted = await _showDisclosure(
+      context,
+      title: l10n.socialNotifTitle,
+      body: l10n.socialNotifBody,
+      cancelLabel: l10n.notNow,
+      icon: Icons.notifications_active_outlined,
+    );
+    await prefs.setBool(_prefNotifAsked, true);
+    if (!accepted) return;
+    final status = await Permission.notification.request();
+    if (status.isGranted) {
+      unawaited(
+        PushNotificationService.instance.onNotificationPermissionGranted(),
+      );
+    }
+  }
 
   /// Runs [prepareForRide]; true when recording may start.
   static Future<bool> requestForRecording(
     BuildContext context, {
     bool offerBackground = false,
+    bool warnBackgroundLimited = true,
   }) async {
     final outcome = await prepareForRide(
       context,
       offerBackground: offerBackground,
+      warnBackgroundLimited: warnBackgroundLimited,
     );
     return outcome.granted;
   }
 
   /// [offerBackground]: iOS step 2 right after step 1 succeeds (Armar auto).
+  ///
+  /// [warnBackgroundLimited]: false when the caller explains the missing
+  /// "Allow all the time" itself (arm-for-auto-start), to avoid two warnings.
   static Future<RidePermissionOutcome> prepareForRide(
     BuildContext context, {
     bool offerBackground = false,
+    bool warnBackgroundLimited = true,
   }) async {
     if (!await Geolocator.isLocationServiceEnabled()) {
       if (context.mounted) await _showServicesOffDialog(context);
@@ -154,7 +219,7 @@ class LocationPermissionGate {
         if (needNotifications) await prefs.setBool(_prefNotifAsked, true);
         if (needBattery) await prefs.setBool(_prefBatteryAsked, true);
         if (!context.mounted) return const RidePermissionOutcome.granted();
-        return _granted(context, permission);
+        return _granted(context, permission, warn: warnBackgroundLimited);
       }
 
       // 1. Foreground location.
@@ -218,7 +283,7 @@ class LocationPermissionGate {
       await offerAlwaysIfUseful(context);
     }
     if (!context.mounted) return const RidePermissionOutcome.granted();
-    return _granted(context, permission);
+    return _granted(context, permission, warn: warnBackgroundLimited);
   }
 
   static Future<bool> _notificationsGranted() async {
@@ -232,10 +297,11 @@ class LocationPermissionGate {
   /// Foreground-only on Android: still record, warn once per app session.
   static RidePermissionOutcome _granted(
     BuildContext context,
-    LocationPermission permission,
-  ) {
+    LocationPermission permission, {
+    bool warn = true,
+  }) {
     final limited = _isAndroid && permission != LocationPermission.always;
-    if (limited && !_warnedLimited) {
+    if (warn && limited && !_warnedLimited) {
       _warnedLimited = true;
       final l10n = context.l10n;
       showAppSnack(

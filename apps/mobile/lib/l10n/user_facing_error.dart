@@ -92,6 +92,12 @@ extension UserFacingErrorL10n on AppLocalizations {
     if (lower.contains('a ride is already recording')) {
       return errRideAlreadyRecording;
     }
+    if (lower.contains('could not start background gps')) {
+      return errArmBackgroundGps;
+    }
+    if (lower.contains('a ride is already starting')) {
+      return errRideAlreadyRecording;
+    }
     if (lower.contains('viewing as another rider')) {
       return errRecordingWhileImpersonating;
     }

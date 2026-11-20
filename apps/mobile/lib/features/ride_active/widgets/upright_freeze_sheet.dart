@@ -59,6 +59,13 @@ Future<bool> freezeThenArm(
     if (!await LocationPermissionGate.requestForRecording(
       context,
       offerBackground: true,
+      warnBackgroundLimited: false,
+    )) {
+      return false;
+    }
+    if (!context.mounted) return false;
+    if (!await LocationPermissionGate.confirmAutoStartWithoutBackground(
+      context,
     )) {
       return false;
     }

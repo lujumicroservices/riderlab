@@ -24,7 +24,7 @@ class ModeToggle extends ConsumerWidget {
     final l10n = context.l10n;
     final mode = ref.watch(appModeProvider);
     final armed = ref.watch(armedStateProvider);
-    final recording = ref.watch(rideRecorderProvider).isRecording;
+    final recording = ref.watch(isRecordingProvider);
     final locked = armed || recording;
     final off = mode == AppMode.off;
     final accent = off ? OffroadTheme.track : AppTheme.signal;

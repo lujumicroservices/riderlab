@@ -75,6 +75,10 @@ enum ProPurchaseResult {
 
   /// Store or network error.
   failed,
+
+  /// The store accepted the purchase but payment is not settled yet
+  /// (e.g. Google Play cash / deferred payment). Pro arrives via the listener.
+  pending,
 }
 
 /// Sideload, not signed in: keep the local Settings toggle for pilots.
@@ -277,6 +281,9 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
         if (code == PurchasesErrorCode.purchaseCancelledError) {
           return ProPurchaseResult.cancelled;
         }
+        if (code == PurchasesErrorCode.paymentPendingError) {
+          return ProPurchaseResult.pending;
+        }
       } catch (_) {}
     }
     return ProPurchaseResult.failed;
@@ -296,7 +303,9 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
 
   /// Buy one store package picked in the paywall.
   Future<ProPurchaseResult> purchasePackage(Package package) async {
-    if (state.isPro) return ProPurchaseResult.success;
+    // Only an existing store subscription makes buying pointless. Partner-code
+    // or local Pro must still be able to subscribe before it runs out.
+    if (state.isPaid) return ProPurchaseResult.success;
     if (!_rcReady) return ProPurchaseResult.notConfigured;
     try {
       final purchase = await Purchases.purchase(
@@ -304,10 +313,14 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
       );
       _applyRevenueCat(purchase.customerInfo);
       await refresh(fromStoreOnly: true);
-      return state.isPro ? ProPurchaseResult.success : ProPurchaseResult.failed;
+      // The store call returned without error, so a missing entitlement means
+      // the payment is still settling, not that the purchase failed.
+      return state.isPaid
+          ? ProPurchaseResult.success
+          : ProPurchaseResult.pending;
     } catch (e) {
       debugPrint('RevenueCat purchase failed: $e');
-      if (state.isPro) return ProPurchaseResult.success;
+      if (state.isPaid) return ProPurchaseResult.success;
       return _errorResult(e);
     }
   }
@@ -326,7 +339,7 @@ class ProEntitlementController extends StateNotifier<ProEntitlementStatus> {
   /// Buy the default package (yearly first) without a plan picker.
   /// UI should open `showProUpsellSheet` instead, which shows the price.
   Future<ProPurchaseResult> purchasePro() async {
-    if (state.isPro) return ProPurchaseResult.success;
+    if (state.isPaid) return ProPurchaseResult.success;
     if (!_rcReady) return ProPurchaseResult.notConfigured;
     final current = await currentOffering();
     final package =

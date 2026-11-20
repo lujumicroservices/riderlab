@@ -27,6 +27,8 @@ import '../adventure_camera/widgets/adventure_camera_lifecycle_binder.dart';
 import '../friends/friends_screen.dart';
 import '../ride_active/armed_session_flow.dart';
 import '../ride_active/armed_session_nav.dart';
+import '../ride_active/location_permission_gate.dart';
+import '../ride_active/ride_notification_l10n.dart';
 import '../ride_active/widgets/upright_freeze_sheet.dart';
 import '../ride_detail/ride_detail_screen.dart';
 import '../ride_detail/ride_rename.dart';
@@ -123,8 +125,12 @@ class HomeScreen extends ConsumerWidget {
                             tooltip: l10n.rodadasTitle,
                             label: l10n.homeNavRodadas,
                             semanticId: DemoIds.navRodadas,
-                            onPressed: () {
-                              Navigator.of(context).push(
+                            onPressed: () async {
+                              await LocationPermissionGate.askNotificationsForSocial(
+                                context,
+                              );
+                              if (!context.mounted) return;
+                              await Navigator.of(context).push(
                                 MaterialPageRoute<void>(
                                   builder: (_) => const RodadasScreen(),
                                 ),
@@ -136,8 +142,12 @@ class HomeScreen extends ConsumerWidget {
                             tooltip: l10n.friends,
                             label: l10n.homeNavFriends,
                             semanticId: DemoIds.navFriends,
-                            onPressed: () {
-                              Navigator.of(context).push(
+                            onPressed: () async {
+                              await LocationPermissionGate.askNotificationsForSocial(
+                                context,
+                              );
+                              if (!context.mounted) return;
+                              await Navigator.of(context).push(
                                 MaterialPageRoute<void>(
                                   builder: (_) => const FriendsScreen(),
                                 ),
@@ -502,6 +512,14 @@ class _ArmAutoResumeOpenerState extends ConsumerState<_ArmAutoResumeOpener>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Localize the foreground notification before any recording screen opens
+    // (auto-start, resumed ride) and again whenever the app language changes.
+    applyRideNotificationText(context, ref.read(rideRecorderProvider));
+  }
+
+  @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -676,7 +694,7 @@ class _ArmedBanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final recording = ref.watch(rideRecorderProvider).isRecording;
+    final recording = ref.watch(isRecordingProvider);
     final paused = ref.watch(activeRideProvider).valueOrNull?.isPaused ?? false;
     final held = ref.watch(motionDetectionHeldProvider);
     final title = !recording

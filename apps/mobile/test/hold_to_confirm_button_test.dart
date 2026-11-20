@@ -55,6 +55,29 @@ void main() {
     expect(find.text('Mantén presionado para terminar'), findsNothing);
   });
 
+  testWidgets('a drag that starts on the button never confirms', (
+    tester,
+  ) async {
+    var confirmed = 0;
+    await tester.pumpWidget(
+      _wrap(
+        HoldToConfirmButton(onConfirmed: () => confirmed++, label: 'Terminar'),
+      ),
+    );
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.text('Terminar')),
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+    await gesture.moveBy(const Offset(0, 40));
+    await tester.pump(const Duration(milliseconds: 1200));
+    expect(confirmed, 0);
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(confirmed, 0);
+    expect(find.text('Mantén presionado para terminar'), findsNothing);
+  });
+
   testWidgets('button is at least 56 dp tall', (tester) async {
     await tester.pumpWidget(
       _wrap(HoldToConfirmButton(onConfirmed: () {}, label: 'Terminar')),

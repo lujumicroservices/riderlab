@@ -11,6 +11,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/ride_providers.dart';
 import '../../../providers/social_providers.dart';
 import '../../../theme/app_theme.dart';
+import '../../../widgets/visibility_selector.dart';
 
 /// Assign route + visibility (Only me / Friends / Everyone).
 /// Updates local DB immediately; cloud sync is fire-and-forget so toggles feel instant.
@@ -47,7 +48,7 @@ class RideSharePanel extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 10),
-          _LocalizedVisibilitySelector(
+          VisibilitySelector(
             value: ride.visibility,
             onChanged: (v) => _setVisibility(ref, v),
           ),
@@ -170,59 +171,5 @@ class RideSharePanel extends ConsumerWidget {
     ref.invalidate(routesListProvider);
     ref.invalidate(rideProvider(ride.id));
     ref.invalidate(overlappingPeersProvider(ride.id));
-  }
-}
-
-/// Localized 3-way visibility control (Solo yo / Amigos / Todos).
-class _LocalizedVisibilitySelector extends StatelessWidget {
-  const _LocalizedVisibilitySelector({
-    required this.value,
-    required this.onChanged,
-  });
-
-  final ShareVisibility value;
-  final ValueChanged<ShareVisibility> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    String label(ShareVisibility v) => switch (v) {
-      ShareVisibility.private => l10n.rideDetailVisibilityPrivate,
-      ShareVisibility.friends => l10n.rideDetailVisibilityFriends,
-      ShareVisibility.public => l10n.rideDetailVisibilityPublic,
-    };
-    String help(ShareVisibility v) => switch (v) {
-      ShareVisibility.private => l10n.rideDetailVisibilityPrivateHelp,
-      ShareVisibility.friends => l10n.rideDetailVisibilityFriendsHelp,
-      ShareVisibility.public => l10n.rideDetailVisibilityPublicHelp,
-    };
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SegmentedButton<ShareVisibility>(
-          segments: [
-            for (final v in ShareVisibility.values)
-              ButtonSegment(
-                value: v,
-                label: Text(label(v), style: GoogleFonts.exo2(fontSize: 12)),
-                tooltip: help(v),
-              ),
-          ],
-          selected: {value},
-          onSelectionChanged: (set) {
-            if (set.isEmpty) return;
-            onChanged(set.first);
-          },
-          style: const ButtonStyle(
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          help(value),
-          style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
-        ),
-      ],
-    );
   }
 }

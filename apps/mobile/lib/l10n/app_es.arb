@@ -483,12 +483,10 @@
   "settingsHubLabSub": "Funciones en prueba",
   "settingsHubStaff": "Staff",
   "settingsHubStaffSub": "Ver como otro usuario, reportes y códigos de socio",
-  "settingsHubStoreUnavailable": "La tienda no está disponible en este momento. Revisa tu conexión e intenta de nuevo más tarde.",
   "proUnlock": "RiderLab Pro",
   "proUnlockBody": "Elige cualquier tramo, detalle completo de curvas y el historial completo de frenadas.",
   "proFeatureSegment": "Acercar cualquier parte del recorrido",
   "proFeatureBrakes": "Detalle completo de frenadas (no solo una vista previa)",
-  "proFeatureNoAds": "Sin banners publicitarios",
   "upgradeToPro": "Pasar a Pro",
   "proUnlocked": "Pro activo",
   "proToggleDev": "Pro desbloqueado",
@@ -838,7 +836,6 @@
   "familyShareFromCircle": "Compartir link ahora",
   "familyRodadaTipTitle": "¿Link para familia?",
   "familyRodadaTipBody": "Pack = mapa de la rodada en la app. Familia sin app = compartir desde En vivo (mismo link se puede reenviar).",
-  "familyRodadaTipCta": "Ver círculo familiar",
   "familyWatchScreenTitle": "Avisar a familia",
   "familyWatchScreenHelp": "Comparte un link para que te vean en el mapa. No necesitan RiderLab.",
   "familyNotEmergency": "Esto no llama a emergencias (no es 911).",
@@ -870,7 +867,6 @@
   "familyRiderFallback": "Rider",
   "familyNotifyToggle": "Avisar a familia",
   "familyNotifyHelp": "Genera un link y abre el menú de compartir para mandárselo a tu familiar (no necesitan la app).",
-  "familyNotifyHelpRodada": "Avisa a familia/amigos fuera del pack. Puedes reenviar el mismo link a más personas.",
   "familyNotifyStart": "Compartir",
   "familyWatchActive": "Familia puede verte",
   "familyWatchInactive": "No estás compartiendo",
@@ -879,7 +875,6 @@
   "familyOk": "Todo bien",
   "familyStopped": "Me detuve",
   "familySos": "Necesito ayuda",
-  "familyShareLink": "Reenviar link",
   "familyShareAgain": "Enviar a otro",
   "familyShareAgainHint": "Puedes mandar el mismo link a más personas; los anteriores siguen funcionando.",
   "familyRotateLink": "Nuevo link",
@@ -1252,6 +1247,10 @@
       }
     }
   },
+  "invitePushReasonSession": "tu sesión expiró; vuelve a iniciar sesión",
+  "invitePushReasonService": "el servicio de notificaciones no respondió",
+  "invitePushReasonUnknown": "error desconocido",
+  "visibilityMenuTooltip": "Visibilidad",
   "rodadaCodeBanner": "código {code}",
   "@rodadaCodeBanner": {
     "placeholders": {
@@ -1261,8 +1260,6 @@
     }
   },
   "meetup": "Encuentro",
-  "yourSharing": "Qué compartes",
-  "sharingDefaultsHelp": "Apagado hasta que lo actives. Al iniciar la rodada, RiderLab usa lo que hayas marcado abajo.",
   "notRodadaMember": "No eres miembro.",
   "shareLocationOnRoute": "Compartir ubicación con la rodada",
   "shareLocationEvery5Min": "Cada 5 min mientras la rodada está en vivo",
@@ -1582,7 +1579,6 @@
   "bikeCustomModelHint": "Escribe el nombre del modelo",
   "leanLabHomeCta": "Lab de inclinación — Bugambilias",
   "leanLabTitle": "Lab de inclinación",
-  "settingsRideSection": "Recorrido",
   "settingsShareSection": "Rodadas y compartir",
   "settingsShareSectionHelp": "Valen para todas las rodadas. El pack y familia usan estos interruptores.",
   "settingsLegalSection": "Legal",
@@ -2857,5 +2853,12 @@
   "offroadAdviceSpacingDense": "Los puntos están amontonados a menos de 1 m. Eso es ruido del GPS, no la forma del borde.",
   "offroadAdviceNeedElevation": "No hay altitud. Saltos y subidas la necesitan. La altura del GPS del teléfono es floja; un barómetro es mejor.",
   "offroadAdviceAlignLandmark": "Cuando cierre, alinea la meta con un poste o una raya que veas en la foto satélite. El GPS del teléfono suele quedar a varios metros de la imagen.",
-  "offroadAdviceWalkAgain": "Un solo paseo es un borrador. Vuelve a caminar cada borde y quédate con el que cae sobre la cinta o la rodada, no con un promedio de los dos."
+  "offroadAdviceWalkAgain": "Un solo paseo es un borrador. Vuelve a caminar cada borde y quédate con el que cae sobre la cinta o la rodada, no con un promedio de los dos.",
+  "proPurchasePending": "Tu pago está pendiente. Pro se activa en cuanto la tienda lo confirme.",
+  "armNeedsAlwaysTitle": "Con la pantalla bloqueada puede no grabar",
+  "armNeedsAlwaysBody": "El arranque automático empieza a grabar con la pantalla bloqueada. Sin \"Permitir todo el tiempo\" en Ubicación, Android puede no darle GPS. Elígelo en Ajustes → Permisos → Ubicación, o continúa y deja la pantalla encendida hasta que arranque.",
+  "armContinueAnyway": "Continuar así",
+  "socialNotifTitle": "Avisos de rodadas",
+  "socialNotifBody": "Activa las notificaciones para enterarte cuando te inviten a una rodada o cuando empiece.",
+  "errArmBackgroundGps": "No se pudo iniciar el GPS en segundo plano. Permite las notificaciones y quita la restricción de batería para RiderLab en Ajustes, y vuelve a intentarlo."
 }

@@ -1,0 +1,11 @@
+{
+  "enabledPlugins": {
+    "superpowers@anthropic-plugin-directory": true,
+    "supabase@anthropic-plugin-directory": true,
+    "context7@anthropic-plugin-directory": true,
+    "claude-security@anthropic-plugin-directory": true,
+    "dart-and-flutter@anthropic-plugin-directory": true,
+    "adb-mcp@anthropic-plugin-directory": true,
+    "mobile-release-check-play-and-app-store-readiness@anthropic-plugin-directory": true
+  }
+}

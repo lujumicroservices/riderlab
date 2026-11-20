@@ -1083,10 +1083,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'View as another rider, reports and partner codes';
 
   @override
-  String get settingsHubStoreUnavailable =>
-      'The store isn\'t available right now. Check your connection and try again later.';
-
-  @override
   String get proUnlock => 'RiderLab Pro';
 
   @override
@@ -1098,9 +1094,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get proFeatureBrakes => 'Full braking details (not just a preview)';
-
-  @override
-  String get proFeatureNoAds => 'No advertising banners';
 
   @override
   String get upgradeToPro => 'Upgrade to Pro';
@@ -1886,9 +1879,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Pack = rodada map in the app. Family without the app = share from Live (same link can be resent).';
 
   @override
-  String get familyRodadaTipCta => 'Open family circle';
-
-  @override
   String get familyWatchScreenTitle => 'Notify family';
 
   @override
@@ -1970,10 +1960,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Creates a link and opens the share sheet so you can send it (they don’t need the app).';
 
   @override
-  String get familyNotifyHelpRodada =>
-      'Notify family/friends outside the pack. You can resend the same link to more people.';
-
-  @override
   String get familyNotifyStart => 'Share';
 
   @override
@@ -1997,9 +1983,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get familySos => 'Need help';
-
-  @override
-  String get familyShareLink => 'Resend link';
 
   @override
   String get familyShareAgain => 'Send to another';
@@ -2509,19 +2492,25 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get invitePushReasonSession => 'your session expired; sign in again';
+
+  @override
+  String get invitePushReasonService =>
+      'the notification service did not respond';
+
+  @override
+  String get invitePushReasonUnknown => 'unknown error';
+
+  @override
+  String get visibilityMenuTooltip => 'Visibility';
+
+  @override
   String rodadaCodeBanner(String code) {
     return 'code $code';
   }
 
   @override
   String get meetup => 'Meetup';
-
-  @override
-  String get yourSharing => 'Your sharing';
-
-  @override
-  String get sharingDefaultsHelp =>
-      'Off until you turn it on. When the rodada starts, RiderLab uses whatever you enabled below.';
 
   @override
   String get notRodadaMember => 'You are not a member.';
@@ -3034,9 +3023,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leanLabTitle => 'Lean Lab';
-
-  @override
-  String get settingsRideSection => 'Ride';
 
   @override
   String get settingsShareSection => 'Group rides and sharing';
@@ -5090,4 +5076,29 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get offroadAdviceWalkAgain =>
       'One pass is a sketch. Walk each edge again and keep the pass that sits on the tape or the rut, not an average of the two.';
+
+  @override
+  String get proPurchasePending =>
+      'Your payment is pending. Pro turns on as soon as the store confirms it.';
+
+  @override
+  String get armNeedsAlwaysTitle => 'It may not record with the screen locked';
+
+  @override
+  String get armNeedsAlwaysBody =>
+      'Auto-start begins recording with the screen locked. Without \"Allow all the time\" for location, Android may not give it GPS. Pick it in Settings → Permissions → Location, or continue and keep the screen on until it starts.';
+
+  @override
+  String get armContinueAnyway => 'Continue anyway';
+
+  @override
+  String get socialNotifTitle => 'Rodada alerts';
+
+  @override
+  String get socialNotifBody =>
+      'Turn on notifications to know when you are invited to a rodada or when it starts.';
+
+  @override
+  String get errArmBackgroundGps =>
+      'Could not start background GPS. Allow notifications and remove the battery restriction for RiderLab in Settings, then try again.';
 }

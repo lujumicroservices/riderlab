@@ -16,6 +16,8 @@ import '../../core/models/track_point.dart';
 import '../../core/services/lean_sensor.dart';
 import '../../core/services/location_service.dart';
 import '../../core/services/loop_session_controller.dart';
+import '../../core/models/ride.dart';
+import '../../core/services/ride_recorder.dart';
 import '../../core/services/rider_telemetry_service.dart';
 import '../../core/utils/geo_utils.dart';
 import '../../l10n/l10n_ext.dart';
@@ -153,26 +155,30 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
 
   /// Cancelar during permissions / GPS warm-up: leave now; if the recorder
   /// still finishes starting in the background, stop and drop that ride.
-  void _cancelStart(Future<void>? pendingStart) {
+  void _cancelStart(Future<Ride>? pendingStart) {
     if (_cancelRequested) return;
     _cancelRequested = true;
     final recorder = ref.read(rideRecorderProvider);
     final db = ref.read(rideDatabaseProvider);
+    // Stops the warm-up so this start never creates a ride.
+    recorder.cancelPendingStart();
     unawaited(() async {
+      Ride? created;
       try {
-        await pendingStart;
+        created = await pendingStart;
       } catch (_) {}
-      final ride = recorder.activeRide;
-      if (ride == null || !recorder.isRecording) return;
+      // Only undo the ride this start created; a newer ride the rider began
+      // after cancelling must survive.
+      if (created == null || recorder.activeRide?.id != created.id) return;
       try {
         await recorder.stop();
-        await db.deleteRide(ride.id);
+        await db.deleteRide(created.id);
       } catch (_) {}
     }());
     if (mounted) Navigator.of(context).pop();
   }
 
-  Future<void>? _pendingStart;
+  Future<Ride>? _pendingStart;
 
   /// Arm-auto already started the recorder; still bind route/loop so laps
   /// count under the ruta and auto-lap works.
@@ -281,7 +287,7 @@ class _ActiveRideScreenState extends ConsumerState<ActiveRideScreen> {
       ref.invalidate(activeRideProvider);
       await _resumeFamilyWatch();
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted || e is RideStartCancelled) return;
       setState(() {
         _starting = false;
         _startError = e;

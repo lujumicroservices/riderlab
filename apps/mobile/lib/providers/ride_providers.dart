@@ -21,7 +21,6 @@ import '../core/services/sync_outbox_service.dart';
 import '../core/supabase/supabase_bootstrap.dart';
 import 'pro_entitlement_provider.dart';
 
-
 final rideDatabaseProvider = Provider<RideDatabase>((ref) {
   return RideDatabase.instance;
 });
@@ -58,10 +57,9 @@ final rideRecorderProvider = Provider<RideRecorder>((ref) {
     },
     onSuggestEnd: (rideId) {
       unawaited(
-        ref.read(rideSyncServiceProvider).syncRide(
-              rideId,
-              allowRecording: true,
-            ),
+        ref
+            .read(rideSyncServiceProvider)
+            .syncRide(rideId, allowRecording: true),
       );
     },
   );
@@ -119,7 +117,9 @@ class GarageCloudSyncNotifier extends StateNotifier<bool> {
     final uid = SupabaseBootstrap.permanentUserId;
     state = true;
     try {
-      await _ref.read(rideSyncServiceProvider).pullMyCloudRides(
+      await _ref
+          .read(rideSyncServiceProvider)
+          .pullMyCloudRides(
             policy: TrackPullPolicy.fillGapsOnly,
             tracksOnlyIfLocalEmpty: true,
             afterSummaries: (changed) {
@@ -149,8 +149,8 @@ class GarageCloudSyncNotifier extends StateNotifier<bool> {
 
 final garageCloudSyncProvider =
     StateNotifierProvider<GarageCloudSyncNotifier, bool>((ref) {
-  return GarageCloudSyncNotifier(ref);
-});
+      return GarageCloudSyncNotifier(ref);
+    });
 
 final ridesListProvider = FutureProvider<List<Ride>>((ref) async {
   final db = ref.watch(rideDatabaseProvider);
@@ -158,11 +158,7 @@ final ridesListProvider = FutureProvider<List<Ride>>((ref) async {
   unawaited(ref.read(garageCloudSyncProvider.notifier).ensureStarted());
   // Soft backfill start→end place titles; refresh list when any are written.
   unawaited(() async {
-    final named = await nameUntitledRides(
-      db,
-      rides,
-      limit: 8,
-    );
+    final named = await nameUntitledRides(db, rides, limit: 8);
     if (named > 0) {
       ref.invalidateSelf();
     }
@@ -240,8 +236,8 @@ class RideTitleNamingController extends StateNotifier<RideTitleNamingState> {
 
 final rideTitleNamingProvider =
     StateNotifierProvider<RideTitleNamingController, RideTitleNamingState>(
-  (ref) => RideTitleNamingController(ref),
-);
+      (ref) => RideTitleNamingController(ref),
+    );
 
 /// Reverse-geocode start/end for untitled completed rides.
 /// Returns how many titles were written.
@@ -279,14 +275,18 @@ Future<int> nameUntitledRides(
   return named;
 }
 
-final rideProvider =
-    FutureProvider.autoDispose.family<Ride?, String>((ref, id) async {
+final rideProvider = FutureProvider.autoDispose.family<Ride?, String>((
+  ref,
+  id,
+) async {
   return ref.watch(rideDatabaseProvider).getRide(id);
 });
 
 /// Download GPS for this ride if local SQLite has none (recovered ride).
-final rideTrackReadyProvider =
-    FutureProvider.autoDispose.family<void, String>((ref, id) async {
+final rideTrackReadyProvider = FutureProvider.autoDispose.family<void, String>((
+  ref,
+  id,
+) async {
   final db = ref.watch(rideDatabaseProvider);
   if (await db.countPoints(id) > 0) return;
   try {
@@ -295,58 +295,60 @@ final rideTrackReadyProvider =
 });
 
 /// Full GPS — sync, export, reel, compare. Not used to open Ride Lab.
-final ridePointsProvider =
-    FutureProvider.autoDispose.family<List<TrackPoint>, String>((ref, id) async {
-  await ref.watch(rideTrackReadyProvider(id).future);
-  return ref.watch(rideDatabaseProvider).getPoints(id);
-});
+final ridePointsProvider = FutureProvider.autoDispose
+    .family<List<TrackPoint>, String>((ref, id) async {
+      await ref.watch(rideTrackReadyProvider(id).future);
+      return ref.watch(rideDatabaseProvider).getPoints(id);
+    });
 
 /// ~1k GPS vertices for map + charts (includes first/last).
-final rideOverviewPointsProvider =
-    FutureProvider.autoDispose.family<List<TrackPoint>, String>((ref, id) async {
-  await ref.watch(rideTrackReadyProvider(id).future);
-  return ref.watch(rideDatabaseProvider).getPointsOverview(id);
-});
+final rideOverviewPointsProvider = FutureProvider.autoDispose
+    .family<List<TrackPoint>, String>((ref, id) async {
+      await ref.watch(rideTrackReadyProvider(id).future);
+      return ref.watch(rideDatabaseProvider).getPointsOverview(id);
+    });
 
-final rideLeanSamplesProvider =
-    FutureProvider.autoDispose.family<List<LeanSample>, String>((ref, id) {
-  return ref.watch(rideDatabaseProvider).getLeanSamples(id);
-});
+final rideLeanSamplesProvider = FutureProvider.autoDispose
+    .family<List<LeanSample>, String>((ref, id) {
+      return ref.watch(rideDatabaseProvider).getLeanSamples(id);
+    });
 
-final ridePhotosProvider =
-    FutureProvider.autoDispose.family<List<RidePhoto>, String>((ref, id) {
-  return ref.watch(rideDatabaseProvider).getRidePhotos(id);
-});
+final ridePhotosProvider = FutureProvider.autoDispose
+    .family<List<RidePhoto>, String>((ref, id) {
+      return ref.watch(rideDatabaseProvider).getRidePhotos(id);
+    });
 
 /// Full-track curves / skill; loads in a background isolate.
-final rideLabAnalyticsProvider =
-    FutureProvider.autoDispose.family<RideAnalytics?, String>((ref, id) async {
-  await ref.watch(rideTrackReadyProvider(id).future);
-  final db = ref.watch(rideDatabaseProvider);
-  final ride = await db.getRide(id);
-  if (ride == null) return null;
-  final points = await db.getPoints(id);
-  final lean = await db.getLeanSamples(id);
-  List<GeoPoint>? matched;
-  try {
-    matched = await ref.read(mapMatchServiceProvider).match(points);
-  } catch (_) {
-    matched = null;
-  }
-  return computeRideLabAnalytics(
-    ride: ride,
-    points: points,
-    leanSamples: lean,
-    matchedCenterline: matched,
-  );
-});
+final rideLabAnalyticsProvider = FutureProvider.autoDispose
+    .family<RideAnalytics?, String>((ref, id) async {
+      await ref.watch(rideTrackReadyProvider(id).future);
+      final db = ref.watch(rideDatabaseProvider);
+      final ride = await db.getRide(id);
+      if (ride == null) return null;
+      final points = await db.getPoints(id);
+      final lean = await db.getLeanSamples(id);
+      List<GeoPoint>? matched;
+      try {
+        matched = await ref.read(mapMatchServiceProvider).match(points);
+      } catch (_) {
+        matched = null;
+      }
+      return computeRideLabAnalytics(
+        ride: ride,
+        points: points,
+        leanSamples: lean,
+        matchedCenterline: matched,
+      );
+    });
 
-final ridesForRouteProvider =
-    FutureProvider.autoDispose.family<List<Ride>, String>((ref, routeId) {
-  return ref.watch(rideDatabaseProvider).listRidesForRoute(routeId);
-});
+final ridesForRouteProvider = FutureProvider.autoDispose
+    .family<List<Ride>, String>((ref, routeId) {
+      return ref.watch(rideDatabaseProvider).listRidesForRoute(routeId);
+    });
 
-final activeRideProvider = StreamProvider.autoDispose<ActiveRideSnapshot?>((ref) {
+final activeRideProvider = StreamProvider.autoDispose<ActiveRideSnapshot?>((
+  ref,
+) {
   final recorder = ref.watch(rideRecorderProvider);
   return recorder.snapshots.map<ActiveRideSnapshot?>((s) => s);
 });
@@ -386,13 +388,33 @@ class ArmedStateNotifier extends StateNotifier<bool> {
 
 final armedStateProvider =
     StateNotifierProvider.autoDispose<ArmedStateNotifier, bool>((ref) {
-  final recorder = ref.watch(rideRecorderProvider);
-  return ArmedStateNotifier(recorder);
-});
+      final recorder = ref.watch(rideRecorderProvider);
+      return ArmedStateNotifier(recorder);
+    });
+
+/// True while a ride is recording. Rebuilds on start/stop, unlike reading
+/// [RideRecorder.isRecording] off the plain [rideRecorderProvider].
+final isRecordingProvider =
+    StateNotifierProvider.autoDispose<RecordingStateNotifier, bool>((ref) {
+      return RecordingStateNotifier(ref.watch(rideRecorderProvider));
+    });
+
+class RecordingStateNotifier extends StateNotifier<bool> {
+  RecordingStateNotifier(RideRecorder recorder) : super(recorder.isRecording) {
+    _sub = recorder.recordingStates.listen((recording) => state = recording);
+  }
+
+  late final StreamSubscription<bool> _sub;
+
+  @override
+  void dispose() {
+    unawaited(_sub.cancel());
+    super.dispose();
+  }
+}
 
 class MotionHeldNotifier extends StateNotifier<bool> {
-  MotionHeldNotifier(this._recorder)
-      : super(_recorder.motionDetectionHeld) {
+  MotionHeldNotifier(this._recorder) : super(_recorder.motionDetectionHeld) {
     _sub = _recorder.motionHeldStates.listen((held) => state = held);
   }
 
@@ -410,22 +432,23 @@ class MotionHeldNotifier extends StateNotifier<bool> {
 
 final motionDetectionHeldProvider =
     StateNotifierProvider.autoDispose<MotionHeldNotifier, bool>((ref) {
-  final recorder = ref.watch(rideRecorderProvider);
-  return MotionHeldNotifier(recorder);
-});
+      final recorder = ref.watch(rideRecorderProvider);
+      return MotionHeldNotifier(recorder);
+    });
 
 final loopSessionControllerProvider =
     Provider.autoDispose<LoopSessionController>((ref) {
-  final controller = LoopSessionController(
-    recorder: ref.watch(rideRecorderProvider),
-    database: ref.watch(rideDatabaseProvider),
-  );
-  ref.onDispose(() => unawaited(controller.dispose()));
-  return controller;
-});
+      final controller = LoopSessionController(
+        recorder: ref.watch(rideRecorderProvider),
+        database: ref.watch(rideDatabaseProvider),
+      );
+      ref.onDispose(() => unawaited(controller.dispose()));
+      return controller;
+    });
 
-final loopSessionStateProvider =
-    StreamProvider.autoDispose<LoopSessionState>((ref) {
+final loopSessionStateProvider = StreamProvider.autoDispose<LoopSessionState>((
+  ref,
+) {
   final controller = ref.watch(loopSessionControllerProvider);
   return controller.states;
 });

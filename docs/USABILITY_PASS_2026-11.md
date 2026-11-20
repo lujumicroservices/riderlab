@@ -87,8 +87,22 @@ Pendiente / no verificado:
 - Grabar una rodada real con movimiento (aviso "Recorrido guardado", HUD con velocidad).
 - Hoja de Pro en build de Play con precios reales de RevenueCat y "Restaurar compras".
 - Pantalla de inicio de sesión nueva (modo crear cuenta, logo de Google): cubierta por tests, no vista en emulador.
-- `lib/widgets/visibility_selector.dart` (pantalla de rutas) y `ShareVisibility.label` siguen en inglés.
-- La notificación de un recorrido recuperado antes de abrir una pantalla de grabación sigue en inglés.
-- Claves ARB sin uso que se pueden borrar: `proTrialDaysLeft`, `startTrialHelp`, `removeAdsWithPro`, `adPlaceholder`, y los textos viejos de Rodadas reemplazados en Ajustes.
+- Arranque automático con ubicación "Mientras se usa la app" en Android 12+ con la pantalla bloqueada: probar en un teléfono real si graba GPS. Hoy se avisa antes de armar y se puede continuar.
+- Claves ARB `proTrialDaysLeft`, `startTrialHelp`, `removeAdsWithPro`, `adPlaceholder` y algunas de Ajustes viejos: sin uso en esta rama pero todavía usadas en `ios/appstore-release` y `consolidate/2026-11`. Borrarlas cuando esas ramas tomen este cambio.
 - La "última sincronización" en Ajustes solo vive en memoria durante la sesión.
-- Códigos de razón de invitaciones push (invite_push_feedback) se muestran tal cual.
+
+## Correcciones tras la revisión del PR (2026-11-20)
+
+- Selector de visibilidad (rutas y detalle) traducido y unificado; `ShareVisibility.label`/`help` en inglés eliminados.
+- La notificación fija de grabación toma el idioma de la app desde Home, también en arranque automático.
+- Errores de invitación (`upstream_failed`, `unauthorized`…) se muestran como texto para el usuario.
+- Calle/Pista ya no se queda bloqueado al terminar una rodada de arranque automático (nuevo `isRecordingProvider`).
+- Cancelar durante el calentamiento del GPS detiene el arranque; ya no puede borrar una rodada nueva.
+- Mantener presionado para terminar se cancela si el dedo se desliza (scroll en el HUD de vuelta).
+- Pro por código de socio puede suscribirse; pago pendiente de Play se informa como pendiente, no como error.
+- Al armar sin "Permitir todo el tiempo" en Android: aviso con "Abrir Ajustes" / "Continuar así" (una vez por sesión).
+- Notificaciones se piden con contexto al entrar a Rodadas o Amigos para quien nunca grabó.
+- Falla al armar muestra cómo arreglarlo (notificaciones y batería) en vez de "Algo salió mal".
+- Lean Lab pide permisos antes de calibrar, no con el teléfono ya en el soporte.
+
+Verificado: `flutter analyze` 0 errores (25 avisos, igual que antes), `flutter test` 300 pasan; en emulador: Home, Rodadas, armado con y sin permiso en segundo plano.

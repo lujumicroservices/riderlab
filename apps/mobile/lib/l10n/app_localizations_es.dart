@@ -1089,10 +1089,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'Ver como otro usuario, reportes y códigos de socio';
 
   @override
-  String get settingsHubStoreUnavailable =>
-      'La tienda no está disponible en este momento. Revisa tu conexión e intenta de nuevo más tarde.';
-
-  @override
   String get proUnlock => 'RiderLab Pro';
 
   @override
@@ -1105,9 +1101,6 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get proFeatureBrakes =>
       'Detalle completo de frenadas (no solo una vista previa)';
-
-  @override
-  String get proFeatureNoAds => 'Sin banners publicitarios';
 
   @override
   String get upgradeToPro => 'Pasar a Pro';
@@ -1900,9 +1893,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'Pack = mapa de la rodada en la app. Familia sin app = compartir desde En vivo (mismo link se puede reenviar).';
 
   @override
-  String get familyRodadaTipCta => 'Ver círculo familiar';
-
-  @override
   String get familyWatchScreenTitle => 'Avisar a familia';
 
   @override
@@ -1983,10 +1973,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'Genera un link y abre el menú de compartir para mandárselo a tu familiar (no necesitan la app).';
 
   @override
-  String get familyNotifyHelpRodada =>
-      'Avisa a familia/amigos fuera del pack. Puedes reenviar el mismo link a más personas.';
-
-  @override
   String get familyNotifyStart => 'Compartir';
 
   @override
@@ -2010,9 +1996,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get familySos => 'Necesito ayuda';
-
-  @override
-  String get familyShareLink => 'Reenviar link';
 
   @override
   String get familyShareAgain => 'Enviar a otro';
@@ -2523,19 +2506,26 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get invitePushReasonSession =>
+      'tu sesión expiró; vuelve a iniciar sesión';
+
+  @override
+  String get invitePushReasonService =>
+      'el servicio de notificaciones no respondió';
+
+  @override
+  String get invitePushReasonUnknown => 'error desconocido';
+
+  @override
+  String get visibilityMenuTooltip => 'Visibilidad';
+
+  @override
   String rodadaCodeBanner(String code) {
     return 'código $code';
   }
 
   @override
   String get meetup => 'Encuentro';
-
-  @override
-  String get yourSharing => 'Qué compartes';
-
-  @override
-  String get sharingDefaultsHelp =>
-      'Apagado hasta que lo actives. Al iniciar la rodada, RiderLab usa lo que hayas marcado abajo.';
 
   @override
   String get notRodadaMember => 'No eres miembro.';
@@ -3052,9 +3042,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get leanLabTitle => 'Lab de inclinación';
-
-  @override
-  String get settingsRideSection => 'Recorrido';
 
   @override
   String get settingsShareSection => 'Rodadas y compartir';
@@ -5114,4 +5101,29 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get offroadAdviceWalkAgain =>
       'Un solo paseo es un borrador. Vuelve a caminar cada borde y quédate con el que cae sobre la cinta o la rodada, no con un promedio de los dos.';
+
+  @override
+  String get proPurchasePending =>
+      'Tu pago está pendiente. Pro se activa en cuanto la tienda lo confirme.';
+
+  @override
+  String get armNeedsAlwaysTitle => 'Con la pantalla bloqueada puede no grabar';
+
+  @override
+  String get armNeedsAlwaysBody =>
+      'El arranque automático empieza a grabar con la pantalla bloqueada. Sin \"Permitir todo el tiempo\" en Ubicación, Android puede no darle GPS. Elígelo en Ajustes → Permisos → Ubicación, o continúa y deja la pantalla encendida hasta que arranque.';
+
+  @override
+  String get armContinueAnyway => 'Continuar así';
+
+  @override
+  String get socialNotifTitle => 'Avisos de rodadas';
+
+  @override
+  String get socialNotifBody =>
+      'Activa las notificaciones para enterarte cuando te inviten a una rodada o cuando empiece.';
+
+  @override
+  String get errArmBackgroundGps =>
+      'No se pudo iniciar el GPS en segundo plano. Permite las notificaciones y quita la restricción de batería para RiderLab en Ajustes, y vuelve a intentarlo.';
 }

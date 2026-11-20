@@ -76,6 +76,12 @@ class ActiveRideSnapshot {
   List<RideStretch> get stretches => rideStretchesFrom(points);
 }
 
+/// Thrown by [RideRecorder.start] when [RideRecorder.cancelPendingStart]
+/// abandoned it before a ride was created.
+class RideStartCancelled implements Exception {
+  const RideStartCancelled();
+}
+
 /// Copy for the persistent recording / armed notifications.
 ///
 /// The UI sets [RideRecorder.notificationText] from the app's l10n before
@@ -106,10 +112,10 @@ class RideRecorder {
     BarometerSensor? barometerSensor,
     this.onRideCompleted,
     this.onSuggestEnd,
-  })  : _db = database ?? RideDatabase.instance,
-        _location = locationService ?? LocationService(),
-        _lean = leanSensor ?? LeanSensor(),
-        _baro = barometerSensor ?? BarometerSensor();
+  }) : _db = database ?? RideDatabase.instance,
+       _location = locationService ?? LocationService(),
+       _lean = leanSensor ?? LeanSensor(),
+       _baro = barometerSensor ?? BarometerSensor();
 
   /// Fired after a ride is marked completed (stop or recover).
   final void Function(Ride ride)? onRideCompleted;
@@ -141,6 +147,7 @@ class RideRecorder {
   final _fixAcceptTimes = <DateTime>[];
   final _armedController = StreamController<bool>.broadcast();
   final _motionHeldController = StreamController<bool>.broadcast();
+  final _recordingController = StreamController<bool>.broadcast();
 
   final MotionPatternDetector _motion = MotionPatternDetector();
   final MotionPatternDetector _armMotion = MotionPatternDetector();
@@ -197,6 +204,10 @@ class RideRecorder {
 
   Stream<bool> get motionHeldStates => _motionHeldController.stream;
 
+  /// Fires when recording starts (true) or stops (false), including
+  /// auto-start from the armed state and reattaching a recovered ride.
+  Stream<bool> get recordingStates => _recordingController.stream;
+
   Ride? get activeRide => _ride;
   bool get isRecording => _ride?.status == RideStatus.recording;
   bool get isArmed => _armed;
@@ -225,8 +236,7 @@ class RideRecorder {
 
   /// Route id that will be applied when arm auto-starts (if any).
   String? get armedRouteId => _armedRouteId;
-  bool get isPaused =>
-      isRecording && (_rodadaMetricsHeld || _motion.isPaused);
+  bool get isPaused => isRecording && (_rodadaMetricsHeld || _motion.isPaused);
 
   /// Automatic pause/resume while recording (persisted).
   bool get autoPauseEnabled => _autoPauseEnabled;
@@ -346,7 +356,48 @@ class RideRecorder {
 
   Future<Ride?> recoverIncompleteRide() => _db.getActiveRide();
 
+  /// Bumped by every [start] and by [cancelPendingStart]; a start whose
+  /// token no longer matches stops before creating a ride.
+  int _startToken = 0;
+  bool _startInFlight = false;
+
+  /// Abandons a [start] still in permissions / GNSS warm-up. That start then
+  /// throws [RideStartCancelled] instead of creating a ride, and a new [start]
+  /// may begin right away.
+  void cancelPendingStart() {
+    if (!_startInFlight) return;
+    _startToken++;
+    _startInFlight = false;
+  }
+
   Future<Ride> start({
+    void Function(GnssWarmupStatus status)? onWarmup,
+    bool skipWarmup = false,
+    String? routeId,
+  }) async {
+    if (_startInFlight) {
+      throw StateError('A ride is already starting');
+    }
+    _startInFlight = true;
+    final token = ++_startToken;
+    try {
+      return await _startImpl(
+        token,
+        onWarmup: onWarmup,
+        skipWarmup: skipWarmup,
+        routeId: routeId,
+      );
+    } finally {
+      if (token == _startToken) _startInFlight = false;
+    }
+  }
+
+  void _throwIfStartCancelled(int token) {
+    if (token != _startToken) throw const RideStartCancelled();
+  }
+
+  Future<Ride> _startImpl(
+    int token, {
     void Function(GnssWarmupStatus status)? onWarmup,
     bool skipWarmup = false,
     String? routeId,
@@ -373,16 +424,12 @@ class RideRecorder {
       ),
     );
 
-    onWarmup?.call(
-      const GnssWarmupStatus(
-        phase: GpsWarmupPhase.permissions,
-      ),
-    );
+    onWarmup?.call(const GnssWarmupStatus(phase: GpsWarmupPhase.permissions));
 
     final permission = await _location.ensurePermission();
+    _throwIfStartCancelled(token);
     if (!permission.granted) {
-      final reason =
-          permission.reason ?? LocationPermissionDenyReason.denied;
+      final reason = permission.reason ?? LocationPermissionDenyReason.denied;
       unawaited(
         _telemetry.error(
           where: 'ride.start.permission',
@@ -394,14 +441,11 @@ class RideRecorder {
     }
 
     if (skipWarmup) {
-      onWarmup?.call(
-        const GnssWarmupStatus(
-          phase: GpsWarmupPhase.ready,
-        ),
-      );
+      onWarmup?.call(const GnssWarmupStatus(phase: GpsWarmupPhase.ready));
     } else {
       // Lock onto GNSS before the first stored point (shows live accuracy in UI).
       await for (final status in _location.warmUpGnss()) {
+        _throwIfStartCancelled(token);
         onWarmup?.call(status);
         if (status.phase == GpsWarmupPhase.ready ||
             status.phase == GpsWarmupPhase.timeout) {
@@ -409,15 +453,17 @@ class RideRecorder {
             _telemetry.log(
               category: TelemetryCategory.gps,
               eventType: 'warmup_${status.phase.name}',
-              payload: {
-                'accuracy_m': status.accuracyMeters,
-              },
+              payload: {'accuracy_m': status.accuracyMeters},
             ),
           );
         }
       }
     }
 
+    _throwIfStartCancelled(token);
+    if (_ride != null) {
+      throw StateError('A ride is already recording');
+    }
     final ride = Ride(
       id: _uuid.v4(),
       startedAt: DateTime.now(),
@@ -428,6 +474,7 @@ class RideRecorder {
     await _db.upsertRide(ride);
     _ride = ride;
     _telemetry.bindRide(ride.id);
+    _recordingController.add(true);
     _sessionPoints.clear();
     _pending.clear();
     _lastPoint = null;
@@ -532,6 +579,7 @@ class RideRecorder {
     unawaited(_telemetry.flushPending());
     _telemetry.bindRide(null);
     _ride = null;
+    _recordingController.add(false);
     _rodadaMetricsHeld = false;
     _motionDetectionHeld = false;
     _motion.motionDetectionHeld = false;
@@ -612,10 +660,7 @@ class RideRecorder {
     final ride = await _db.getRide(rideId);
     if (ride == null) return;
     await _db.upsertRide(
-      ride.copyWith(
-        endedAt: DateTime.now(),
-        status: RideStatus.abandoned,
-      ),
+      ride.copyWith(endedAt: DateTime.now(), status: RideStatus.abandoned),
     );
   }
 
@@ -657,6 +702,7 @@ class RideRecorder {
     await _ensureAutoPausePref();
     final points = await _db.getPoints(ride.id);
     _ride = ride;
+    _recordingController.add(true);
     _boundRodadaId = ride.rodadaId ?? _boundRodadaId;
     _rodadaMetricsHeld = false;
     _sessionPoints
@@ -668,7 +714,9 @@ class RideRecorder {
     _distanceMeters = ride.distanceMeters;
     _maxSpeedMps = ride.maxSpeedMps;
     _speedSum = (ride.avgSpeedMps ?? 0) * (points.isEmpty ? 0 : points.length);
-    _speedSamples = points.where((p) => p.speedMps != null && p.speedMps! >= 0).length;
+    _speedSamples = points
+        .where((p) => p.speedMps != null && p.speedMps! >= 0)
+        .length;
     _maxLeanAbs = ride.maxLeanDegrees;
     _maxLeanLeft = 0;
     _maxLeanRight = 0;
@@ -790,10 +838,7 @@ class RideRecorder {
     unawaited(ArmForegroundService.stop());
     _armedController.add(false);
     unawaited(
-      _telemetry.log(
-        category: TelemetryCategory.arm,
-        eventType: 'disarmed',
-      ),
+      _telemetry.log(category: TelemetryCategory.arm, eventType: 'disarmed'),
     );
   }
 
@@ -935,6 +980,7 @@ class RideRecorder {
     await _db.upsertRide(ride);
 
     _ride = ride;
+    _recordingController.add(true);
     _sessionPoints.clear();
     _pending.clear();
     _lastPoint = null;
@@ -971,18 +1017,18 @@ class RideRecorder {
 
     try {
       _sub = _watchPositions().listen(
-            _onPosition,
-            onError: (Object error, StackTrace stack) {
-              debugPrint('RiderLab ride GPS: $error');
-              unawaited(
-                _telemetry.error(
-                  where: 'ride.gps_stream_arm',
-                  error: error,
-                  category: TelemetryCategory.gps,
-                ),
-              );
-            },
+        _onPosition,
+        onError: (Object error, StackTrace stack) {
+          debugPrint('RiderLab ride GPS: $error');
+          unawaited(
+            _telemetry.error(
+              where: 'ride.gps_stream_arm',
+              error: error,
+              category: TelemetryCategory.gps,
+            ),
           );
+        },
+      );
       await ArmForegroundService.stop();
     } catch (e, st) {
       debugPrint('RiderLab dense GPS start failed, keep arm FGS: $e\n$st');
@@ -1093,10 +1139,7 @@ class RideRecorder {
           eventType: paused ? 'auto_paused' : 'auto_resumed',
           latitude: position.latitude,
           longitude: position.longitude,
-          payload: {
-            'speed_kmh': speedKmh,
-            'accuracy_m': position.accuracy,
-          },
+          payload: {'speed_kmh': speedKmh, 'accuracy_m': position.accuracy},
         ),
       );
     }
@@ -1145,7 +1188,7 @@ class RideRecorder {
       );
       final dtSec =
           point.timestamp.difference(previous.timestamp).inMilliseconds /
-              1000.0;
+          1000.0;
       final maxJump = maxPlausibleJumpMeters(
         dtSeconds: dtSec,
         accuracyMeters: position.accuracy,
@@ -1189,11 +1232,7 @@ class RideRecorder {
             eventType: 'gps_recovered_anchor',
             latitude: point.latitude,
             longitude: point.longitude,
-            payload: {
-              'jump_m': jump,
-              'dt_s': dtSec,
-              'implied_mps': impliedMps,
-            },
+            payload: {'jump_m': jump, 'dt_s': dtSec, 'implied_mps': impliedMps},
           ),
         );
       }
@@ -1221,16 +1260,18 @@ class RideRecorder {
 
     final speed = point.speedMps;
     if (speed != null) {
-      _maxSpeedMps =
-          _maxSpeedMps == null ? speed : (_maxSpeedMps! > speed ? _maxSpeedMps : speed);
+      _maxSpeedMps = _maxSpeedMps == null
+          ? speed
+          : (_maxSpeedMps! > speed ? _maxSpeedMps : speed);
       _speedSum += speed;
       _speedSamples++;
     }
 
     if (relativeLean != null) {
       final absLean = relativeLean.abs();
-      _maxLeanAbs =
-          _maxLeanAbs == null ? absLean : (_maxLeanAbs! > absLean ? _maxLeanAbs : absLean);
+      _maxLeanAbs = _maxLeanAbs == null
+          ? absLean
+          : (_maxLeanAbs! > absLean ? _maxLeanAbs : absLean);
       if (relativeLean < -2) {
         _maxLeanLeft = math.max(_maxLeanLeft, -relativeLean);
       } else if (relativeLean > 2) {
@@ -1333,7 +1374,8 @@ class RideRecorder {
     if (lean == null) return;
     final now = DateTime.now();
     final prev = _lastLeanSampleAt;
-    if (prev != null && now.difference(prev) < const Duration(milliseconds: 100)) {
+    if (prev != null &&
+        now.difference(prev) < const Duration(milliseconds: 100)) {
       return;
     }
     _lastLeanSampleAt = now;
@@ -1473,5 +1515,6 @@ class RideRecorder {
     await _autoStartController.close();
     await _armedController.close();
     await _motionHeldController.close();
+    await _recordingController.close();
   }
 }

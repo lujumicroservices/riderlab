@@ -16,6 +16,7 @@ import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
 import '../../theme/app_theme.dart';
 import '../ride_active/active_ride_screen.dart';
+import '../ride_active/location_permission_gate.dart';
 import '../ride_active/widgets/upright_freeze_panel.dart';
 import '../ride_detail/widgets/motorcycle_lean_gauge.dart';
 import 'lean_lab_bootstrap.dart';
@@ -38,9 +39,20 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
   DateTime? _calibAt;
   bool _starting = false;
 
+  /// Permission explainers run here, before the phone goes on the mount, so
+  /// none of them pops up after calibration.
+  final _permissions = Completer<bool>();
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final outcome = await LocationPermissionGate.prepareForRide(context);
+      if (!mounted) return;
+      _permissions.complete(outcome.granted);
+      if (!outcome.granted) Navigator.of(context).pop();
+    });
     _direction = LeanLabService.defaultDirection(widget.sessionType);
     _sensor.start();
     _freeze = UprightFreezeController(
@@ -72,6 +84,7 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
     final g0 = _frozenG0;
     if (g0 == null || _starting) return;
     setState(() => _starting = true);
+    if (!await _permissions.future || !mounted) return;
     final recorder = ref.read(rideRecorderProvider);
     recorder.prepareLeanLabUpright(g0);
     recorder.prepareLeanLabNeutral(0);
@@ -127,8 +140,10 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          Text(l10n.leanLabDirectionQ,
-              style: GoogleFonts.exo2(fontWeight: FontWeight.w700)),
+          Text(
+            l10n.leanLabDirectionQ,
+            style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -138,22 +153,26 @@ class _LeanLabPrepScreenState extends ConsumerState<LeanLabPrepScreen> {
                 selected: _direction == LeanLabDirection.outbound,
                 onSelected: busy
                     ? null
-                    : (_) =>
-                        setState(() => _direction = LeanLabDirection.outbound),
+                    : (_) => setState(
+                        () => _direction = LeanLabDirection.outbound,
+                      ),
               ),
               ChoiceChip(
                 label: Text(l10n.leanLabDirectionReturn),
                 selected: _direction == LeanLabDirection.returnTrip,
                 onSelected: busy
                     ? null
-                    : (_) =>
-                        setState(() => _direction = LeanLabDirection.returnTrip),
+                    : (_) => setState(
+                        () => _direction = LeanLabDirection.returnTrip,
+                      ),
               ),
             ],
           ),
           const SizedBox(height: 20),
-          Text(l10n.leanLabCalibTitle,
-              style: GoogleFonts.exo2(fontWeight: FontWeight.w700)),
+          Text(
+            l10n.leanLabCalibTitle,
+            style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+          ),
           const SizedBox(height: 6),
           Text(
             l10n.leanLabCalibHelp,
@@ -204,9 +223,7 @@ class _PoseBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pose = snap.pose;
-    final warn = frozen &&
-        pose == PhonePoseClass.verticalY &&
-        snap.tilt > 8;
+    final warn = frozen && pose == PhonePoseClass.verticalY && snap.tilt > 8;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -232,10 +249,7 @@ class _PoseBanner extends StatelessWidget {
           if (warn)
             Text(
               context.l10n.leanLabFreezeRedo(snap.tilt.toStringAsFixed(0)),
-              style: GoogleFonts.rajdhani(
-                color: AppTheme.signal,
-                fontSize: 12,
-              ),
+              style: GoogleFonts.rajdhani(color: AppTheme.signal, fontSize: 12),
             ),
         ],
       ),
