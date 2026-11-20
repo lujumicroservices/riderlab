@@ -4,7 +4,6 @@ import 'package:motoline/core/lean_lab/upright_freeze_controller.dart';
 import 'package:motoline/core/models/imu_sample.dart';
 import 'package:motoline/core/models/lean_sample.dart';
 import 'package:motoline/core/services/lean_engine.dart';
-import 'package:motoline/features/ride_active/widgets/upright_freeze_panel.dart';
 
 void main() {
   test('hold freeze starts a 4s countdown', () {

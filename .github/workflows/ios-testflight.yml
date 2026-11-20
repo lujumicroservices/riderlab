@@ -52,6 +52,7 @@ jobs:
           # Fijo: misma versión que la PC de desarrollo (LUJU3), donde pasa flutter analyze.
           flutter-version: 3.47.1
           channel: stable
+          flutter-version: 3.41.4
           cache: true
 
       - name: Check required secrets
