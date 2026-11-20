@@ -53,8 +53,12 @@ final rideRecorderProvider = Provider<RideRecorder>((ref) {
   final recorder = RideRecorder(
     database: ref.watch(rideDatabaseProvider),
     onRideCompleted: (_) {
+      // The garage on Home must show the new ride however the session ended
+      // (armed hub, active screen, recovery).
+      ref.invalidate(ridesListProvider);
       unawaited(ref.read(proEntitlementProvider.notifier).onRideCompleted());
     },
+    onRideUpdated: (_) => ref.invalidate(ridesListProvider),
     onSuggestEnd: (rideId) {
       unawaited(
         ref

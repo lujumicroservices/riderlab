@@ -111,6 +111,7 @@ class RideRecorder {
     LeanSensor? leanSensor,
     BarometerSensor? barometerSensor,
     this.onRideCompleted,
+    this.onRideUpdated,
     this.onSuggestEnd,
   }) : _db = database ?? RideDatabase.instance,
        _location = locationService ?? LocationService(),
@@ -119,6 +120,9 @@ class RideRecorder {
 
   /// Fired after a ride is marked completed (stop or recover).
   final void Function(Ride ride)? onRideCompleted;
+
+  /// Fired when a finished ride changes in the background (place title).
+  final void Function(Ride ride)? onRideUpdated;
 
   /// Localized notification copy for the foreground services.
   RideNotificationText notificationText = const RideNotificationText();
@@ -602,6 +606,7 @@ class RideRecorder {
       if (title == null || title.trim().isEmpty) return;
       final named = ride.copyWith(title: title.trim());
       await _db.upsertRide(named);
+      onRideUpdated?.call(named);
       debugPrint('RiderLab ride title: $title');
     } catch (e) {
       debugPrint('RiderLab ride title: $e');
