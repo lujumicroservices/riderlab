@@ -1,25 +1,64 @@
+import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:permission_handler/permission_handler.dart' show openAppSettings;
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/notifications/push_notification_service.dart';
+import '../../core/services/arm_foreground_service.dart';
 import '../../core/services/location_service.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/app_snack.dart';
 
-/// Prominent disclosure before Android/iOS location permission prompts.
+/// Result of [LocationPermissionGate.prepareForRide].
+class RidePermissionOutcome {
+  const RidePermissionOutcome.granted({this.backgroundLimited = false})
+    : granted = true,
+      cancelled = false,
+      reason = null;
+
+  const RidePermissionOutcome.failed(LocationPermissionDenyReason this.reason)
+    : granted = false,
+      cancelled = false,
+      backgroundLimited = false;
+
+  const RidePermissionOutcome.cancelled()
+    : granted = false,
+      cancelled = true,
+      reason = null,
+      backgroundLimited = false;
+
+  final bool granted;
+
+  /// The user backed out of our own explainer (not an error).
+  final bool cancelled;
+
+  /// Why recording cannot start (phone location off, denied, denied forever).
+  final LocationPermissionDenyReason? reason;
+
+  /// Android: foreground-only location. Recording works through the
+  /// foreground service, but may pause with the screen off.
+  final bool backgroundLimited;
+}
+
+/// Prominent disclosure + every system prompt a ride needs, before calibration.
 ///
-/// Same entry points on both platforms (Grabar, Armar auto, rodada, settings):
-/// 1. Own disclosure → system prompt for foreground location.
-///    Android: fine/coarse → notifications → background ("all the time").
-///    iOS: "While Using" only.
-/// 2. iOS only: "Always" is offered later, in context ([offerAlwaysIfUseful]):
-///    when Armar auto is enabled or after a ride ends. Own explanation screen
-///    first; "Not now" is remembered and never asked again automatically.
+/// One explainer lists only the steps still pending, then asks in order:
+/// 1. Foreground location ("While using the app").
+/// 2. Android: background location. Android 11+ sends the user to Settings,
+///    so our own "One more step" dialog (Continue / Not now) comes first.
+///    Declining is remembered: no nag on later starts, only a toast.
+/// 3. Notifications (Android 13+ / iOS), so the recording notification shows.
+/// 4. Android: battery-optimization exemption.
+///
+/// Calibration (and arming) run after this, so nothing pops once the phone is
+/// on the mount. iOS "Always" is still offered later, in context
+/// ([offerAlwaysIfUseful]).
 class LocationPermissionGate {
   LocationPermissionGate._();
 
@@ -27,47 +66,253 @@ class LocationPermissionGate {
 
   static const _prefAlwaysNotNow = 'ios_location_always_not_now';
   static const _prefAlwaysAsked = 'ios_location_always_asked';
+  static const _prefBgDeclined = 'ride_android_background_declined';
+  static const _prefNotifAsked = 'ride_notifications_asked';
+  static const _prefBatteryAsked = 'ride_battery_optimization_asked';
+
+  static bool _warnedLimited = false;
+  static bool _autoStartAccepted = false;
 
   static bool get _isIos => !kIsWeb && Platform.isIOS;
+  static bool get _isAndroid => !kIsWeb && Platform.isAndroid;
 
-  /// Shows disclosure (when needed) then requests location permissions for rides.
-  ///
-  /// [offerBackground]: iOS step 2 right after step 1 succeeds (Armar auto).
+  /// Arm-for-auto-start begins recording while the screen is locked. On
+  /// Android a location service started from the background may get no GPS
+  /// without "Allow all the time", so the rider is told before arming and can
+  /// open Settings or continue anyway. True when arming may proceed.
+  static Future<bool> confirmAutoStartWithoutBackground(
+    BuildContext context,
+  ) async {
+    if (!_isAndroid) return true;
+    if (await Geolocator.checkPermission() == LocationPermission.always) {
+      return true;
+    }
+    // Asked once per app session: the rider already chose to go without it.
+    if (_autoStartAccepted) return true;
+    if (!context.mounted) return false;
+    final l10n = context.l10n;
+    final proceed = await _showDisclosure(
+      context,
+      title: l10n.armNeedsAlwaysTitle,
+      body: l10n.armNeedsAlwaysBody,
+      cancelLabel: l10n.locationOpenSettings,
+      confirmLabel: l10n.armContinueAnyway,
+      icon: Icons.lock_clock,
+    );
+    if (!proceed) {
+      await openAppSettings();
+      return false;
+    }
+    _autoStartAccepted = true;
+    return true;
+  }
+
+  /// Social entry points (Rodadas, Friends): riders who never record still
+  /// need notifications for invites and "rodada started". Asks once, with
+  /// context, sharing the "asked" flag with the first-ride flow.
+  static Future<void> askNotificationsForSocial(BuildContext context) async {
+    if (kIsWeb) return;
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool(_prefNotifAsked) ?? false) return;
+    if (await _notificationsGranted()) return;
+    if (!context.mounted) return;
+    final l10n = context.l10n;
+    final accepted = await _showDisclosure(
+      context,
+      title: l10n.socialNotifTitle,
+      body: l10n.socialNotifBody,
+      cancelLabel: l10n.notNow,
+      icon: Icons.notifications_active_outlined,
+    );
+    await prefs.setBool(_prefNotifAsked, true);
+    if (!accepted) return;
+    final status = await Permission.notification.request();
+    if (status.isGranted) {
+      unawaited(
+        PushNotificationService.instance.onNotificationPermissionGranted(),
+      );
+    }
+  }
+
+  /// Runs [prepareForRide]; true when recording may start.
   static Future<bool> requestForRecording(
     BuildContext context, {
     bool offerBackground = false,
+    bool warnBackgroundLimited = true,
   }) async {
-    if (await _location.hasRecordingPermission()) {
-      if (offerBackground && context.mounted) {
-        await offerAlwaysIfUseful(context);
-      }
-      return true;
-    }
-    if (!context.mounted) return false;
-
-    if (_isIos &&
-        await Geolocator.checkPermission() == LocationPermission.deniedForever) {
-      // iOS will not show the system prompt again: explain and offer Settings.
-      if (context.mounted) await _showDeniedDialog(context);
-      return false;
-    }
-    if (!context.mounted) return false;
-
-    final accepted = await _showDisclosure(
+    final outcome = await prepareForRide(
       context,
-      title: context.l10n.locationDisclosureTitle,
-      body: _isIos
-          ? context.l10n.locationDisclosureBodyIos
-          : context.l10n.locationDisclosureBody,
+      offerBackground: offerBackground,
+      warnBackgroundLimited: warnBackgroundLimited,
     );
-    if (!accepted || !context.mounted) return false;
+    return outcome.granted;
+  }
 
-    final result = await _location.ensurePermission();
-    if (!result.granted) return false;
+  /// [offerBackground]: iOS step 2 right after step 1 succeeds (Armar auto).
+  ///
+  /// [warnBackgroundLimited]: false when the caller explains the missing
+  /// "Allow all the time" itself (arm-for-auto-start), to avoid two warnings.
+  static Future<RidePermissionOutcome> prepareForRide(
+    BuildContext context, {
+    bool offerBackground = false,
+    bool warnBackgroundLimited = true,
+  }) async {
+    if (!await Geolocator.isLocationServiceEnabled()) {
+      if (context.mounted) await _showServicesOffDialog(context);
+      return const RidePermissionOutcome.failed(
+        LocationPermissionDenyReason.servicesOff,
+      );
+    }
+
+    var permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.deniedForever) {
+      if (context.mounted) await _showDeniedDialog(context);
+      return const RidePermissionOutcome.failed(
+        LocationPermissionDenyReason.deniedForever,
+      );
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final needForeground =
+        permission == LocationPermission.denied ||
+        permission == LocationPermission.unableToDetermine;
+    final needBackground =
+        _isAndroid &&
+        permission != LocationPermission.always &&
+        !(prefs.getBool(_prefBgDeclined) ?? false);
+    final needNotifications =
+        !(prefs.getBool(_prefNotifAsked) ?? false) &&
+        !await _notificationsGranted();
+    final needBattery =
+        _isAndroid &&
+        !(prefs.getBool(_prefBatteryAsked) ?? false) &&
+        !await ArmForegroundService.isIgnoringBatteryOptimizations();
+
+    if (!context.mounted) return const RidePermissionOutcome.cancelled();
+    if (needForeground || needBackground || needNotifications || needBattery) {
+      final l10n = context.l10n;
+      final steps = <String>[
+        if (needForeground && !_isIos) l10n.ridePermsStepLocation,
+        if (needBackground) l10n.ridePermsStepBackground,
+        if (needNotifications) l10n.ridePermsStepNotifications,
+        if (needBattery) l10n.ridePermsStepBattery,
+      ];
+      final intro = _isIos && needForeground
+          ? l10n.locationDisclosureBodyIos
+          : l10n.ridePermsIntro;
+      final body = [
+        intro,
+        for (var i = 0; i < steps.length; i++) '${i + 1}. ${steps[i]}',
+      ].join('\n');
+
+      final accepted = await _showDisclosure(
+        context,
+        title: l10n.locationDisclosureTitle,
+        body: body,
+        cancelLabel: needForeground ? l10n.cancel : l10n.notNow,
+      );
+      if (!accepted) {
+        if (needForeground) return const RidePermissionOutcome.cancelled();
+        // Location already works: remember the optional steps as declined
+        // so the explainer does not come back on every start.
+        if (needBackground) await prefs.setBool(_prefBgDeclined, true);
+        if (needNotifications) await prefs.setBool(_prefNotifAsked, true);
+        if (needBattery) await prefs.setBool(_prefBatteryAsked, true);
+        if (!context.mounted) return const RidePermissionOutcome.granted();
+        return _granted(context, permission, warn: warnBackgroundLimited);
+      }
+
+      // 1. Foreground location.
+      if (needForeground) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.deniedForever) {
+          if (context.mounted) await _showDeniedDialog(context);
+          return const RidePermissionOutcome.failed(
+            LocationPermissionDenyReason.deniedForever,
+          );
+        }
+        if (permission != LocationPermission.whileInUse &&
+            permission != LocationPermission.always) {
+          return const RidePermissionOutcome.failed(
+            LocationPermissionDenyReason.denied,
+          );
+        }
+      }
+
+      // 2. Android background location (Settings page on Android 11+).
+      if (needBackground &&
+          permission != LocationPermission.always &&
+          context.mounted) {
+        final go = await _showDisclosure(
+          context,
+          title: context.l10n.ridePermsBackgroundTitle,
+          body: context.l10n.ridePermsBackgroundBody,
+          cancelLabel: context.l10n.notNow,
+          icon: Icons.lock_clock,
+        );
+        var always = false;
+        if (go) always = await _location.requestAlwaysUpgrade();
+        if (always) {
+          permission = LocationPermission.always;
+        } else {
+          await prefs.setBool(_prefBgDeclined, true);
+        }
+      }
+
+      // 3. Notifications (recording notification + rodada pushes).
+      if (needNotifications) {
+        await prefs.setBool(_prefNotifAsked, true);
+        final status = await Permission.notification.request();
+        if (status.isGranted) {
+          unawaited(
+            PushNotificationService.instance.onNotificationPermissionGranted(),
+          );
+        }
+      }
+
+      // 4. Android battery optimization (system dialog).
+      if (needBattery) {
+        await prefs.setBool(_prefBatteryAsked, true);
+        try {
+          await ArmForegroundService.requestIgnoreBatteryOptimizationIfNeeded();
+        } catch (_) {}
+      }
+    }
+
     if (offerBackground && context.mounted) {
       await offerAlwaysIfUseful(context);
     }
-    return true;
+    if (!context.mounted) return const RidePermissionOutcome.granted();
+    return _granted(context, permission, warn: warnBackgroundLimited);
+  }
+
+  static Future<bool> _notificationsGranted() async {
+    try {
+      return await Permission.notification.isGranted;
+    } catch (_) {
+      return true;
+    }
+  }
+
+  /// Foreground-only on Android: still record, warn once per app session.
+  static RidePermissionOutcome _granted(
+    BuildContext context,
+    LocationPermission permission, {
+    bool warn = true,
+  }) {
+    final limited = _isAndroid && permission != LocationPermission.always;
+    if (warn && limited && !_warnedLimited) {
+      _warnedLimited = true;
+      final l10n = context.l10n;
+      showAppSnack(
+        context,
+        l10n.ridePermsBackgroundLimited,
+        tone: AppToastTone.warning,
+        actionLabel: l10n.locationOpenSettings,
+        onAction: () => unawaited(openAppSettings()),
+      );
+    }
+    return RidePermissionOutcome.granted(backgroundLimited: limited);
   }
 
   /// iOS step 2: offer "Always" once, with an explanation screen first.
@@ -134,8 +379,22 @@ class LocationPermissionGate {
     return _showSettingsDialog(
       context,
       title: l10n.locationDeniedTitle,
-      body: l10n.locationDeniedBody,
+      body: _isIos ? l10n.locationDeniedBody : l10n.ridePermsDeniedBodyAndroid,
     );
+  }
+
+  /// Phone-wide location switch is off: offer the system location page.
+  static Future<void> _showServicesOffDialog(BuildContext context) async {
+    final l10n = context.l10n;
+    final open = await _showDisclosure(
+      context,
+      title: l10n.ridePermsLocationOffTitle,
+      body: l10n.locationServicesOff,
+      cancelLabel: l10n.notNow,
+      confirmLabel: l10n.locationOpenSettings,
+      icon: Icons.location_off,
+    );
+    if (open) await Geolocator.openLocationSettings();
   }
 
   static Future<void> _showSettingsDialog(

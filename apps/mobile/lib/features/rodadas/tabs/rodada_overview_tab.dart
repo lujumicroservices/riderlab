@@ -50,7 +50,7 @@ class RodadaOverviewTab extends ConsumerWidget {
 
     return overview.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('$e')),
+      error: (e, _) => Center(child: Text(context.l10n.userFacingError(e))),
       data: (rodada) {
         if (rodada == null) return const SizedBox.shrink();
         return RefreshIndicator(
@@ -144,7 +144,7 @@ class RodadaOverviewTab extends ConsumerWidget {
               ),
               mine.when(
                 loading: () => const LinearProgressIndicator(),
-                error: (e, _) => Text('$e'),
+                error: (e, _) => Text(context.l10n.userFacingError(e)),
                 data: (m) {
                   if (m == null) {
                     return Text(l10n.notRodadaMember);
@@ -189,7 +189,7 @@ class RodadaOverviewTab extends ConsumerWidget {
               const SizedBox(height: 8),
               members.when(
                 loading: () => const CircularProgressIndicator(),
-                error: (e, _) => Text('$e'),
+                error: (e, _) => Text(context.l10n.userFacingError(e)),
                 data: (list) {
                   if (list.isEmpty) {
                     return Text(l10n.noMembersYet);
@@ -280,7 +280,7 @@ class RodadaOverviewTab extends ConsumerWidget {
       }
     } catch (e) {
       if (!context.mounted) return;
-      showAppSnackError(context, '$e');
+      showAppSnackError(context, context.l10n.userFacingError(e));
     }
   }
 
@@ -297,7 +297,7 @@ class RodadaOverviewTab extends ConsumerWidget {
       showAppSnack(context, l10n.rodadaStatusChanged('ended'));
     } catch (e) {
       if (!context.mounted) return;
-      showAppSnackError(context, '$e');
+      showAppSnackError(context, context.l10n.userFacingError(e));
     }
   }
 
@@ -335,7 +335,7 @@ class RodadaOverviewTab extends ConsumerWidget {
       );
     } catch (e) {
       if (!context.mounted) return;
-      showAppSnackError(context, '$e');
+      showAppSnackError(context, context.l10n.userFacingError(e));
     }
   }
 }

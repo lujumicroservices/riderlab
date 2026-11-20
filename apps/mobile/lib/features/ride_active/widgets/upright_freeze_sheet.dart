@@ -9,9 +9,10 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/ride_providers.dart';
 import '../../../theme/app_theme.dart';
 import '../location_permission_gate.dart';
+import '../ride_notification_l10n.dart';
 import 'upright_freeze_panel.dart';
 
-/// Tap while the phone is still in hand, pocket it, freeze g0, then arm.
+/// Phone on the mount, bike upright and still: tap, hold still 4 s, freeze g0.
 Future<Vec3?> showUprightFreezeSheet(
   BuildContext context, {
   required String title,
@@ -32,7 +33,11 @@ Future<Vec3?> showUprightFreezeSheet(
 
 bool freezeThenArmInProgress = false;
 
-/// Arm auto-start only after a pocket/tank freeze so 0° is captured in-mount.
+/// Arm auto-start only after an in-mount freeze so 0° is captured on the bike.
+///
+/// Every permission prompt (location, background, notifications, battery)
+/// runs before the calibration sheet, so nothing pops once the phone is
+/// mounted.
 ///
 /// [autoBeginHold] presses the 4 s hold immediately (rodada auto-arm).
 Future<bool> freezeThenArm(
@@ -54,6 +59,13 @@ Future<bool> freezeThenArm(
     if (!await LocationPermissionGate.requestForRecording(
       context,
       offerBackground: true,
+      warnBackgroundLimited: false,
+    )) {
+      return false;
+    }
+    if (!context.mounted) return false;
+    if (!await LocationPermissionGate.confirmAutoStartWithoutBackground(
+      context,
     )) {
       return false;
     }
@@ -66,11 +78,12 @@ Future<bool> freezeThenArm(
       autoBeginHold: autoBeginHold,
     );
     if (g0 == null || !context.mounted) return false;
-    ref.read(rideRecorderProvider).prepareLeanLabUpright(g0);
-    await ref.read(armedStateProvider.notifier).arm(
-      routeId: routeId,
-      rodadaId: rodadaId,
-    );
+    final armRecorder = ref.read(rideRecorderProvider);
+    applyRideNotificationText(context, armRecorder);
+    armRecorder.prepareLeanLabUpright(g0);
+    await ref
+        .read(armedStateProvider.notifier)
+        .arm(routeId: routeId, rodadaId: rodadaId);
     return true;
   } finally {
     freezeThenArmInProgress = false;

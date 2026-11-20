@@ -53,8 +53,9 @@ class _RideCompareScreenState extends ConsumerState<RideCompareScreen> {
     if (peer == null) return;
     setState(() => _loadingPeerTrack = true);
     try {
-      final points =
-          await ref.read(socialRepositoryProvider).trackPoints(peer.id);
+      final points = await ref
+          .read(socialRepositoryProvider)
+          .trackPoints(peer.id);
       if (!mounted) return;
       setState(() {
         _peerPoints = points;
@@ -82,14 +83,15 @@ class _RideCompareScreenState extends ConsumerState<RideCompareScreen> {
       ),
       body: rideAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, _) => Center(child: Text(context.l10n.userFacingError(e))),
         data: (ride) {
           if (ride == null) {
             return Center(child: Text(l10n.rideNotFound));
           }
           return pointsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('$e')),
+            error: (e, _) =>
+                Center(child: Text(context.l10n.userFacingError(e))),
             data: (points) {
               final you = RideAnalytics(ride: ride, points: points);
               return ListView(
@@ -220,9 +222,7 @@ class _PeerPickTile extends StatelessWidget {
                     children: [
                       Text(
                         peer.riderLabel,
-                        style: GoogleFonts.exo2(
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: GoogleFonts.exo2(fontWeight: FontWeight.w600),
                       ),
                       Text(
                         '${DateFormat.MMMd().add_jm().format(peer.startedAt.toLocal())} · '

@@ -71,7 +71,7 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen>
     } catch (e) {
       if (!mounted) return;
       setState(() => _detecting = false);
-      showAppSnackError(context, '$e');
+      showAppSnackError(context, context.l10n.userFacingError(e));
     }
   }
 
@@ -173,7 +173,7 @@ class _RouteDetailScreenState extends ConsumerState<RouteDetailScreen>
       ensureArmedSessionHub(context, ref);
     } catch (e) {
       if (!mounted) return;
-      showAppSnackError(context, '$e');
+      showAppSnackError(context, context.l10n.userFacingError(e));
     }
   }
 
@@ -326,7 +326,7 @@ class _LapsTab extends ConsumerWidget {
 
     return ridesAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('$e')),
+      error: (e, _) => Center(child: Text(context.l10n.userFacingError(e))),
       data: (rides) {
         final completed = rides
             .where((r) => r.status == RideStatus.completed)
@@ -526,7 +526,7 @@ class _LoopModuleTab extends StatelessWidget {
             padding: EdgeInsets.all(16),
             child: Center(child: CircularProgressIndicator()),
           ),
-          error: (e, _) => Text('$e'),
+          error: (e, _) => Text(context.l10n.userFacingError(e)),
           data: (loops) {
             if (loops.isEmpty) {
               return Text(

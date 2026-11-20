@@ -103,26 +103,43 @@ class ArmForegroundService {
     _inited = true;
   }
 
+  /// Notifications + battery-optimization exemption.
+  ///
+  /// Not called from [start]: the ride permission flow
+  /// (LocationPermissionGate) asks these once, before calibration, so no
+  /// system dialog pops after the phone is already on the mount.
   static Future<void> requestPermissions() async {
     if (kIsWeb) return;
     final n = await FlutterForegroundTask.checkNotificationPermission();
     if (n != NotificationPermission.granted) {
       await FlutterForegroundTask.requestNotificationPermission();
     }
-    if (Platform.isAndroid) {
-      if (!await FlutterForegroundTask.isIgnoringBatteryOptimizations) {
-        await FlutterForegroundTask.requestIgnoreBatteryOptimization();
-      }
-    }
+    await requestIgnoreBatteryOptimizationIfNeeded();
   }
 
+  /// Android: true when RiderLab is exempt from battery optimization.
+  static Future<bool> isIgnoringBatteryOptimizations() async {
+    if (kIsWeb || !Platform.isAndroid) return true;
+    return FlutterForegroundTask.isIgnoringBatteryOptimizations;
+  }
+
+  /// Android: system dialog to exempt RiderLab from battery optimization.
+  static Future<bool> requestIgnoreBatteryOptimizationIfNeeded() async {
+    if (kIsWeb || !Platform.isAndroid) return true;
+    if (await FlutterForegroundTask.isIgnoringBatteryOptimizations) {
+      return true;
+    }
+    return FlutterForegroundTask.requestIgnoreBatteryOptimization();
+  }
+
+  /// [title] / [text] should come from the app's l10n (see
+  /// RideRecorder.notificationText); the defaults are a fallback only.
   static Future<bool> start({
     required DataCallback onData,
     String title = 'RiderLab',
     String text = 'Armed — waiting to auto-start (screen can be locked)…',
   }) async {
     ensureInitialized();
-    await requestPermissions();
 
     if (_callback != null) {
       FlutterForegroundTask.removeTaskDataCallback(_callback!);

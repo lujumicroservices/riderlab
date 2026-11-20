@@ -12,6 +12,9 @@ import '../../widgets/app_snack.dart';
 
 /// Google + email/password controls. Used on the auth gate and (rarely)
 /// Settings if a leftover guest session is still present.
+///
+/// The email part has two modes: sign in (default) and create account, which
+/// adds a "confirm password" field. Validation errors show on the field.
 class SignInForm extends ConsumerStatefulWidget {
   const SignInForm({super.key, this.onSignedIn});
 
@@ -24,12 +27,18 @@ class SignInForm extends ConsumerStatefulWidget {
 class _SignInFormState extends ConsumerState<SignInForm> {
   final _email = TextEditingController();
   final _password = TextEditingController();
+  final _confirm = TextEditingController();
   bool _hidePassword = true;
+  bool _createMode = false;
+  String? _emailError;
+  String? _passwordError;
+  String? _confirmError;
 
   @override
   void dispose() {
     _email.dispose();
     _password.dispose();
+    _confirm.dispose();
     super.dispose();
   }
 
@@ -44,37 +53,60 @@ class _SignInFormState extends ConsumerState<SignInForm> {
     if (ok) await _afterOk();
   }
 
+  void _setMode(bool create) {
+    setState(() {
+      _createMode = create;
+      _emailError = null;
+      _passwordError = null;
+      _confirmError = null;
+      _confirm.clear();
+    });
+    ref.read(authErrorProvider.notifier).state = null;
+  }
+
+  String? _emailIssue(AppLocalizations l10n) {
+    final issue = validateEmailPassword(
+      email: _email.text,
+      password: 'x' * kMinAuthPasswordLength,
+    );
+    return issue == null ? null : l10n.authInvalidEmail;
+  }
+
   Future<void> _forgotPassword() async {
     final l10n = context.l10n;
-    final email = _email.text.trim();
-    if (email.isEmpty || !email.contains('@')) {
-      ref.read(authErrorProvider.notifier).state = l10n.authInvalidEmail;
-      return;
-    }
-    final ok = await ref.read(authActionsProvider).requestPasswordReset(email);
+    final emailError = _emailIssue(l10n);
+    setState(() => _emailError = emailError);
+    if (emailError != null) return;
+    final ok = await ref
+        .read(authActionsProvider)
+        .requestPasswordReset(_email.text.trim());
     if (!mounted) return;
     if (ok) {
       showAppSnack(context, l10n.authResetEmailSent);
     }
   }
 
-  Future<void> _submit({required bool create}) async {
+  Future<void> _submit() async {
     final l10n = context.l10n;
-    final issue = validateEmailPassword(
-      email: _email.text,
-      password: _password.text,
-    );
-    if (issue != null) {
-      ref.read(authErrorProvider.notifier).state = switch (issue) {
-        EmailPasswordIssue.emptyEmail ||
-        EmailPasswordIssue.invalidEmail => l10n.authInvalidEmail,
-        EmailPasswordIssue.shortPassword => l10n.authShortPassword,
-      };
+    final emailError = _emailIssue(l10n);
+    final passwordError = _password.text.length < kMinAuthPasswordLength
+        ? l10n.authShortPassword
+        : null;
+    final confirmError =
+        _createMode && passwordError == null && _confirm.text != _password.text
+        ? l10n.authPasswordMismatch
+        : null;
+    setState(() {
+      _emailError = emailError;
+      _passwordError = passwordError;
+      _confirmError = confirmError;
+    });
+    if (emailError != null || passwordError != null || confirmError != null) {
       return;
     }
 
     final actions = ref.read(authActionsProvider);
-    final ok = create
+    final ok = _createMode
         ? await actions.signUpWithEmail(_email.text, _password.text)
         : await actions.signInWithEmail(_email.text, _password.text);
     if (ok) await _afterOk();
@@ -100,99 +132,167 @@ class _SignInFormState extends ConsumerState<SignInForm> {
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (final provider in auth.availableProviders) ...[
-          if (provider == AuthProviderKind.apple)
-            // Apple's own button style (HIG), same size and position as Google.
-            SignInWithAppleButton(
-              onPressed: () => _google(provider),
-              text: l10n.signInWith(provider.label),
-              style: SignInWithAppleButtonStyle.white,
-              height: 44,
-              borderRadius: const BorderRadius.all(Radius.circular(22)),
+    final passwordToggle = IconButton(
+      onPressed: () => setState(() => _hidePassword = !_hidePassword),
+      icon: Icon(
+        _hidePassword
+            ? Icons.visibility_outlined
+            : Icons.visibility_off_outlined,
+      ),
+    );
+
+    return AutofillGroup(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final provider in auth.availableProviders) ...[
+            if (provider == AuthProviderKind.apple)
+              // Apple's own button style (HIG), same size and position as
+              // Google.
+              SignInWithAppleButton(
+                onPressed: () => _google(provider),
+                text: l10n.signInWith(provider.label),
+                style: SignInWithAppleButtonStyle.white,
+                height: 44,
+                borderRadius: const BorderRadius.all(Radius.circular(22)),
+              )
+            else
+              // Google sign-in branding: light button, multicolor "G".
+              FilledButton.icon(
+                onPressed: () => _google(provider),
+                icon: const GoogleGLogo(size: 18),
+                label: Text(l10n.signInWith(provider.label)),
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: const Color(0xFF1F1F1F),
+                ),
+              ),
+            const SizedBox(height: 8),
+          ],
+          _orDivider(l10n),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _email,
+            keyboardType: TextInputType.emailAddress,
+            autofillHints: const [AutofillHints.email],
+            textInputAction: TextInputAction.next,
+            autocorrect: false,
+            onChanged: (_) {
+              if (_emailError != null) setState(() => _emailError = null);
+            },
+            decoration: _fieldDecoration(
+              l10n.authEmailLabel,
+              errorText: _emailError,
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _password,
+            obscureText: _hidePassword,
+            autofillHints: [
+              _createMode ? AutofillHints.newPassword : AutofillHints.password,
+            ],
+            textInputAction: _createMode
+                ? TextInputAction.next
+                : TextInputAction.done,
+            onSubmitted: _createMode ? null : (_) => _submit(),
+            onChanged: (_) {
+              if (_passwordError != null) {
+                setState(() => _passwordError = null);
+              }
+            },
+            decoration: _fieldDecoration(
+              l10n.authPasswordLabel,
+              errorText: _passwordError,
+              suffixIcon: passwordToggle,
+            ),
+          ),
+          if (_createMode) ...[
+            const SizedBox(height: 12),
+            TextField(
+              controller: _confirm,
+              obscureText: _hidePassword,
+              autofillHints: const [AutofillHints.newPassword],
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => _submit(),
+              onChanged: (_) {
+                if (_confirmError != null) {
+                  setState(() => _confirmError = null);
+                }
+              },
+              decoration: _fieldDecoration(
+                l10n.authConfirmPasswordLabel,
+                errorText: _confirmError,
+              ),
+            ),
+          ],
+          const SizedBox(height: 16),
+          FilledButton(
+            onPressed: _submit,
+            child: Text(
+              _createMode ? l10n.authCreateAccount : l10n.authSignInEmail,
+            ),
+          ),
+          // Server / auth errors stay next to the button that caused them.
+          if (error != null && error.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              _localizeAuthError(l10n, error),
+              style: GoogleFonts.rajdhani(
+                color: AppTheme.signal,
+                fontSize: 13,
+                height: 1.35,
+              ),
+            ),
+          ],
+          const SizedBox(height: 4),
+          if (_createMode)
+            TextButton(
+              onPressed: () => _setMode(false),
+              child: Text(l10n.authHaveAccount),
             )
-          else
-            FilledButton.icon(
-              onPressed: () => _google(provider),
-              icon: Icon(_iconFor(provider)),
-              label: Text(l10n.signInWith(provider.label)),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppTheme.mist,
-                foregroundColor: AppTheme.asphalt,
+          else ...[
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: _forgotPassword,
+                child: Text(l10n.authForgotPassword),
               ),
             ),
-          const SizedBox(height: 8),
-        ],
-        _orDivider(l10n),
-        const SizedBox(height: 8),
-        TextField(
-          controller: _email,
-          keyboardType: TextInputType.emailAddress,
-          autofillHints: const [AutofillHints.email],
-          textInputAction: TextInputAction.next,
-          autocorrect: false,
-          decoration: _fieldDecoration(l10n.authEmailLabel),
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: _password,
-          obscureText: _hidePassword,
-          autofillHints: const [AutofillHints.password],
-          textInputAction: TextInputAction.done,
-          onSubmitted: (_) => _submit(create: false),
-          decoration: _fieldDecoration(l10n.authPasswordLabel).copyWith(
-            suffixIcon: IconButton(
-              onPressed: () => setState(() => _hidePassword = !_hidePassword),
-              icon: Icon(
-                _hidePassword
-                    ? Icons.visibility_outlined
-                    : Icons.visibility_off_outlined,
-              ),
+            TextButton(
+              onPressed: () => _setMode(true),
+              child: Text(l10n.authNoAccount),
             ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        FilledButton(
-          onPressed: () => _submit(create: false),
-          child: Text(l10n.authSignInEmail),
-        ),
-        Align(
-          alignment: Alignment.centerRight,
-          child: TextButton(
-            onPressed: busy ? null : _forgotPassword,
-            child: Text(l10n.authForgotPassword),
-          ),
-        ),
-        TextButton(
-          onPressed: () => _submit(create: true),
-          child: Text(l10n.authCreateAccount),
-        ),
-        if (error != null && error.isNotEmpty) ...[
-          const SizedBox(height: 10),
-          Text(
-            _localizeAuthError(l10n, error),
-            style: GoogleFonts.rajdhani(
-              color: AppTheme.signal,
-              fontSize: 13,
-              height: 1.35,
-            ),
-          ),
+          ],
         ],
-      ],
+      ),
     );
   }
 
-  InputDecoration _fieldDecoration(String label) {
+  InputDecoration _fieldDecoration(
+    String label, {
+    String? errorText,
+    Widget? suffixIcon,
+  }) {
+    OutlineInputBorder border(Color color, [double width = 1]) {
+      return OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: color, width: width),
+      );
+    }
+
     return InputDecoration(
       labelText: label,
+      errorText: errorText,
+      errorMaxLines: 2,
+      suffixIcon: suffixIcon,
       filled: true,
-      fillColor: AppTheme.asphalt,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
+      fillColor: AppTheme.asphaltElevated,
+      border: border(AppTheme.mist.withValues(alpha: 0.24)),
+      enabledBorder: border(AppTheme.mist.withValues(alpha: 0.24)),
+      focusedBorder: border(AppTheme.line, 2),
+      errorBorder: border(AppTheme.signal),
+      focusedErrorBorder: border(AppTheme.signal, 2),
     );
   }
 
@@ -211,13 +311,6 @@ class _SignInFormState extends ConsumerState<SignInForm> {
       ],
     );
   }
-
-  IconData _iconFor(AuthProviderKind provider) {
-    return switch (provider) {
-      AuthProviderKind.apple => Icons.apple,
-      AuthProviderKind.google => Icons.g_mobiledata_rounded,
-    };
-  }
 }
 
 String _localizeAuthError(AppLocalizations l10n, String raw) {
@@ -226,6 +319,65 @@ String _localizeAuthError(AppLocalizations l10n, String raw) {
     EmailAuthServerIssue.emailNotConfirmed ||
     EmailAuthServerIssue.needsEmailConfirm => l10n.authConfirmEmailThenSignIn,
     EmailAuthServerIssue.alreadyRegistered => l10n.authEmailAlreadyRegistered,
-    EmailAuthServerIssue.unknown => raw,
+    EmailAuthServerIssue.unknown => l10n.userFacingError(raw),
   };
+}
+
+/// Google's multicolor "G" mark, drawn without an asset or SVG dependency.
+class GoogleGLogo extends StatelessWidget {
+  const GoogleGLogo({super.key, this.size = 18});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox.square(
+      dimension: size,
+      child: const CustomPaint(painter: _GoogleGPainter()),
+    );
+  }
+}
+
+class _GoogleGPainter extends CustomPainter {
+  const _GoogleGPainter();
+
+  static const _blue = Color(0xFF4285F4);
+  static const _green = Color(0xFF34A853);
+  static const _yellow = Color(0xFFFBBC05);
+  static const _red = Color(0xFFEA4335);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final s = size.shortestSide;
+    final stroke = s * 0.2;
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (s - stroke) / 2;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    const deg = 3.141592653589793 / 180;
+
+    Paint arc(Color color) => Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = stroke;
+
+    // Angles: 0 = 3 o'clock, clockwise. The opening sits at the upper right.
+    canvas.drawArc(rect, 0 * deg, 45 * deg, false, arc(_blue));
+    canvas.drawArc(rect, 45 * deg, 100 * deg, false, arc(_green));
+    canvas.drawArc(rect, 145 * deg, 70 * deg, false, arc(_yellow));
+    canvas.drawArc(rect, 215 * deg, 100 * deg, false, arc(_red));
+
+    // Crossbar of the G.
+    canvas.drawRect(
+      Rect.fromLTRB(
+        center.dx,
+        center.dy - stroke / 2,
+        center.dx + radius + stroke / 2,
+        center.dy + stroke / 2,
+      ),
+      Paint()..color = _blue,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

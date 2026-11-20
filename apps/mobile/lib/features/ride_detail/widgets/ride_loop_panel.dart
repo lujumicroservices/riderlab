@@ -71,7 +71,7 @@ class _RideLoopPanelState extends ConsumerState<RideLoopPanel> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _detecting = false);
-      showAppSnackError(context, '$e');
+      showAppSnackError(context, context.l10n.userFacingError(e));
     }
   }
 
@@ -108,7 +108,7 @@ class _RideLoopPanelState extends ConsumerState<RideLoopPanel> {
       showAppSnack(context, l10n.routeLoopSaved);
     } catch (e) {
       if (!mounted) return;
-      showAppSnackError(context, '$e');
+      showAppSnackError(context, context.l10n.userFacingError(e));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -128,7 +128,7 @@ class _RideLoopPanelState extends ConsumerState<RideLoopPanel> {
       showAppSnack(context, l10n.routeLoopSaved);
     } catch (e) {
       if (!mounted) return;
-      showAppSnackError(context, '$e');
+      showAppSnackError(context, context.l10n.userFacingError(e));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -211,7 +211,7 @@ class _RideLoopPanelState extends ConsumerState<RideLoopPanel> {
             padding: EdgeInsets.all(8),
             child: Center(child: CircularProgressIndicator()),
           ),
-          error: (e, _) => Text('$e'),
+          error: (e, _) => Text(context.l10n.userFacingError(e)),
           data: (loops) {
             if (loops.isEmpty) {
               return Text(

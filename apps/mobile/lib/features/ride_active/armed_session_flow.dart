@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/lean_lab/lean_lab_service.dart';
-import '../../l10n/gps_warmup_l10n.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/ride_providers.dart';
 import '../../widgets/app_snack.dart';
@@ -64,6 +63,10 @@ void openArmedSessionAfterAutoStart(BuildContext context, WidgetRef ref) {
 }
 
 /// Stop recording (or just disarm) and leave the armed hub/HUD.
+///
+/// Callers gate this behind `HoldToConfirmButton` (press and hold ~1 s).
+/// Shows "Recorrido guardado" or "Sesión cancelada: no hubo movimiento"
+/// through the global toast host, so the message survives the pop to Home.
 Future<void> completeArmedOrActiveRide(
   BuildContext context,
   WidgetRef ref,
@@ -72,11 +75,16 @@ Future<void> completeArmedOrActiveRide(
   final l10n = context.l10n;
 
   if (!recorder.isRecording) {
-    if (recorder.isArmed) {
+    final wasArmed = recorder.isArmed;
+    // Toast first: disarming can pop this screen and unmount [context].
+    // The global toast host keeps it visible on Home.
+    if (wasArmed) {
+      showAppSnack(context, l10n.rideSessionCancelledNoMotion);
       ref.read(armedStateProvider.notifier).disarm();
     }
     ref.read(armedSessionNavProvider.notifier).reset();
-    if (context.mounted && Navigator.of(context).canPop()) {
+    if (!context.mounted) return;
+    if (Navigator.of(context).canPop()) {
       Navigator.of(context).popUntil((route) => route.isFirst);
     }
     return;
@@ -93,6 +101,9 @@ Future<void> completeArmedOrActiveRide(
       rideId: ride.id,
       samples: points,
     );
+    // Global toast host (null context): shown even if stopping the recorder
+    // already popped this screen.
+    showAppSnack(null, l10n.rideSavedToast, tone: AppToastTone.success);
     if (!context.mounted) return;
     ref.read(armedSessionNavProvider.notifier).reset();
     final leanSession = await LeanLabService.instance.getSession(ride.id);

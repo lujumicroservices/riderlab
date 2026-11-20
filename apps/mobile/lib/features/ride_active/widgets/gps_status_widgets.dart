@@ -9,12 +9,12 @@ import '../../../theme/ride_viz_palette.dart';
 
 /// Full-screen warm-up while permissions + GNSS settle.
 class GpsWarmupPanel extends StatelessWidget {
-  const GpsWarmupPanel({
-    super.key,
-    required this.status,
-  });
+  const GpsWarmupPanel({super.key, required this.status, this.onCancel});
 
   final GnssWarmupStatus status;
+
+  /// Shows a 56 dp "Cancelar" button at the bottom when set.
+  final VoidCallback? onCancel;
 
   @override
   Widget build(BuildContext context) {
@@ -23,10 +23,9 @@ class GpsWarmupPanel extends StatelessWidget {
     final accent = ready
         ? RideVizPalette.leanLeft
         : (status.phase == GpsWarmupPhase.locking
-            ? AppTheme.lineHot
-            : AppTheme.steel);
-    final meters =
-        LocationService.warmTargetAccuracyMeters.toStringAsFixed(0);
+              ? AppTheme.lineHot
+              : AppTheme.steel);
+    final meters = LocationService.warmTargetAccuracyMeters.toStringAsFixed(0);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 24, 28, 24),
@@ -45,7 +44,8 @@ class GpsWarmupPanel extends StatelessWidget {
                     width: 88,
                     height: 88,
                     child: CircularProgressIndicator(
-                      value: status.phase == GpsWarmupPhase.permissions ||
+                      value:
+                          status.phase == GpsWarmupPhase.permissions ||
                               status.phase == GpsWarmupPhase.searching
                           ? null
                           : status.lockProgress.clamp(0.08, 1.0),
@@ -67,10 +67,7 @@ class GpsWarmupPanel extends StatelessWidget {
           Text(
             ready ? l10n.gpsReady : l10n.startingRide,
             textAlign: TextAlign.center,
-            style: GoogleFonts.exo2(
-              fontSize: 28,
-              fontWeight: FontWeight.w700,
-            ),
+            style: GoogleFonts.exo2(fontSize: 28, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 10),
           Text(
@@ -101,6 +98,17 @@ class GpsWarmupPanel extends StatelessWidget {
             ),
           ),
           const Spacer(flex: 3),
+          if (onCancel != null)
+            SafeArea(
+              top: false,
+              child: OutlinedButton(
+                onPressed: onCancel,
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(56),
+                ),
+                child: Text(l10n.cancel),
+              ),
+            ),
         ],
       ),
     );
@@ -121,8 +129,7 @@ class _AccuracyMeter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final meters =
-        LocationService.warmTargetAccuracyMeters.toStringAsFixed(0);
+    final meters = LocationService.warmTargetAccuracyMeters.toStringAsFixed(0);
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: BoxDecoration(
@@ -208,8 +215,8 @@ class GpsLockBadge extends StatelessWidget {
     final icon = acc == null
         ? Icons.gps_not_fixed
         : acc <= LocationService.warmTargetAccuracyMeters
-            ? Icons.gps_fixed
-            : Icons.gps_not_fixed;
+        ? Icons.gps_fixed
+        : Icons.gps_not_fixed;
 
     final parts = <String>[];
     if (hz != null) {

@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../../l10n/l10n_ext.dart';
 import '../../../theme/app_theme.dart';
+import 'hold_to_confirm_button.dart';
 
-/// Compact pause/resume detection + finish session controls.
+/// Pause/resume detection + press-and-hold finish, both labelled and 56 dp.
+///
+/// The two actions sit apart (16 dp gap, different shapes) so a gloved
+/// thumb does not hit "Terminar" when reaching for pause.
 class SessionActionBar extends StatelessWidget {
   const SessionActionBar({
     super.key,
@@ -19,75 +23,42 @@ class SessionActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Material(
-          color: AppTheme.asphalt,
-          borderRadius: BorderRadius.circular(16),
-          child: Ink(
-            height: 56,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppTheme.mist.withValues(alpha: 0.18)),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _BarSlot(
-                    tooltip: held
-                        ? l10n.resumeMotionDetection
-                        : l10n.pauseMotionDetection,
-                    onPressed: onToggleHold,
-                    child: Icon(
-                      held ? Icons.play_arrow_rounded : Icons.pause_rounded,
-                      size: 30,
-                      color: held ? AppTheme.lineHot : AppTheme.mist,
-                    ),
-                  ),
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: onToggleHold,
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(56),
+                foregroundColor: held ? AppTheme.lineHot : AppTheme.mist,
+                side: BorderSide(color: AppTheme.mist.withValues(alpha: 0.3)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                Container(
-                  width: 1,
-                  height: 32,
-                  color: AppTheme.steel.withValues(alpha: 0.4),
-                ),
-                Expanded(
-                  child: _BarSlot(
-                    tooltip: l10n.endSession,
-                    onPressed: onFinish,
-                    child: const CheckeredFlagIcon(
-                      size: 26,
-                      color: AppTheme.signal,
-                    ),
-                  ),
-                ),
-              ],
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+              ),
+              icon: Icon(
+                held ? Icons.play_arrow_rounded : Icons.pause_rounded,
+                size: 28,
+              ),
+              label: Text(
+                held ? l10n.resumeMotionDetection : l10n.pauseMotionDetection,
+                maxLines: 2,
+                textAlign: TextAlign.center,
+              ),
             ),
           ),
-        ),
-      ],
-    );
-  }
-}
-
-class _BarSlot extends StatelessWidget {
-  const _BarSlot({
-    required this.tooltip,
-    required this.onPressed,
-    required this.child,
-  });
-
-  final String tooltip;
-  final VoidCallback onPressed;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: InkWell(
-        onTap: onPressed,
-        child: Center(child: child),
+          const SizedBox(width: 16),
+          Expanded(
+            child: HoldToConfirmButton(
+              onConfirmed: onFinish,
+              label: l10n.rideFinishShort,
+              icon: const CheckeredFlagIcon(size: 24, color: Colors.white),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:motoline/core/services/logger_pairing_service.dart';
 import 'package:motoline/core/services/metrica_ble_pairing.dart';
 import 'package:motoline/core/services/metrica_ble_protocol.dart';
-import 'package:motoline/core/services/metrica_paddock_wifi.dart';
 import 'package:motoline/features/settings/metrica_ble_pair_section.dart';
 import 'package:motoline/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';

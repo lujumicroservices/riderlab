@@ -36,10 +36,7 @@ class RideSharePanel extends ConsumerWidget {
         children: [
           Text(
             l10n.shareRideTitle,
-            style: GoogleFonts.exo2(
-              fontWeight: FontWeight.w700,
-              fontSize: 16,
-            ),
+            style: GoogleFonts.exo2(fontWeight: FontWeight.w700, fontSize: 16),
           ),
           const SizedBox(height: 4),
           Text(
@@ -65,42 +62,44 @@ class RideSharePanel extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 6),
-            ref.watch(routesListProvider).when(
-              loading: () => const LinearProgressIndicator(),
-              error: (_, _) => Text(
-                l10n.cloudUnavailable,
-                style: const TextStyle(color: AppTheme.steel, fontSize: 12),
-              ),
-              data: (routes) {
-                return DropdownButtonFormField<String?>(
-                  key: ValueKey('route-${ride.id}-${ride.routeId}'),
-                  initialValue: ride.routeId,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: AppTheme.asphalt,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
+            ref
+                .watch(routesListProvider)
+                .when(
+                  loading: () => const LinearProgressIndicator(),
+                  error: (_, _) => Text(
+                    l10n.cloudUnavailable,
+                    style: const TextStyle(color: AppTheme.steel, fontSize: 12),
                   ),
-                  hint: Text(l10n.noRouteAssigned),
-                  items: [
-                    DropdownMenuItem<String?>(
-                      value: null,
-                      child: Text(l10n.noRouteAssigned),
-                    ),
-                    for (final r in routes)
-                      DropdownMenuItem<String?>(
-                        value: r.id,
-                        child: Text(r.name),
+                  data: (routes) {
+                    return DropdownButtonFormField<String?>(
+                      key: ValueKey('route-${ride.id}-${ride.routeId}'),
+                      initialValue: ride.routeId,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: AppTheme.asphalt,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
                       ),
-                  ],
-                  onChanged: (routeId) {
-                    unawaited(_setRoute(ref, routeId));
+                      hint: Text(l10n.noRouteAssigned),
+                      items: [
+                        DropdownMenuItem<String?>(
+                          value: null,
+                          child: Text(l10n.noRouteAssigned),
+                        ),
+                        for (final r in routes)
+                          DropdownMenuItem<String?>(
+                            value: r.id,
+                            child: Text(r.name),
+                          ),
+                      ],
+                      onChanged: (routeId) {
+                        unawaited(_setRoute(ref, routeId));
+                      },
+                    );
                   },
-                );
-              },
-            ),
+                ),
             const SizedBox(height: 8),
             Align(
               alignment: Alignment.centerLeft,
@@ -160,10 +159,9 @@ class RideSharePanel extends ConsumerWidget {
       ),
     );
     if (ok != true || !context.mounted) return;
-    final route = await ref.read(routeServiceProvider).createRoute(
-          name: ctrl.text,
-          visibility: ShareVisibility.friends,
-        );
+    final route = await ref
+        .read(routeServiceProvider)
+        .createRoute(name: ctrl.text, visibility: ShareVisibility.friends);
     final updated = ride.copyWith(
       routeId: route.id,
       visibility: ShareVisibility.friends,

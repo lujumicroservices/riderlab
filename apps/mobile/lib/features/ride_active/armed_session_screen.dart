@@ -12,6 +12,7 @@ import '../rodadas/rodada_capture.dart';
 import '../rodadas/rodada_capture_flow.dart';
 import 'armed_session_flow.dart';
 import 'armed_session_nav.dart';
+import 'widgets/hold_to_confirm_button.dart';
 import 'widgets/recording_rec_badge.dart';
 
 /// Session hub while armed: status, enter/leave the recording HUD, end ride.
@@ -166,7 +167,10 @@ class _ArmedSessionScreenState extends ConsumerState<ArmedSessionScreen> {
                               .forceStartFromArm();
                         } catch (e) {
                           if (!context.mounted) return;
-                          showAppSnackError(context, '$e');
+                          showAppSnackError(
+                            context,
+                            context.l10n.userFacingError(e),
+                          );
                         }
                       },
                       icon: const Icon(Icons.bug_report_outlined, size: 18),
@@ -188,23 +192,17 @@ class _ArmedSessionScreenState extends ConsumerState<ArmedSessionScreen> {
                       ),
                     ),
                   if (recording) const SizedBox(height: 10),
-                  FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppTheme.signal,
-                      minimumSize: const Size.fromHeight(48),
-                    ),
-                    onPressed: () {
+                  HoldToConfirmButton(
+                    onConfirmed: () {
                       if (shouldUseRodadaPauseAction(recorder.activeRodadaId)) {
                         holdRodadaCaptureAndReturn(context, ref);
                       } else {
                         completeArmedOrActiveRide(context, ref);
                       }
                     },
-                    child: Text(
-                      shouldUseRodadaPauseAction(recorder.activeRodadaId)
-                          ? l10n.pauseRodadaCapture
-                          : l10n.armedSessionEndArm,
-                    ),
+                    label: shouldUseRodadaPauseAction(recorder.activeRodadaId)
+                        ? l10n.pauseRodadaCapture
+                        : l10n.armedSessionEndArm,
                   ),
                 ],
               ),

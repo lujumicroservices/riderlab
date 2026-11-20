@@ -379,7 +379,25 @@
   "curvaSwipeHint": "Desliza izquierda / derecha para cambiar de curva.",
   "curvaOpenMap": "Mapa completo",
   "curvaZoomLab": "Zoom Lab",
-  "armAutoRide": "Empezar a Rodar",
+  "armAutoRide": "Empezar a rodar",
+  "rideHoldToFinishHint": "Mantén presionado para terminar",
+  "rideFinishShort": "Terminar",
+  "rideBackHint": "Para salir, mantén presionado Terminar",
+  "rideSavedToast": "Recorrido guardado",
+  "rideSessionCancelledNoMotion": "Sesión cancelada: no hubo movimiento",
+  "rideHudLeanSetting": "Fijando 0°",
+  "ridePermsIntro": "RiderLab graba tu línea GPS mientras ruedas, también con la pantalla apagada y el teléfono en el soporte. La ubicación se usa solo mientras grabas o esperas para arrancar, y se detiene al terminar. Una notificación queda visible mientras tanto.\n\nAhora te pediremos:",
+  "ridePermsStepLocation": "Ubicación: elige «Mientras se usa la app».",
+  "ridePermsStepBackground": "Pantalla apagada: en la siguiente pantalla elige «Permitir todo el tiempo».",
+  "ridePermsStepNotifications": "Notificaciones: para mostrar que estás grabando.",
+  "ridePermsStepBattery": "Batería: permite que RiderLab funcione sin restricciones para que Android no detenga la grabación.",
+  "ridePermsBackgroundTitle": "Un paso más",
+  "ridePermsBackgroundBody": "Para grabar con la pantalla apagada, Android abrirá los ajustes de ubicación de RiderLab. Elige «Permitir todo el tiempo» y regresa con Atrás.",
+  "ridePermsBackgroundLimited": "Con la pantalla apagada la grabación puede pausarse. Puedes cambiarlo en Ajustes.",
+  "ridePermsLocationOffTitle": "La ubicación del teléfono está apagada",
+  "ridePermsDeniedBodyAndroid": "RiderLab necesita tu ubicación para grabar tu línea. En Ajustes → Permisos → Ubicación elige «Permitir solo mientras se usa la app» o «Permitir todo el tiempo».",
+  "rideNotifRecording": "Grabando recorrido…",
+  "rideNotifArmed": "Lista: arranca y se graba sola. Puedes bloquear la pantalla.",
   "disarmAutoRide": "Cancelar arranque auto",
   "waitingForMotion": "Armado",
   "armedBannerBody": "Armado: al moverte empieza a grabar. Al parar queda detenido.",
@@ -423,15 +441,56 @@
   "pro": "PRO",
   "free": "Gratis",
   "settings": "Ajustes",
+  "settingsHubProfileGuest": "Sin sesión iniciada",
+  "settingsHubProfileSignInHint": "Toca para iniciar sesión",
+  "settingsHubChipFree": "Free",
+  "settingsHubChipPro": "Pro",
+  "settingsHubProFree": "Plan gratis",
+  "settingsHubProActive": "Activo",
+  "settingsHubProActiveUntil": "Activo hasta {date}",
+  "@settingsHubProActiveUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsHubRecording": "Grabación",
+  "settingsHubSoundOn": "Sonido del modo activado",
+  "settingsHubSoundOff": "Sonido del modo desactivado",
+  "settingsHubRodadas": "Rodadas y privacidad",
+  "settingsHubShareLiveOn": "Compartes tu ubicación en rodadas",
+  "settingsHubShareLiveOff": "No compartes tu ubicación en rodadas",
+  "settingsHubShareHelp": "Aplican a todas tus rodadas. Tu grupo y tu familia solo ven dónde vas si activas estas opciones.",
+  "settingsHubFamilyLinkBody": "Tu familia puede seguirte sin tener la app: en En vivo toca Compartir y mándales el link. Puedes reenviar el mismo link cuando quieras.",
+  "settingsHubData": "Datos y sincronización",
+  "settingsHubDataSub": "Respalda tus recorridos en la nube",
+  "settingsHubLastSync": "Última sincronización: {time}",
+  "@settingsHubLastSync": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsHubAccessories": "Accesorios",
+  "settingsHubAccessoriesSub": "Cámara GoPro y M5 Logger",
+  "settingsHubAccessoriesSubCameraOnly": "Cámara GoPro",
+  "settingsHubM5LoggerSub": "Emparejar el equipo o importar una sesión de la SD",
+  "settingsHubLegal": "Legal y ayuda",
+  "settingsHubLegalSub": "Términos, privacidad y normas de la comunidad",
+  "settingsHubLab": "Laboratorio",
+  "settingsHubLabSub": "Funciones en prueba",
+  "settingsHubStaff": "Staff",
+  "settingsHubStaffSub": "Ver como otro usuario, reportes y códigos de socio",
   "proUnlock": "RiderLab Pro",
   "proUnlockBody": "Elige cualquier tramo, detalle completo de curvas y el historial completo de frenadas.",
   "proFeatureSegment": "Acercar cualquier parte del recorrido",
   "proFeatureBrakes": "Detalle completo de frenadas (no solo una vista previa)",
-  "proFeatureNoAds": "Sin banners publicitarios",
   "upgradeToPro": "Pasar a Pro",
   "proUnlocked": "Pro activo",
   "proToggleDev": "Pro desbloqueado",
-  "proToggleHelp": "Desbloqueo temporal hasta conectar la tienda. Apágalo para ver la versión gratis.",
+  "proToggleHelp": "Solo en versiones de prueba: activa Pro en este teléfono. Apágalo para ver la versión gratis.",
   "proTrialDaysLeft": "Prueba Pro · {days} días restantes",
   "@proTrialDaysLeft": {
     "placeholders": {
@@ -448,7 +507,16 @@
       }
     }
   },
-  "proExpiredKeepLab": "Se acabó tu Pro — conserva el zoom de segmento y el detalle de curvas.",
+  "proExpiredKeepLab": "Tu Pro terminó. Suscríbete para recuperar el zoom de tramo y el detalle de curvas.",
+  "proStoreOnlyBuild": "Las suscripciones solo están disponibles en la versión de Google Play / App Store. Si tienes un código de socio, canjéalo aquí.",
+  "proStoreOnlyBuildNoCodes": "Las suscripciones solo están disponibles en la versión de la tienda. Intenta de nuevo más tarde.",
+  "proRestoreFailed": "No pudimos restaurar tus compras. Revisa tu conexión e intenta de nuevo.",
+  "proFeatureHardware": "Conecta el logger Métrica y tu cámara GoPro",
+  "proFeatureCamera": "Controla tu cámara GoPro desde la app",
+  "proSubscriptionFooter": "Pro es una suscripción mensual o anual que se renueva automáticamente. Cancela cuando quieras desde tu tienda.",
+  "proPartnerCodeHint": "Un código de socio da 90 días de Pro.",
+  "authHaveAccount": "Ya tengo cuenta",
+  "authNoAccount": "¿No tienes cuenta? Crear cuenta",
   "partnerProCode": "Código Pro de socio",
   "partnerProCodeHint": "Pega tu código",
   "partnerProCodeHelp": "Un código personal de un socio RiderLab. No es el código de una rodada.",
@@ -471,8 +539,8 @@
       }
     }
   },
-  "startTrialHelp": "Toda cuenta con sesión inicia 30 días de Pro. Después, el detalle de Ride Lab es de pago. Un código de socio suma 90 días.",
-  "proStoreNotReady": "La compra aún no está en la tienda. Entra con tu cuenta para 30 días de Pro, o canjea un código de socio.",
+  "startTrialHelp": "El detalle de Ride Lab es parte de Pro, con suscripción mensual o anual. Un código de socio da 90 días.",
+  "proStoreNotReady": "No pudimos abrir la compra en la tienda. Intenta de nuevo más tarde o canjea un código de socio.",
   "proStoreNotReadyIos": "La suscripción Pro aún no está disponible en el App Store. Intenta más tarde.",
   "brakesProTeaser": "Mostrando {shown} de {total}. Desbloquea Pro para el historial completo de frenadas.",
   "@brakesProTeaser": {
@@ -525,7 +593,7 @@
   "accountSignedIn": "Sesión iniciada",
   "accountSignedInBody": "Tu cuenta está vinculada. Cerrar sesión vuelve a la pantalla de inicio de sesión.",
   "authGateTitle": "Entra para rodar",
-  "authGateBody": "RiderLab necesita una cuenta. Usa Google o correo y contraseña — el modo invitado está apagado. Así también entra la revisión de las tiendas.",
+  "authGateBody": "RiderLab necesita una cuenta para guardar tus recorridos. Entra con Google o con tu correo.",
   "signInWith": "Entrar con {provider}",
   "@signInWith": {
     "placeholders": {
@@ -664,7 +732,7 @@
   "labAdventureCameraZonesPlaceStop": "Siguiente toque: Parada ■ de este par",
   "labAdventureCameraZonesPairs": "Pares",
   "rideDeckTitle": "Iniciar recorrido",
-  "rideDeckHelp": "Toca una vez, pon el teléfono en el bolsillo o en el tanque, quédate quieto. Cuando sientas vibrar y un beep, el 0° quedó guardado y el recorrido arranca — no vuelves a tocar.",
+  "rideDeckHelp": "Pon el teléfono en el soporte, vertical, con la moto derecha y quieta. Toca «Sostener vertical 4 s» y no muevas la moto 4 segundos. Al vibrar, el 0° queda guardado y el recorrido arranca.",
   "startRideNow": "Iniciar recorrido ahora",
   "labAdventureCameraZoneStart": "Inicio",
   "labAdventureCameraZoneStop": "Parada",
@@ -690,7 +758,7 @@
   "labAdventureCameraScenarioAggressiveBody": "ON: Cámara de aventura · Auto-grabar conducción agresiva · cámaras en el grupo.\nOFF: Grabar con el recorrido · Zonas inicio/fin en el mapa · Seguir pausa auto.",
   "labAdventureCameraScenarioAggressiveApply": "Aplicar setup solo agresivo",
   "armAutoNoRouteHint": "Listo — al rodar se inicia un recorrido en el garaje.",
-  "freezeThenArmHelp": "Toca una vez, coloca el teléfono, quédate quieto. Un vibrar y un beep confirman que el 0° quedó guardado. Luego bloquea la pantalla — al arrancar se inicia el recorrido. No vuelves a tocar.",
+  "freezeThenArmHelp": "Pon el teléfono en el soporte, vertical, con la moto derecha y quieta. Toca «Sostener vertical 4 s» y no muevas la moto 4 segundos. Al vibrar, el 0° queda guardado: bloquea la pantalla y arranca; el recorrido empieza solo.",
   "armAutoRouteArmed": "Listo — al arrancar se inicia el recorrido",
   "armAutoRouteArmedNamed": "Listo para «{name}» — el recorrido se guarda en esa ruta",
   "@armAutoRouteArmedNamed": {
@@ -708,6 +776,54 @@
       }
     }
   },
+  "homeDiscardRecoveredTitle": "¿Descartar recorrido?",
+  "homeDiscardRecoveredBody": "¿Borrar el recorrido del {date}? No se puede deshacer.",
+  "@homeDiscardRecoveredBody": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeSaveRecoveredError": "No se pudo guardar la línea. Intenta de nuevo.",
+  "homeRideMaxSpeed": "máx. {speed} km/h",
+  "@homeRideMaxSpeed": {
+    "placeholders": {
+      "speed": {
+        "type": "String"
+      }
+    }
+  },
+  "homeRideMaxLean": "incl. {lean}°",
+  "@homeRideMaxLean": {
+    "placeholders": {
+      "lean": {
+        "type": "String"
+      }
+    }
+  },
+  "homeNavRodadas": "Rodadas",
+  "homeNavFriends": "Amigos",
+  "homeModeStreet": "Calle",
+  "homeModeTrack": "Pista",
+  "homeModeSemantics": "Modo de la app: {mode}. Toca para cambiar entre Calle y Pista.",
+  "@homeModeSemantics": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "homeModeLockedHint": "Termina o desarma el recorrido para cambiar de modo.",
+  "rideDetailAppBarTitle": "Ride Lab",
+  "rideDetailAppBarTitleSegment": "Tramo",
+  "rideDetailNoScore": "—",
+  "rideDetailVisibilityPrivate": "Solo yo",
+  "rideDetailVisibilityFriends": "Amigos",
+  "rideDetailVisibilityPublic": "Todos",
+  "rideDetailVisibilityPrivateHelp": "Oculto para otros pilotos",
+  "rideDetailVisibilityFriendsHelp": "Visible para tus amigos aceptados",
+  "rideDetailVisibilityPublicHelp": "Visible para todos en RiderLab",
   "rodadasTitle": "Rodadas",
   "rodadasHomeSubtitle": "Crea una rodada · invita · comparte GPS en vivo",
   "friendsHelp": "Busca riders, envía solicitudes de amistad e invita amigos aceptados a una rodada.",
@@ -720,7 +836,6 @@
   "familyShareFromCircle": "Compartir link ahora",
   "familyRodadaTipTitle": "¿Link para familia?",
   "familyRodadaTipBody": "Pack = mapa de la rodada en la app. Familia sin app = compartir desde En vivo (mismo link se puede reenviar).",
-  "familyRodadaTipCta": "Ver círculo familiar",
   "familyWatchScreenTitle": "Avisar a familia",
   "familyWatchScreenHelp": "Comparte un link para que te vean en el mapa. No necesitan RiderLab.",
   "familyNotEmergency": "Esto no llama a emergencias (no es 911).",
@@ -752,7 +867,6 @@
   "familyRiderFallback": "Rider",
   "familyNotifyToggle": "Avisar a familia",
   "familyNotifyHelp": "Genera un link y abre el menú de compartir para mandárselo a tu familiar (no necesitan la app).",
-  "familyNotifyHelpRodada": "Avisa a familia/amigos fuera del pack. Puedes reenviar el mismo link a más personas.",
   "familyNotifyStart": "Compartir",
   "familyWatchActive": "Familia puede verte",
   "familyWatchInactive": "No estás compartiendo",
@@ -761,7 +875,6 @@
   "familyOk": "Todo bien",
   "familyStopped": "Me detuve",
   "familySos": "Necesito ayuda",
-  "familyShareLink": "Reenviar link",
   "familyShareAgain": "Enviar a otro",
   "familyShareAgainHint": "Puedes mandar el mismo link a más personas; los anteriores siguen funcionando.",
   "familyRotateLink": "Nuevo link",
@@ -1063,7 +1176,7 @@
   "startRodadaConfirmBody": "Se avisará a todos los miembros. Si activaste armar ruta o compartir ubicación, eso arranca ahora.",
   "rodadaStartedSnack": "Rodada iniciada. Se avisó a los miembros.",
   "autoArmOnRodadaStart": "Armar ruta al iniciar la rodada",
-  "autoArmOnRodadaStartHelp": "Una sola vez cuando la rodada pase a en vivo. Si cancelas, arma después con Empezar a Rodar.",
+  "autoArmOnRodadaStartHelp": "Una sola vez cuando la rodada pase a en vivo. Si cancelas, arma después con Empezar a rodar.",
   "autoShareFamilyOnRodada": "Compartir ubicación con mi círculo familiar",
   "autoShareFamilyOnRodadaHelp": "Activa el watch familiar automáticamente mientras esta rodada esté en vivo.",
   "markAsOpen": "Marcar abierta",
@@ -1134,6 +1247,10 @@
       }
     }
   },
+  "invitePushReasonSession": "tu sesión expiró; vuelve a iniciar sesión",
+  "invitePushReasonService": "el servicio de notificaciones no respondió",
+  "invitePushReasonUnknown": "error desconocido",
+  "visibilityMenuTooltip": "Visibilidad",
   "rodadaCodeBanner": "código {code}",
   "@rodadaCodeBanner": {
     "placeholders": {
@@ -1143,8 +1260,6 @@
     }
   },
   "meetup": "Encuentro",
-  "yourSharing": "Qué compartes",
-  "sharingDefaultsHelp": "Apagado hasta que lo actives. Al iniciar la rodada, RiderLab usa lo que hayas marcado abajo.",
   "notRodadaMember": "No eres miembro.",
   "shareLocationOnRoute": "Compartir ubicación con la rodada",
   "shareLocationEvery5Min": "Cada 5 min mientras la rodada está en vivo",
@@ -1464,7 +1579,6 @@
   "bikeCustomModelHint": "Escribe el nombre del modelo",
   "leanLabHomeCta": "Lab de inclinación — Bugambilias",
   "leanLabTitle": "Lab de inclinación",
-  "settingsRideSection": "Recorrido",
   "settingsShareSection": "Rodadas y compartir",
   "settingsShareSectionHelp": "Valen para todas las rodadas. El pack y familia usan estos interruptores.",
   "settingsLegalSection": "Legal",
@@ -1473,7 +1587,7 @@
   "sessionPhaseRecording": "Grabando",
   "sessionPhaseStopped": "Detenido",
   "pauseMotionDetection": "Pausar detección",
-  "resumeMotionDetection": "Resumir detección",
+  "resumeMotionDetection": "Reanudar detección",
   "sessionArmedHelp": "GPS listo. Al moverte empieza a grabar. Al parar pasa a detenido.",
   "sessionStoppedHelp": "Sesión en pausa por detención. Al moverte vuelve a grabar.",
   "sessionDetectionPausedHelp": "La detección de movimiento está pausada. El estado no cambia solo.",
@@ -2026,9 +2140,53 @@
   },
   "gpsStartKeepSky": "Arrancando — mantén el cielo abierto para mejor señal",
   "gpsRollingNextLap": "Rodando hacia la siguiente vuelta…",
-  "locationServicesOff": "Activa la ubicación para grabar tu línea.",
+  "locationServicesOff": "Activa la ubicación del teléfono para grabar tu línea.",
   "locationPermissionDenied": "Se necesita permiso de ubicación para dibujar tu línea.",
   "locationPermissionDeniedForever": "Activa la ubicación en Ajustes e inténtalo de nuevo.",
+  "errNoConnection": "Sin conexión. Revisa tu internet e intenta de nuevo.",
+  "errTimeout": "Tardó demasiado en responder. Revisa tu conexión e intenta de nuevo.",
+  "errServer": "El servidor tuvo un problema. Intenta de nuevo en un momento.",
+  "errSignInRequired": "Inicia sesión para continuar.",
+  "errSessionExpired": "Tu sesión expiró. Inicia sesión de nuevo.",
+  "errNotAllowed": "No tienes permiso para hacer esto.",
+  "errPermissionDenied": "Falta un permiso. Actívalo en Ajustes e intenta de nuevo.",
+  "errNotFound": "No se encontró. Puede que se haya borrado.",
+  "errRideAlreadyRecording": "Ya hay un recorrido grabándose.",
+  "errRecordingWhileImpersonating": "La grabación está apagada mientras ves como otro piloto.",
+  "errGeneric": "Algo salió mal. Intenta de nuevo.",
+  "copyLoggerIntro": "Hardware post-rodada: microSD en pista, Wi‑Fi en paddock. Empareja el Basic con tu cuenta o importa una carpeta de sesión.",
+  "copyLoggerPairSection": "Emparejar",
+  "copyLoggerGenerateCode": "Generar código",
+  "copyLoggerCodeMinted": "Código: {code} (15 min). Reclámalo desde el logger.",
+  "@copyLoggerCodeMinted": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "copyLoggerClaimButton": "Reclamar código → PAIR serial",
+  "copyLoggerClaimTitle": "Reclamar código de emparejamiento",
+  "copyLoggerCodeLabel": "Código",
+  "copyLoggerCodeHint": "8 caracteres",
+  "copyLoggerClaim": "Reclamar",
+  "copyLoggerPairCopied": "Comando PAIR copiado. Pégalo en el monitor USB del Basic.",
+  "copyLoggerImportSection": "Importar sesión",
+  "copyLoggerImportHelp": "Carpeta con manifest.json + gnss.ndjson (desde la microSD).",
+  "copyLoggerPickFolder": "Elegir carpeta de sesión",
+  "copyLoggerPickFolderTitle": "Carpeta de sesión del logger (manifest + gnss.ndjson)",
+  "copyLoggerImported": "Importada: {points} pts · {title}",
+  "@copyLoggerImported": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "copyLoggerImportFailed": "No se pudo importar la sesión. Revisa que la carpeta tenga manifest.json y gnss.ndjson con puntos.",
   "locationDisclosureTitle": "Ubicación para grabar recorridos",
   "locationDisclosureBody": "RiderLab graba tu línea GPS durante un recorrido activo.\n\n• La ubicación se usa solo mientras grabas\n• Una notificación permanece visible al grabar\n• La grabación continúa con la pantalla bloqueada o el teléfono en el bolsillo\n• La ubicación se detiene cuando terminas el recorrido\n\nA continuación, el teléfono pedirá permiso de ubicación. Elige Permitir todo el tiempo para que funcione con la pantalla apagada.",
   "locationDisclosureContinue": "Continuar",
@@ -2139,7 +2297,7 @@
   "termsAcceptBody": "Al usar RiderLab aceptas los Términos de uso y el Aviso de privacidad.\n\nNo uses el teléfono mientras conduces. El radio y las fotos son para ir con tu grupo. Contenido sexual, odio, acoso, spam o publicaciones ilegales pueden banearte.\n\nAbre los documentos completos abajo. Después los puedes leer otra vez en Ajustes.",
   "termsAcceptAgree": "Acepto",
   "termsAcceptDecline": "Ahora no",
-  "modeToggleSemantics": "Cambiar entre modo calle (ON) y off-road (OFF)",
+  "modeToggleSemantics": "Cambiar entre modo Calle y Pista",
   "offroadBrandTag": "OFF-ROAD",
   "offroadHomeTitle": "Mis circuitos",
   "offroadHomeSubtitle": "Pistas mapeadas con Métrica",
@@ -2695,5 +2853,12 @@
   "offroadAdviceSpacingDense": "Los puntos están amontonados a menos de 1 m. Eso es ruido del GPS, no la forma del borde.",
   "offroadAdviceNeedElevation": "No hay altitud. Saltos y subidas la necesitan. La altura del GPS del teléfono es floja; un barómetro es mejor.",
   "offroadAdviceAlignLandmark": "Cuando cierre, alinea la meta con un poste o una raya que veas en la foto satélite. El GPS del teléfono suele quedar a varios metros de la imagen.",
-  "offroadAdviceWalkAgain": "Un solo paseo es un borrador. Vuelve a caminar cada borde y quédate con el que cae sobre la cinta o la rodada, no con un promedio de los dos."
+  "offroadAdviceWalkAgain": "Un solo paseo es un borrador. Vuelve a caminar cada borde y quédate con el que cae sobre la cinta o la rodada, no con un promedio de los dos.",
+  "proPurchasePending": "Tu pago está pendiente. Pro se activa en cuanto la tienda lo confirme.",
+  "armNeedsAlwaysTitle": "Con la pantalla bloqueada puede no grabar",
+  "armNeedsAlwaysBody": "El arranque automático empieza a grabar con la pantalla bloqueada. Sin \"Permitir todo el tiempo\" en Ubicación, Android puede no darle GPS. Elígelo en Ajustes → Permisos → Ubicación, o continúa y deja la pantalla encendida hasta que arranque.",
+  "armContinueAnyway": "Continuar así",
+  "socialNotifTitle": "Avisos de rodadas",
+  "socialNotifBody": "Activa las notificaciones para enterarte cuando te inviten a una rodada o cuando empiece.",
+  "errArmBackgroundGps": "No se pudo iniciar el GPS en segundo plano. Permite las notificaciones y quita la restricción de batería para RiderLab en Ajustes, y vuelve a intentarlo."
 }

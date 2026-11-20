@@ -3,683 +3,295 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/app_build_info.dart';
 import '../../core/app_mode.dart';
-import '../../core/lean_lab/lean_lab_service.dart';
 import '../../core/auth/impersonation_controller.dart';
-import '../../core/legal/legal_urls.dart';
-import '../../core/notifications/push_diagnostics.dart';
+import '../../core/distribution.dart';
 import '../../l10n/l10n_ext.dart';
+import '../../providers/alias_provider.dart';
 import '../../providers/auth_providers.dart';
-import '../../providers/force_start_prefs.dart';
 import '../../providers/locale_provider.dart';
 import '../../providers/pro_entitlement_provider.dart';
-import '../../providers/ride_providers.dart';
 import '../../providers/rodada_share_prefs.dart';
-import '../../core/services/ride_sync_service.dart';
 import '../../theme/app_theme.dart';
-import '../../theme/brand_mark.dart';
 import '../../theme/ride_viz_palette.dart';
-import '../../widgets/account_auth_section.dart';
-import '../../widgets/partner_code_redeem.dart';
-import '../../widgets/pro_upsell.dart';
-import '../../widgets/rider_alias_chip.dart';
-import '../adventure_camera/widgets/adventure_camera_settings_section.dart';
-import '../experimental/circuit_8h/circuit_8h_hub_screen.dart';
-import 'widgets/app_version_tile.dart';
-import '../home/home_nav_icons.dart';
-import '../lean_lab/lean_imu_lab_screen.dart';
-import '../lean_lab/lean_lab_screen.dart';
-import '../moderation/content_guidelines.dart';
-import '../moderation/staff_reports_screen.dart';
-import '../ride_active/location_permission_gate.dart';
-import '../rodadas/rodada_providers.dart';
-import '../watch/family_circle_screen.dart';
-import 'impersonate_screen.dart';
-import 'logger_hardware_screen.dart';
-import 'settings_group.dart';
 import '../../widgets/app_snack.dart';
-import '../../core/distribution.dart';
-import '../../core/pro/store_l10n.dart';
+import '../../widgets/pro_upsell.dart';
+import 'sections/settings_accessories_screen.dart';
+import 'sections/settings_account_screen.dart';
+import 'sections/settings_data_screen.dart';
+import 'sections/settings_lab_screen.dart';
+import 'sections/settings_language_screen.dart';
+import 'sections/settings_legal_screen.dart';
+import 'sections/settings_pro_screen.dart';
+import 'sections/settings_recording_screen.dart';
+import 'sections/settings_rodadas_screen.dart';
+import 'sections/settings_section_common.dart';
+import 'sections/settings_staff_screen.dart';
 
-class SettingsScreen extends ConsumerStatefulWidget {
+/// Settings hub: profile card + one row per section (each opens its own
+/// screen in `sections/`), so every option is at most two taps away.
+class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
-  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
-}
-
-class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  bool _syncing = false;
-
-  @override
-  void initState() {
-    super.initState();
-    PushDiagnostics.hydrate().then((_) {
-      if (mounted) setState(() {});
-    });
-  }
-
-  Future<void> _syncCloud() async {
-    final l10n = context.l10n;
-    if (ref.read(impersonationProvider).active) {
-      showAppSnack(context, l10n.impersonateNoSync);
-      return;
-    }
-    setState(() => _syncing = true);
-    try {
-      final sync = ref.read(rideSyncServiceProvider);
-      final outbox = ref.read(syncOutboxServiceProvider);
-      final drained = await outbox.drain(limit: 40);
-      final result = await sync.syncAllCompletedRides();
-      final combinedOk = drained.ok + result.ok;
-      final combinedFail = drained.fail + result.fail;
-      final pulled = await sync.pullMyCloudRides(
-        policy: TrackPullPolicy.preferRicher,
-      );
-      final leanPulled = await LeanLabService.instance.pullMyCloudSessions();
-      if (!mounted) return;
-      final err = sync.lastSyncError ?? sync.lastPullError;
-      final detail = err == null ? '' : '\n$err';
-      showAppSnack(
-        context,
-        '${l10n.syncCloudRidesDone(combinedOk, combinedFail)} · '
-        '${l10n.syncCloudRidesPulled(pulled, leanPulled)}'
-        '$detail',
-        duration: Duration(seconds: err == null ? 4 : 10),
-      );
-      ref.invalidate(ridesListProvider);
-    } finally {
-      if (mounted) setState(() => _syncing = false);
-    }
-  }
-
-  Future<void> _pushShareToRodadas() async {
-    await syncShareSettingsToOpenRodadas(
-      repo: ref.read(rodadaRepositoryProvider),
-      settings: ref.read(rodadaSharePrefsProvider),
-    );
-    ref.invalidate(myRodadasProvider);
-  }
-
-  TextStyle get _tileTitle => GoogleFonts.rajdhani(fontWeight: FontWeight.w600);
-
-  TextStyle get _tileSub =>
-      GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12);
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final isPro = ref.watch(isProProvider);
     final pro = ref.watch(proEntitlementProvider);
     final locale = ref.watch(localeProvider);
     final share = ref.watch(rodadaSharePrefsProvider);
-    final signedIn = ref.watch(hasPermanentIdentityProvider);
-    final accountGroup = SettingsGroup(
-      title: l10n.accountSection,
-      children: [
-        ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.translate, color: AppTheme.mist),
-          title: Text(
-            locale.languageCode == 'es' ? l10n.spanish : l10n.english,
-            style: _tileTitle,
-          ),
-          trailing: TextButton(
-            onPressed: () => ref.read(localeProvider.notifier).toggle(),
-            child: Text(
-              locale.languageCode == 'es' ? l10n.english : l10n.spanish,
-            ),
-          ),
-        ),
-        SwitchListTile(
-          contentPadding: EdgeInsets.zero,
-          secondary: const Icon(Icons.volume_up_rounded, color: AppTheme.mist),
-          title: Text(l10n.settingsModeSound, style: _tileTitle),
-          subtitle: Text(l10n.settingsModeSoundHelp, style: _tileSub),
-          value: ref.watch(modeSoundEnabledProvider),
-          activeThumbColor: RideVizPalette.leanLeft,
-          onChanged: (v) => ref.read(modeSoundEnabledProvider.notifier).set(v),
-        ),
-        const AccountAuthSection(),
-      ],
+    final soundOn = ref.watch(modeSoundEnabledProvider);
+    final imp = ref.watch(impersonationProvider);
+    final lastSync = settingsLastSyncLabel(
+      context,
+      ref.watch(settingsLastSyncProvider),
     );
+    final showLab = !AppDistribution.isStoreBuild || imp.staff;
+    final showStaff = settingsStaffVisible(imp);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.settings),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 12),
-            child: Center(child: RiderAliasChip(compact: true)),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(l10n.settings)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
         children: [
-          RiderLabMark(
-            size: BrandMarkSize.title,
-            showAccentBar: true,
-            showAttribution: true,
-            attribution: l10n.byRawThrottle,
-          ),
-          const SizedBox(height: 16),
-          const Align(alignment: Alignment.centerLeft, child: RiderAliasChip()),
-          const SizedBox(height: 8),
-          const AppVersionTile(),
+          const _ProfileCard(),
           const SizedBox(height: 12),
-          Material(
-            color: AppTheme.lineHot.withValues(alpha: 0.14),
-            borderRadius: BorderRadius.circular(12),
-            child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 4,
-              ),
-              leading: const Icon(Icons.alt_route, color: AppTheme.lineHot),
-              title: Text(l10n.gpsTrackPointsLabTile, style: _tileTitle),
-              subtitle: Text(l10n.gpsTrackPointsLabHelp, style: _tileSub),
-              trailing: const Icon(
-                Icons.chevron_right,
-                color: AppTheme.lineHot,
-              ),
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const Circuit8hHubScreen(),
-                  ),
-                );
-              },
-            ),
-          ),
-          if (!signedIn) accountGroup,
-          SettingsGroup(
-            title: l10n.settingsShareSection,
-            help: l10n.settingsShareSectionHelp,
-            children: [
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(l10n.autoArmOnRodadaStart, style: _tileTitle),
-                subtitle: Text(l10n.autoArmOnRodadaStartHelp, style: _tileSub),
-                value: share.autoArmOnStart,
-                activeThumbColor: RideVizPalette.leanLeft,
-                onChanged: (v) async {
-                  if (v) {
-                    final ok = await LocationPermissionGate.requestForRecording(
-                      context,
-                      offerBackground: true,
-                    );
-                    if (!ok || !context.mounted) return;
-                  }
-                  await ref
-                      .read(rodadaSharePrefsProvider.notifier)
-                      .setAutoArmOnStart(v);
-                  await _pushShareToRodadas();
-                },
-              ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(l10n.shareLocationOnRoute, style: _tileTitle),
-                subtitle: Text(l10n.shareLocationEvery5Min, style: _tileSub),
-                value: share.shareLive,
-                activeThumbColor: RideVizPalette.leanLeft,
-                onChanged: (v) async {
-                  if (v) {
-                    final ok =
-                        await LocationPermissionGate.requestForRodadaLive(
-                          context,
-                        );
-                    if (!ok || !context.mounted) return;
-                  }
-                  await ref
-                      .read(rodadaSharePrefsProvider.notifier)
-                      .setShareLive(v);
-                  await _pushShareToRodadas();
-                },
-              ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(l10n.autoShareFamilyOnRodada, style: _tileTitle),
-                subtitle: Text(
-                  l10n.autoShareFamilyOnRodadaHelp,
-                  style: _tileSub,
-                ),
-                value: share.autoShareFamily,
-                activeThumbColor: RideVizPalette.leanLeft,
-                onChanged: (v) async {
-                  if (v) {
-                    final ok =
-                        await LocationPermissionGate.requestForRodadaLive(
-                          context,
-                        );
-                    if (!ok || !context.mounted) return;
-                  }
-                  await ref
-                      .read(rodadaSharePrefsProvider.notifier)
-                      .setAutoShareFamily(v);
-                  await _pushShareToRodadas();
-                },
-              ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(l10n.shareTrackAfterRides, style: _tileTitle),
-                value: share.shareTrack,
-                activeThumbColor: RideVizPalette.leanLeft,
-                onChanged: (v) async {
-                  await ref
-                      .read(rodadaSharePrefsProvider.notifier)
-                      .setShareTrack(v);
-                  await _pushShareToRodadas();
-                },
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.favorite, color: AppTheme.lineHot),
-                title: Text(l10n.familyRodadaTipTitle, style: _tileTitle),
-                subtitle: Text(l10n.familyRodadaTipBody, style: _tileSub),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const FamilyCircleScreen(),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-          SettingsGroup(
+          SettingsNavRow(
+            icon: Icons.workspace_premium_outlined,
+            iconColor: RideVizPalette.leanLeft,
             title: l10n.proUnlock,
-            children: [
-              Text(
-                l10n.proUnlockBody,
-                style: GoogleFonts.rajdhani(
-                  color: AppTheme.steel,
-                  fontSize: 14,
-                  height: 1.4,
-                ),
-              ),
-              if (proRemainingLabel(l10n, pro) != null) ...[
-                const SizedBox(height: 8),
-                Text(
-                  proRemainingLabel(l10n, pro)!,
-                  style: GoogleFonts.rajdhani(
-                    color: RideVizPalette.leanLeft,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-              if (pro.expiredAfterGrant) ...[
-                const SizedBox(height: 8),
-                Text(
-                  l10n.proExpiredKeepLab,
-                  style: GoogleFonts.rajdhani(
-                    color: AppTheme.signal,
-                    fontSize: 13,
-                    height: 1.35,
-                  ),
-                ),
-              ],
-              const SizedBox(height: 12),
-              if (allowLocalProToggle)
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(l10n.proToggleDev, style: _tileTitle),
-                  subtitle: Text(l10n.proToggleHelp, style: _tileSub),
-                  value: isPro,
-                  activeThumbColor: RideVizPalette.leanLeft,
-                  onChanged: (v) =>
-                      ref.read(proEntitlementProvider.notifier).setPro(v),
-                ),
-              if (revenueCatConfigured) ...[
-                OutlinedButton(
-                  onPressed: () async {
-                    final ok = await ref
-                        .read(proEntitlementProvider.notifier)
-                        .restorePurchases();
-                    if (!context.mounted) return;
-                    showAppSnack(
-                      context,
-                      ok
-                          ? l10n.proUnlocked
-                          : StoreL10n.of(context).restoredNone,
-                    );
-                  },
-                  child: Text(l10n.restorePurchases),
-                ),
-                if (AppDistribution.allowsOfferCodes)
-                  TextButton(
-                    onPressed: () => ref
-                        .read(proEntitlementProvider.notifier)
-                        .presentOfferCodeRedemption(),
-                    child: Text(StoreL10n.of(context).redeemOfferCode),
-                  ),
-              ],
-              if (AppDistribution.allowsPartnerCodes)
-                const PartnerCodeRedeemField(),
-              const SizedBox(height: 8),
-              if (!isPro)
-                OutlinedButton(
-                  onPressed: () => showProUpsellSheet(context, ref),
-                  child: Text(l10n.upgradeToPro),
-                )
-              else
-                Row(
-                  children: [
-                    Icon(
-                      Icons.verified,
-                      color: RideVizPalette.leanLeft,
-                      size: 18,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        proRemainingLabel(l10n, pro) ?? l10n.proUnlocked,
-                        style: GoogleFonts.rajdhani(
-                          color: RideVizPalette.leanLeft,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-            ],
+            subtitle: settingsProStatusLabel(context, l10n, pro, isPro),
+            onTap: () => pushSettingsPage(context, const SettingsProScreen()),
           ),
-          SettingsGroup(
-            title: l10n.settingsCloudSection,
-            help: l10n.syncCloudRidesHelp,
-            children: [
-              FilledButton.icon(
-                onPressed: _syncing || ref.watch(impersonationProvider).active
-                    ? null
-                    : _syncCloud,
-                icon: _syncing
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.cloud_upload_outlined),
-                label: Text(_syncing ? '…' : l10n.syncCloudRides),
-              ),
-            ],
+          SettingsNavRow(
+            icon: Icons.fiber_manual_record_outlined,
+            title: l10n.settingsHubRecording,
+            subtitle: soundOn
+                ? l10n.settingsHubSoundOn
+                : l10n.settingsHubSoundOff,
+            onTap: () =>
+                pushSettingsPage(context, const SettingsRecordingScreen()),
           ),
-          SettingsGroup(
-            title: l10n.labsSectionTitle,
-            help: l10n.labsSectionHelp,
-            children: [
-              if (AppDistribution.allowsMetricaLogger)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.memory, color: AppTheme.lineHot),
-                  title: Text('M5 Logger', style: _tileTitle),
-                  subtitle: Text(
-                    'Emparejar hardware / importar sesión SD',
-                    style: _tileSub,
-                  ),
-                  trailing: isPro
-                      ? const Icon(Icons.chevron_right)
-                      : const ProBadge(),
-                  onTap: () => openIfPro(context, ref, () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const LoggerHardwareScreen(),
-                      ),
-                    );
-                  }),
-                ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(l10n.showForceStartArmed, style: _tileTitle),
-                subtitle: Text(l10n.showForceStartArmedHelp, style: _tileSub),
-                value: ref.watch(forceStartArmedVisibleProvider),
-                activeThumbColor: RideVizPalette.leanLeft,
-                onChanged: (v) => ref
-                    .read(forceStartArmedVisibleProvider.notifier)
-                    .setVisible(v),
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.alt_route, color: AppTheme.lineHot),
-                title: Text(l10n.gpsTrackPointsLabTile, style: _tileTitle),
-                subtitle: Text(l10n.gpsTrackPointsLabHelp, style: _tileSub),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const Circuit8hHubScreen(),
-                    ),
-                  );
-                },
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const AppMotoIcon(size: 28, color: AppTheme.line),
-                title: Text(l10n.leanLabSettingsTile, style: _tileTitle),
-                subtitle: Text(l10n.leanLabSettingsHelp, style: _tileSub),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const LeanLabScreen(),
-                    ),
-                  );
-                },
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.sensors, color: AppTheme.lineHot),
-                title: Text(l10n.leanImuLabSettingsTile, style: _tileTitle),
-                subtitle: Text(l10n.leanImuLabSettingsHelp, style: _tileSub),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const LeanImuLabScreen(),
-                    ),
-                  );
-                },
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(
-                  Icons.notifications_outlined,
-                  color: AppTheme.mist,
-                ),
-                title: Text(l10n.pushDiagnosticsTitle, style: _tileTitle),
-                subtitle: SelectableText(
-                  PushDiagnostics.history.isEmpty
-                      ? l10n.pushDiagnosticsEmpty
-                      : PushDiagnostics.history.reversed.take(5).join('\n'),
-                  style: _tileSub,
-                ),
-                trailing: PushDiagnostics.history.isEmpty
-                    ? null
-                    : IconButton(
-                        tooltip: l10n.pushDiagnosticsTitle,
-                        icon: const Icon(Icons.copy, size: 18),
-                        onPressed: () async {
-                          await Clipboard.setData(
-                            ClipboardData(
-                              text: PushDiagnostics.history.join('\n'),
-                            ),
-                          );
-                          if (!context.mounted) return;
-                          showAppSnack(context, l10n.pushDiagnosticsCopied);
-                        },
-                      ),
-              ),
-              if (isPro)
-                const AdventureCameraSettingsSection()
-              else
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.videocam_outlined),
-                  title: Text(
-                    StoreL10n.of(context).proHardwareTitle,
-                    style: _tileTitle,
-                  ),
-                  subtitle: Text(
-                    StoreL10n.of(context).proHardwareBody,
-                    style: _tileSub,
-                  ),
-                  trailing: const ProBadge(),
-                  onTap: () => showProUpsellSheet(context, ref),
-                ),
-            ],
+          SettingsNavRow(
+            icon: Icons.groups_outlined,
+            title: l10n.settingsHubRodadas,
+            subtitle: share.shareLive
+                ? l10n.settingsHubShareLiveOn
+                : l10n.settingsHubShareLiveOff,
+            onTap: () =>
+                pushSettingsPage(context, const SettingsRodadasScreen()),
           ),
-          SettingsGroup(
-            title: l10n.settingsLegalSection,
-            children: [
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(
-                  Icons.description_outlined,
-                  color: AppTheme.line,
-                ),
-                title: Text(l10n.termsTitle, style: _tileTitle),
-                subtitle: Text(l10n.legalOpenInBrowser, style: _tileSub),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => openLegalUrlOrSnack(context, LegalUrls.terms),
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(
-                  Icons.privacy_tip_outlined,
-                  color: AppTheme.line,
-                ),
-                title: Text(l10n.privacyTitle, style: _tileTitle),
-                subtitle: Text(l10n.legalOpenInBrowser, style: _tileSub),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => openLegalUrlOrSnack(context, LegalUrls.privacy),
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.gavel_outlined, color: AppTheme.line),
-                title: Text(l10n.ugcGuidelinesTitle, style: _tileTitle),
-                subtitle: Text(l10n.ugcGuidelinesBanner, style: _tileSub),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => showUgcGuidelinesDialog(context),
-              ),
-              if (ref.watch(impersonationProvider).staff &&
-                  !ref.watch(impersonationProvider).active) ...[
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.visibility, color: AppTheme.signal),
-                  title: Text(l10n.impersonateTile, style: _tileTitle),
-                  subtitle: Text(l10n.impersonateHelp, style: _tileSub),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const ImpersonateScreen(),
-                      ),
-                    );
-                  },
-                ),
-                const _StaffPartnerCodeTile(),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(
-                    Icons.flag_outlined,
-                    color: AppTheme.signal,
-                  ),
-                  title: Text(l10n.ugcStaffQueueTitle, style: _tileTitle),
-                  subtitle: Text(l10n.ugcStaffQueueHelp, style: _tileSub),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const StaffReportsScreen(),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ],
+          SettingsNavRow(
+            icon: Icons.cloud_sync_outlined,
+            title: l10n.settingsHubData,
+            subtitle: lastSync ?? l10n.settingsHubDataSub,
+            onTap: () => pushSettingsPage(context, const SettingsDataScreen()),
           ),
-          if (signedIn) accountGroup,
+          SettingsNavRow(
+            icon: Icons.translate,
+            title: l10n.language,
+            subtitle: locale.languageCode == 'es' ? l10n.spanish : l10n.english,
+            onTap: () =>
+                pushSettingsPage(context, const SettingsLanguageScreen()),
+          ),
+          SettingsNavRow(
+            icon: Icons.videocam_outlined,
+            title: l10n.settingsHubAccessories,
+            subtitle: AppDistribution.allowsMetricaLogger
+                ? l10n.settingsHubAccessoriesSub
+                : l10n.settingsHubAccessoriesSubCameraOnly,
+            trailing: isPro ? null : const ProBadge(),
+            onTap: () =>
+                pushSettingsPage(context, const SettingsAccessoriesScreen()),
+          ),
+          SettingsNavRow(
+            icon: Icons.gavel_outlined,
+            title: l10n.settingsHubLegal,
+            subtitle: l10n.settingsHubLegalSub,
+            onTap: () => pushSettingsPage(context, const SettingsLegalScreen()),
+          ),
+          if (showLab)
+            SettingsNavRow(
+              icon: Icons.science_outlined,
+              iconColor: AppTheme.lineHot,
+              title: l10n.settingsHubLab,
+              subtitle: l10n.settingsHubLabSub,
+              onTap: () => pushSettingsPage(context, const SettingsLabScreen()),
+            ),
+          if (showStaff)
+            SettingsNavRow(
+              icon: Icons.admin_panel_settings_outlined,
+              iconColor: AppTheme.signal,
+              title: l10n.settingsHubStaff,
+              subtitle: l10n.settingsHubStaffSub,
+              onTap: () =>
+                  pushSettingsPage(context, const SettingsStaffScreen()),
+            ),
+          const SizedBox(height: 24),
+          const _VersionFooter(),
         ],
       ),
     );
   }
 }
 
-class _StaffPartnerCodeTile extends ConsumerStatefulWidget {
-  const _StaffPartnerCodeTile();
+/// Alias, email and Free/Pro chip. Tapping opens Cuenta.
+class _ProfileCard extends ConsumerWidget {
+  const _ProfileCard();
+
   @override
-  ConsumerState<_StaffPartnerCodeTile> createState() =>
-      _StaffPartnerCodeTileState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final alias = ref.watch(riderAliasProvider).trim();
+    final auth = ref.watch(authServiceProvider);
+    final signedIn = ref.watch(hasPermanentIdentityProvider);
+    final isPro = ref.watch(isProProvider);
+    final authLabel = auth.displayLabel?.trim();
+    final email = auth.currentUser?.email;
+
+    final name = alias.isNotEmpty
+        ? alias
+        : (authLabel != null && authLabel.isNotEmpty
+              ? authLabel
+              : (signedIn
+                    ? l10n.accountSignedIn
+                    : l10n.settingsHubProfileGuest));
+    final secondLine = !signedIn
+        ? l10n.settingsHubProfileSignInHint
+        : (email != null && email.isNotEmpty ? email : null);
+    final initial = name.isNotEmpty
+        ? String.fromCharCode(name.runes.first).toUpperCase()
+        : '?';
+
+    return Material(
+      color: AppTheme.asphaltElevated,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: () => pushSettingsPage(context, const SettingsAccountScreen()),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 72),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: signedIn
+                  ? AppTheme.line.withValues(alpha: 0.35)
+                  : AppTheme.mist.withValues(alpha: 0.08),
+            ),
+          ),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 22,
+                backgroundColor: AppTheme.asphalt,
+                child: Text(
+                  initial,
+                  style: GoogleFonts.exo2(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 18,
+                    color: AppTheme.mist,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.exo2(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                      ),
+                    ),
+                    if (secondLine != null)
+                      Text(
+                        secondLine,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.rajdhani(
+                          color: AppTheme.steel,
+                          fontSize: 13,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              _PlanChip(isPro: isPro),
+              const Icon(Icons.chevron_right),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-class _StaffPartnerCodeTileState extends ConsumerState<_StaffPartnerCodeTile> {
-  final _label = TextEditingController();
-  bool _busy = false;
-  String? _lastCode;
+class _PlanChip extends StatelessWidget {
+  const _PlanChip({required this.isPro});
 
-  @override
-  void dispose() {
-    _label.dispose();
-    super.dispose();
-  }
-
-  Future<void> _create() async {
-    final l10n = context.l10n;
-    setState(() => _busy = true);
-    final result = await ref
-        .read(proEntitlementProvider.notifier)
-        .staffCreatePartnerCode(label: _label.text);
-    if (!mounted) return;
-    setState(() => _busy = false);
-    if (!result.ok || result.code == null) {
-      showAppSnackError(context, l10n.partnerCodeInvalid);
-      return;
-    }
-    setState(() => _lastCode = result.code);
-    await Clipboard.setData(ClipboardData(text: result.code!));
-    if (!mounted) return;
-    showAppSnack(context, l10n.partnerCodeCopied(result.code!));
-  }
+  final bool isPro;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    final color = isPro ? RideVizPalette.leanLeft : AppTheme.steel;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.6)),
+        color: color.withValues(alpha: 0.12),
+      ),
+      child: Text(
+        isPro ? l10n.settingsHubChipPro : l10n.settingsHubChipFree,
+        style: GoogleFonts.rajdhani(
+          color: color,
+          fontWeight: FontWeight.w700,
+          fontSize: 13,
+        ),
+      ),
+    );
+  }
+}
+
+/// Small version line at the bottom of the hub; tap the icon to copy it.
+class _VersionFooter extends ConsumerWidget {
+  const _VersionFooter();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final info = ref.watch(appBuildInfoProvider).valueOrNull;
+    final line = info?.fullLine;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
-          l10n.createPartnerCode,
-          style: GoogleFonts.rajdhani(fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          l10n.createPartnerCodeHelp,
-          style: GoogleFonts.rajdhani(
-            color: AppTheme.steel,
-            fontSize: 12,
-            height: 1.35,
+        Flexible(
+          child: Text(
+            line == null
+                ? l10n.appVersionTitle
+                : '${l10n.appVersionTitle} $line',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 12),
           ),
         ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: _label,
-          decoration: InputDecoration(
-            hintText: l10n.partnerLabelHint,
-            isDense: true,
+        if (line != null)
+          IconButton(
+            tooltip: l10n.appVersionCopy,
+            icon: const Icon(Icons.copy, size: 16, color: AppTheme.steel),
+            onPressed: () async {
+              await Clipboard.setData(ClipboardData(text: line));
+              if (!context.mounted) return;
+              showAppSnack(context, l10n.appVersionCopied);
+            },
           ),
-        ),
-        const SizedBox(height: 8),
-        OutlinedButton(
-          onPressed: _busy ? null : _create,
-          child: Text(l10n.createPartnerCode),
-        ),
-        if (_lastCode != null) ...[
-          const SizedBox(height: 8),
-          SelectableText(
-            _lastCode!,
-            style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
-          ),
-        ],
       ],
     );
   }

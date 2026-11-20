@@ -27,6 +27,8 @@ import '../adventure_camera/widgets/adventure_camera_lifecycle_binder.dart';
 import '../friends/friends_screen.dart';
 import '../ride_active/armed_session_flow.dart';
 import '../ride_active/armed_session_nav.dart';
+import '../ride_active/location_permission_gate.dart';
+import '../ride_active/ride_notification_l10n.dart';
 import '../ride_active/widgets/upright_freeze_sheet.dart';
 import '../ride_detail/ride_detail_screen.dart';
 import '../ride_detail/ride_rename.dart';
@@ -121,9 +123,14 @@ class HomeScreen extends ConsumerWidget {
                             ),
                           HomeNavIconButton(
                             tooltip: l10n.rodadasTitle,
+                            label: l10n.homeNavRodadas,
                             semanticId: DemoIds.navRodadas,
-                            onPressed: () {
-                              Navigator.of(context).push(
+                            onPressed: () async {
+                              await LocationPermissionGate.askNotificationsForSocial(
+                                context,
+                              );
+                              if (!context.mounted) return;
+                              await Navigator.of(context).push(
                                 MaterialPageRoute<void>(
                                   builder: (_) => const RodadasScreen(),
                                 ),
@@ -133,9 +140,14 @@ class HomeScreen extends ConsumerWidget {
                           ),
                           HomeNavIconButton(
                             tooltip: l10n.friends,
+                            label: l10n.homeNavFriends,
                             semanticId: DemoIds.navFriends,
-                            onPressed: () {
-                              Navigator.of(context).push(
+                            onPressed: () async {
+                              await LocationPermissionGate.askNotificationsForSocial(
+                                context,
+                              );
+                              if (!context.mounted) return;
+                              await Navigator.of(context).push(
                                 MaterialPageRoute<void>(
                                   builder: (_) => const FriendsScreen(),
                                 ),
@@ -275,7 +287,13 @@ class HomeScreen extends ConsumerWidget {
                       error: (e, _) => ListView(
                         physics: const AlwaysScrollableScrollPhysics(),
                         padding: const EdgeInsets.all(24),
-                        children: [Text(l10n.couldNotLoadRides('$e'))],
+                        children: [
+                          Text(
+                            l10n.couldNotLoadRides(
+                              context.l10n.userFacingError(e),
+                            ),
+                          ),
+                        ],
                       ),
                       data: (rides) {
                         final completed = rides
@@ -361,7 +379,10 @@ class HomeScreen extends ConsumerWidget {
                       showAppSnack(context, l10n.armAutoNoRouteHint);
                     } catch (e) {
                       if (!context.mounted) return;
-                      showAppSnackError(context, '$e');
+                      showAppSnackError(
+                        context,
+                        context.l10n.userFacingError(e),
+                      );
                     }
                   },
                 ),
@@ -369,8 +390,12 @@ class HomeScreen extends ConsumerWidget {
                   builder: (context) {
                     final pro = ref.watch(proEntitlementProvider);
                     final remaining = proRemainingLabel(l10n, pro);
+                    // At most one promo strip at the bottom: the Pro
+                    // status strip wins over the Free ad banner.
                     if (remaining == null && !pro.expiredAfterGrant) {
-                      return const SizedBox.shrink();
+                      return FreeAdBanner(
+                        onUpgrade: () => showProUpsellSheet(context, ref),
+                      );
                     }
                     return Material(
                       color: AppTheme.asphaltElevated,
@@ -393,7 +418,6 @@ class HomeScreen extends ConsumerWidget {
                     );
                   },
                 ),
-                FreeAdBanner(onUpgrade: () => showProUpsellSheet(context, ref)),
               ],
             ),
           ),
@@ -485,6 +509,14 @@ class _ArmAutoResumeOpenerState extends ConsumerState<_ArmAutoResumeOpener>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Localize the foreground notification before any recording screen opens
+    // (auto-start, resumed ride) and again whenever the app language changes.
+    applyRideNotificationText(context, ref.read(rideRecorderProvider));
   }
 
   @override
@@ -662,9 +694,8 @@ class _ArmedBanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final recording = ref.watch(rideRecorderProvider).isRecording;
-    final paused =
-        ref.watch(activeRideProvider).valueOrNull?.isPaused ?? false;
+    final recording = ref.watch(isRecordingProvider);
+    final paused = ref.watch(activeRideProvider).valueOrNull?.isPaused ?? false;
     final held = ref.watch(motionDetectionHeldProvider);
     final title = !recording
         ? l10n.sessionPhaseArmed
@@ -744,6 +775,35 @@ class _RecoveryBanner extends ConsumerWidget {
 
   final Ride ride;
 
+  String _recoveredDate(BuildContext context) =>
+      DateFormat.MMMd(context.l10n.localeName).add_jm().format(ride.startedAt);
+
+  Future<void> _confirmDiscard(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.homeDiscardRecoveredTitle),
+        content: Text(l10n.homeDiscardRecoveredBody(_recoveredDate(context))),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.signal),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.discard),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    await ref.read(rideRecorderProvider).abandonRecovered(ride.id);
+    ref.invalidate(ridesListProvider);
+    ref.invalidate(incompleteRideProvider);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
@@ -764,9 +824,7 @@ class _RecoveryBanner extends ConsumerWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            l10n.unfinishedRideBody(
-              DateFormat.MMMd().add_jm().format(ride.startedAt),
-            ),
+            l10n.unfinishedRideBody(_recoveredDate(context)),
             style: const TextStyle(color: AppTheme.steel, fontSize: 13),
           ),
           const SizedBox(height: 12),
@@ -774,13 +832,7 @@ class _RecoveryBanner extends ConsumerWidget {
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () async {
-                    await ref
-                        .read(rideRecorderProvider)
-                        .abandonRecovered(ride.id);
-                    ref.invalidate(ridesListProvider);
-                    ref.invalidate(incompleteRideProvider);
-                  },
+                  onPressed: () => _confirmDiscard(context, ref),
                   child: Text(l10n.discard),
                 ),
               ),
@@ -788,9 +840,17 @@ class _RecoveryBanner extends ConsumerWidget {
               Expanded(
                 child: FilledButton(
                   onPressed: () async {
-                    final completed = await ref
-                        .read(rideRecorderProvider)
-                        .finalizeRecovered(ride.id);
+                    final Ride completed;
+                    try {
+                      completed = await ref
+                          .read(rideRecorderProvider)
+                          .finalizeRecovered(ride.id);
+                    } catch (e) {
+                      debugPrint('finalizeRecovered failed: $e');
+                      if (!context.mounted) return;
+                      showAppSnackError(context, l10n.homeSaveRecoveredError);
+                      return;
+                    }
                     unawaited(
                       enqueueAndDrainRideSync(
                         ref.read(syncOutboxServiceProvider),
@@ -834,7 +894,7 @@ class _RideTile extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.notNow),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppTheme.signal),
@@ -856,9 +916,11 @@ class _RideTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final date = DateFormat.MMMd().add_jm().format(ride.startedAt);
-    final abandoned = ride.status == RideStatus.abandoned;
     final l10n = context.l10n;
+    final date = DateFormat.MMMd(
+      l10n.localeName,
+    ).add_jm().format(ride.startedAt);
+    final abandoned = ride.status == RideStatus.abandoned;
 
     final tile = Material(
       color: AppTheme.asphaltElevated,
@@ -929,9 +991,13 @@ class _RideTile extends ConsumerWidget {
                               '${ride.distanceKm.toStringAsFixed(2)} km',
                               formatDuration(ride.duration),
                               if (ride.maxSpeedKmh != null)
-                                'max ${ride.maxSpeedKmh!.toStringAsFixed(0)} km/h',
+                                l10n.homeRideMaxSpeed(
+                                  ride.maxSpeedKmh!.toStringAsFixed(0),
+                                ),
                               if (ride.maxLeanDegrees != null)
-                                'lean ${ride.maxLeanDegrees!.toStringAsFixed(0)}°',
+                                l10n.homeRideMaxLean(
+                                  ride.maxLeanDegrees!.toStringAsFixed(0),
+                                ),
                             ].join(' · '),
                       style: const TextStyle(
                         color: AppTheme.steel,
@@ -1045,7 +1111,8 @@ class _SeasonStrip extends StatelessWidget {
               Expanded(
                 child: _GarageStat(
                   label: l10n.statDistance,
-                  value: '${summary.totalDistanceKm.toStringAsFixed(1)} km',
+                  value: summary.totalDistanceKm.toStringAsFixed(1),
+                  unit: 'km',
                 ),
               ),
               Expanded(
@@ -1054,6 +1121,7 @@ class _SeasonStrip extends StatelessWidget {
                   value: summary.bestMaxSpeedKmh == null
                       ? '--'
                       : summary.bestMaxSpeedKmh!.toStringAsFixed(0),
+                  unit: summary.bestMaxSpeedKmh == null ? null : l10n.kmh,
                 ),
               ),
               Expanded(
@@ -1073,10 +1141,13 @@ class _SeasonStrip extends StatelessWidget {
 }
 
 class _GarageStat extends StatelessWidget {
-  const _GarageStat({required this.label, required this.value});
+  const _GarageStat({required this.label, required this.value, this.unit});
 
   final String label;
   final String value;
+
+  /// Small unit suffix (km, km/h) so the number keeps its size.
+  final String? unit;
 
   @override
   Widget build(BuildContext context) {
@@ -1088,8 +1159,23 @@ class _GarageStat extends StatelessWidget {
           style: GoogleFonts.rajdhani(fontSize: 11, color: AppTheme.steel),
         ),
         const SizedBox(height: 2),
-        Text(
-          value,
+        Text.rich(
+          TextSpan(
+            text: value,
+            children: [
+              if (unit != null)
+                TextSpan(
+                  text: ' $unit',
+                  style: GoogleFonts.rajdhani(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.steel,
+                  ),
+                ),
+            ],
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: GoogleFonts.exo2(
             fontSize: 16,
             fontWeight: FontWeight.w700,

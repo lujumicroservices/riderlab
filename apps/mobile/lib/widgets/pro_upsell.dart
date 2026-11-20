@@ -24,6 +24,51 @@ void openIfPro(BuildContext context, WidgetRef ref, VoidCallback open) {
   }
 }
 
+/// Message for a build without store billing (sideload, or no RevenueCat key).
+String proStoreUnavailableMessage(BuildContext context) {
+  final l10n = context.l10n;
+  if (AppDistribution.allowsPartnerCodes) return l10n.proStoreOnlyBuild;
+  return AppDistribution.isAppStore
+      ? l10n.proStoreNotReadyIos
+      : l10n.proStoreOnlyBuildNoCodes;
+}
+
+/// Snack for a purchase / restore outcome. A user cancel shows nothing.
+void showProPurchaseResult(
+  BuildContext context,
+  ProPurchaseResult result, {
+  bool restore = false,
+}) {
+  final l10n = context.l10n;
+  final s = StoreL10n.of(context);
+  final String? message = switch (result) {
+    ProPurchaseResult.success => l10n.proUnlocked,
+    ProPurchaseResult.cancelled => null,
+    ProPurchaseResult.pending => l10n.proPurchasePending,
+    ProPurchaseResult.notConfigured => proStoreUnavailableMessage(context),
+    ProPurchaseResult.unavailable =>
+      restore ? s.restoredNone : s.plansUnavailable,
+    ProPurchaseResult.failed =>
+      restore
+          ? l10n.proRestoreFailed
+          : (AppDistribution.allowsPartnerCodes
+                ? l10n.proStoreNotReady
+                : l10n.proStoreNotReadyIos),
+  };
+  if (message != null) showAppSnack(context, message);
+}
+
+/// "Restaurar compras" with feedback for every outcome, including builds
+/// without store billing. Reusable from Settings.
+Future<ProPurchaseResult> restoreProPurchases(
+  BuildContext context,
+  WidgetRef ref,
+) async {
+  final result = await ref.read(proEntitlementProvider.notifier).restore();
+  if (context.mounted) showProPurchaseResult(context, result, restore: true);
+  return result;
+}
+
 Future<void> showProUpsellSheet(BuildContext context, WidgetRef ref) {
   return showModalBottomSheet<void>(
     context: context,
@@ -56,13 +101,15 @@ class _ProUpsellSheetState extends ConsumerState<_ProUpsellSheet> {
   }
 
   Future<void> _loadOffering() async {
-    final offering =
-        await ref.read(proEntitlementProvider.notifier).currentOffering();
+    final offering = await ref
+        .read(proEntitlementProvider.notifier)
+        .currentOffering();
     if (!mounted) return;
     setState(() {
       _offering = offering;
       // Yearly is the default choice (docs/FREE_VS_PRO.md).
-      _selected = offering?.annual ??
+      _selected =
+          offering?.annual ??
           offering?.monthly ??
           offering?.availablePackages.firstOrNull;
       _loading = false;
@@ -70,37 +117,26 @@ class _ProUpsellSheetState extends ConsumerState<_ProUpsellSheet> {
   }
 
   Future<void> _subscribe() async {
-    final l10n = context.l10n;
     final notifier = ref.read(proEntitlementProvider.notifier);
+    if (!notifier.storeBillingReady) {
+      showProPurchaseResult(context, ProPurchaseResult.notConfigured);
+      return;
+    }
     setState(() => _busy = true);
-    final ok = _selected != null
+    final result = _selected != null
         ? await notifier.purchasePackage(_selected!)
         : await notifier.purchasePro();
     if (!mounted) return;
     setState(() => _busy = false);
-    if (ok) {
-      Navigator.of(context).pop();
-      showAppSnack(context, l10n.proUnlocked);
-      return;
-    }
-    if (_offering == null) {
-      showAppSnack(
-        context,
-        AppDistribution.allowsPartnerCodes
-            ? l10n.proStoreNotReady
-            : StoreL10n.of(context).storeNotReady,
-      );
-    }
+    showProPurchaseResult(context, result);
+    if (result == ProPurchaseResult.success) Navigator.of(context).pop();
   }
 
   Future<void> _restore() async {
-    final s = StoreL10n.of(context);
-    final l10n = context.l10n;
     setState(() => _busy = true);
-    final ok = await ref.read(proEntitlementProvider.notifier).restorePurchases();
+    await restoreProPurchases(context, ref);
     if (!mounted) return;
     setState(() => _busy = false);
-    showAppSnack(context, ok ? l10n.proUnlocked : s.restoredNone);
   }
 
   @override
@@ -108,6 +144,9 @@ class _ProUpsellSheetState extends ConsumerState<_ProUpsellSheet> {
     final l10n = context.l10n;
     final s = StoreL10n.of(context);
     final status = ref.watch(proEntitlementProvider);
+    final billingReady = ref
+        .read(proEntitlementProvider.notifier)
+        .storeBillingReady;
     final remaining = proRemainingLabel(l10n, status);
     final inset = MediaQuery.viewInsetsOf(context).bottom;
     final packages = <Package>[
@@ -178,7 +217,11 @@ class _ProUpsellSheetState extends ConsumerState<_ProUpsellSheet> {
               const SizedBox(height: 10),
               _FeatureRow(text: l10n.proFeatureCurva),
               const SizedBox(height: 10),
-              _FeatureRow(text: s.proHardwareBody),
+              _FeatureRow(
+                text: AppDistribution.allowsMetricaLogger
+                    ? l10n.proFeatureHardware
+                    : l10n.proFeatureCamera,
+              ),
               const SizedBox(height: 24),
               if (status.isPaid)
                 Text(
@@ -199,7 +242,20 @@ class _ProUpsellSheetState extends ConsumerState<_ProUpsellSheet> {
                       style: GoogleFonts.rajdhani(color: AppTheme.steel),
                     ),
                   )
-                else if (revenueCatConfigured && packages.isEmpty)
+                else if (!billingReady)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Text(
+                      proStoreUnavailableMessage(context),
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.rajdhani(
+                        color: AppTheme.steel,
+                        fontSize: 13,
+                        height: 1.35,
+                      ),
+                    ),
+                  )
+                else if (packages.isEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Text(
@@ -223,7 +279,7 @@ class _ProUpsellSheetState extends ConsumerState<_ProUpsellSheet> {
                     packages.isNotEmpty ? s.subscribe : l10n.upgradeToPro,
                   ),
                 ),
-                if (revenueCatConfigured) ...[
+                if (AppDistribution.isStoreBuild || revenueCatConfigured) ...[
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -239,46 +295,42 @@ class _ProUpsellSheetState extends ConsumerState<_ProUpsellSheet> {
                             onPressed: _busy
                                 ? null
                                 : () => ref
-                                    .read(proEntitlementProvider.notifier)
-                                    .presentOfferCodeRedemption(),
+                                      .read(proEntitlementProvider.notifier)
+                                      .presentOfferCodeRedemption(),
                             child: Text(s.redeemOfferCode),
                           ),
                         ),
                     ],
                   ),
                 ],
-                if (packages.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    s.autoRenewDisclosure(ios: AppDistribution.isAppStore),
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.rajdhani(
-                      color: AppTheme.steel,
-                      fontSize: 11.5,
-                      height: 1.35,
-                    ),
+                const SizedBox(height: 8),
+                Text(
+                  packages.isNotEmpty
+                      ? s.autoRenewDisclosure(ios: AppDistribution.isAppStore)
+                      : l10n.proSubscriptionFooter,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.rajdhani(
+                    color: AppTheme.steel,
+                    fontSize: 11.5,
+                    height: 1.35,
                   ),
-                ],
+                ),
                 if (AppDistribution.allowsPartnerCodes) ...[
                   const SizedBox(height: 16),
                   Text(
                     l10n.havePartnerCode,
                     style: GoogleFonts.rajdhani(fontWeight: FontWeight.w700),
                   ),
+                  Text(
+                    l10n.proPartnerCodeHint,
+                    style: GoogleFonts.rajdhani(
+                      color: AppTheme.steel,
+                      fontSize: 12,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   const PartnerCodeRedeemField(compact: true),
                 ],
-                const SizedBox(height: 8),
-                Text(
-                  AppDistribution.allowsPartnerCodes
-                      ? l10n.startTrialHelp
-                      : s.trialHelpStore,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.rajdhani(
-                    color: AppTheme.steel,
-                    fontSize: 12,
-                  ),
-                ),
               ],
               const SizedBox(height: 8),
               Row(
@@ -363,8 +415,7 @@ class _PlanTile extends StatelessWidget {
             ),
             if (yearly)
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: accent.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(6),

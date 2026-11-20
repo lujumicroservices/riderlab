@@ -65,7 +65,7 @@ class _RidePhotoImportSheetState extends ConsumerState<RidePhotoImportSheet> {
       Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
-      showAppSnackError(context, '$e');
+      showAppSnackError(context, context.l10n.userFacingError(e));
       setState(() => _busy = false);
     }
   }

@@ -118,7 +118,7 @@ Google Sign-In is optional. Email/password is enough for review.
 ```
 
 **Name:** `RiderLab review account`  
-**Username:** the email you created in Supabase → Authentication → Users (auto-confirm).  
+**Username:** `riderlab.review@gmail.com` (Supabase → Authentication → Users, auto-confirmed).  
 **Password:** that user’s password (Play Console only — not in git).
 
 You can still mention Google as optional in “Any other information”:

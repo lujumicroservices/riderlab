@@ -5,17 +5,10 @@ import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-enum LocationPermissionDenyReason {
-  servicesOff,
-  denied,
-  deniedForever,
-}
+enum LocationPermissionDenyReason { servicesOff, denied, deniedForever }
 
 class LocationPermissionResult {
-  const LocationPermissionResult({
-    required this.granted,
-    this.reason,
-  });
+  const LocationPermissionResult({required this.granted, this.reason});
 
   final bool granted;
   final LocationPermissionDenyReason? reason;
@@ -30,20 +23,11 @@ class LocationDeniedException implements Exception {
   String toString() => reason.name;
 }
 
-enum GpsWarmupPhase {
-  permissions,
-  searching,
-  locking,
-  ready,
-  timeout,
-}
+enum GpsWarmupPhase { permissions, searching, locking, ready, timeout }
 
 /// Progress while GNSS settles before the first recorded point.
 class GnssWarmupStatus {
-  const GnssWarmupStatus({
-    required this.phase,
-    this.accuracyMeters,
-  });
+  const GnssWarmupStatus({required this.phase, this.accuracyMeters});
 
   final GpsWarmupPhase phase;
   final double? accuracyMeters;
@@ -55,7 +39,8 @@ class GnssWarmupStatus {
     final acc = accuracyMeters;
     if (acc == null || acc <= 0) return 0;
     if (acc <= LocationService.warmTargetAccuracyMeters) return 1;
-    final t = (LocationService.maxAcceptAccuracyMeters - acc) /
+    final t =
+        (LocationService.maxAcceptAccuracyMeters - acc) /
         (LocationService.maxAcceptAccuracyMeters -
             LocationService.warmTargetAccuracyMeters);
     return t.clamp(0.0, 0.95);
@@ -77,23 +62,18 @@ class LocationService {
   /// Prefer starting once horizontal accuracy is at least this good.
   static const double warmTargetAccuracyMeters = 10;
 
-  static bool get _isIos => !kIsWeb && Platform.isIOS;
-
   /// True when location services are on and recording can start.
   ///
-  /// Android: background ("always") is required (foreground service flow).
-  /// iOS: "While Using" is enough — with UIBackgroundModes `location`,
-  /// `allowBackgroundLocationUpdates` and the blue indicator, a stream started
-  /// in the foreground keeps running with the screen locked. "Always" is
-  /// offered later, in context (step 2, [LocationPermissionGate]).
+  /// Foreground location ("While using the app") is enough on both platforms:
+  /// recording runs inside a location foreground service (Android) or with
+  /// `allowBackgroundLocationUpdates` (iOS), both started while the app is in
+  /// the foreground. "Always" makes screen-off sessions more robust and is
+  /// offered in context by [LocationPermissionGate], never forced here.
   Future<bool> hasRecordingPermission() async {
     if (!await Geolocator.isLocationServiceEnabled()) return false;
     final permission = await Geolocator.checkPermission();
-    if (_isIos) {
-      return permission == LocationPermission.whileInUse ||
-          permission == LocationPermission.always;
-    }
-    return permission == LocationPermission.always;
+    return permission == LocationPermission.whileInUse ||
+        permission == LocationPermission.always;
   }
 
   /// True when background ("always") location is granted.
@@ -102,13 +82,18 @@ class LocationService {
     return permission == LocationPermission.always;
   }
 
-  /// iOS step 2: upgrade "While Using" → "Always". iOS shows this system
-  /// prompt only once; afterwards the change must be made in Settings.
+  /// Step 2: upgrade "While using" → "Always".
+  ///
+  /// Android 11+ opens the app's location settings page (the user must pick
+  /// "Allow all the time" there); iOS shows its one-time upgrade prompt.
   Future<bool> requestAlwaysUpgrade() async {
     final status = await Permission.locationAlways.request();
     return status.isGranted;
   }
 
+  /// Foreground location only. Never opens Settings, never asks for
+  /// notifications or "always": [LocationPermissionGate] runs those steps
+  /// with its own explanations before calibration.
   Future<LocationPermissionResult> ensurePermission() async {
     if (await hasRecordingPermission()) {
       return const LocationPermissionResult(granted: true);
@@ -135,26 +120,11 @@ class LocationService {
     }
 
     if (permission == LocationPermission.deniedForever) {
-      // iOS: LocationPermissionGate shows an explanation with "Open Settings".
-      if (!_isIos) await openAppSettings();
       return const LocationPermissionResult(
         granted: false,
         reason: LocationPermissionDenyReason.deniedForever,
       );
     }
-
-    if (!kIsWeb && Platform.isAndroid) {
-      await Permission.notification.request();
-    }
-
-    // iOS step 1 ends here ("While Using"). Never ask "Always" on every
-    // check: LocationPermissionGate.offerAlwaysIfUseful asks it once, in context.
-    if (_isIos) {
-      return const LocationPermissionResult(granted: true);
-    }
-
-    // Android: always / background — required for glorieta loops with screen off.
-    await Permission.locationAlways.request();
 
     return const LocationPermissionResult(granted: true);
   }

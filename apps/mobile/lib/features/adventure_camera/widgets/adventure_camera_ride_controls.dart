@@ -22,7 +22,7 @@ class AdventureCameraRideControls extends ConsumerWidget {
         if (!hub.isLabEnabled) return const SizedBox.shrink();
         final status =
             ref.watch(adventureCameraStatusProvider).asData?.value ??
-                hub.status;
+            hub.status;
         final label = switch (status.phase) {
           AdventureCameraPhase.disabled => l10n.labAdventureCameraPhaseOff,
           AdventureCameraPhase.idle => l10n.labAdventureCameraPhaseIdle,
@@ -53,7 +53,9 @@ class AdventureCameraRideControls extends ConsumerWidget {
                 if (status.message != null && status.message!.isNotEmpty) ...[
                   const SizedBox(height: 4),
                   Text(
-                    status.message!,
+                    status.phase == AdventureCameraPhase.error
+                        ? context.l10n.userFacingError(status.message!)
+                        : status.message!,
                     style: GoogleFonts.rajdhani(
                       color: status.phase == AdventureCameraPhase.error
                           ? AppTheme.signal

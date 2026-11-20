@@ -36,7 +36,7 @@ Future<bool> confirmAndLeaveRodada(
     await ref.read(rodadaRepositoryProvider).leaveRodada(rodadaId);
   } catch (e) {
     if (context.mounted) {
-      showAppSnackError(context, '$e');
+      showAppSnackError(context, context.l10n.userFacingError(e));
     }
     return false;
   }

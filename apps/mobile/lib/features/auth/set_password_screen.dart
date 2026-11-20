@@ -58,7 +58,7 @@ class _SetPasswordScreenState extends ConsumerState<SetPasswordScreen> {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _error = '$e';
+        _error = context.l10n.userFacingError(e);
       });
     }
   }

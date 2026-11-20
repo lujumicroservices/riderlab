@@ -59,14 +59,15 @@ class RideDetailScreen extends ConsumerWidget {
     return Scaffold(
       body: rideAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, _) => Center(child: Text(context.l10n.userFacingError(e))),
         data: (ride) {
           if (ride == null) {
             return Center(child: Text(l10n.rideNotFound));
           }
           return overviewAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('$e')),
+            error: (e, _) =>
+                Center(child: Text(context.l10n.userFacingError(e))),
             data: (points) {
               return _RideDashboard(
                 rideId: rideId,
@@ -232,7 +233,7 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.notNow),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppTheme.signal),
@@ -437,458 +438,482 @@ class _RideDashboardState extends ConsumerState<_RideDashboard>
     final scrubLean = hasSamples ? a.relativeLeanAt(_scrubIndex) : 0.0;
     final mapScrub = hasSamples ? a.mapIndexOffset + _scrubIndex : null;
 
-    return Column(
-      children: [
-        Expanded(
-          child: CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: [
-              SliverAppBar(
-                pinned: true,
-                backgroundColor: AppTheme.asphalt,
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () {
-                    Navigator.of(context).popUntil((route) => route.isFirst);
-                  },
+    return PopScope(
+      // Back (system or AppBar) first leaves the segment zoom, then pops one
+      // level like any other screen.
+      canPop: !_zoomed,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && _zoomed) _clearSegmentZoom();
+      },
+      child: Column(
+        children: [
+          Expanded(
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverAppBar(
+                  pinned: true,
+                  backgroundColor: AppTheme.asphalt,
+                  leading: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    tooltip: _zoomed
+                        ? l10n.fullRide
+                        : MaterialLocalizations.of(context).backButtonTooltip,
+                    onPressed: () => Navigator.of(context).maybePop(),
+                  ),
+                  titleSpacing: 0,
+                  title: Text(
+                    _zoomed
+                        ? l10n.rideDetailAppBarTitleSegment
+                        : l10n.rideDetailAppBarTitle,
+                    style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
+                  ),
+                  actions: [
+                    IconButton(
+                      tooltip: l10n.deleteRide,
+                      icon: const Icon(Icons.delete_outline),
+                      color: AppTheme.signal,
+                      onPressed: _confirmDeleteRide,
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.only(right: 8),
+                      child: Center(child: RiderAliasChip(compact: true)),
+                    ),
+                  ],
                 ),
-                title: Text(
-                  _zoomed ? l10n.rideLabSegment : l10n.rideLab,
-                  style: GoogleFonts.exo2(fontWeight: FontWeight.w700),
-                ),
-                actions: [
-                  IconButton(
-                    tooltip: l10n.deleteRide,
-                    icon: const Icon(Icons.delete_outline),
-                    color: AppTheme.signal,
-                    onPressed: _confirmDeleteRide,
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.only(right: 8),
-                    child: Center(child: RiderAliasChip(compact: true)),
-                  ),
-                ],
-              ),
-              SliverToBoxAdapter(
-                child: FadeTransition(
-                  opacity: CurvedAnimation(
-                    parent: _intro,
-                    curve: Curves.easeOut,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const RiderLabMark(size: BrandMarkSize.eyebrow),
-                        const SizedBox(height: 8),
-                        Text(
-                          ride.displayTitle(
-                            dateFormat: (d) => DateFormat(
-                              'EEE · MMM d · HH:mm',
-                              l10n.localeName,
-                            ).format(d),
-                          ),
-                          style: GoogleFonts.exo2(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
-                            height: 1.15,
-                          ),
-                        ),
-                        if (ride.title != null &&
-                            ride.title!.trim().isNotEmpty) ...[
-                          const SizedBox(height: 4),
+                SliverToBoxAdapter(
+                  child: FadeTransition(
+                    opacity: CurvedAnimation(
+                      parent: _intro,
+                      curve: Curves.easeOut,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const RiderLabMark(size: BrandMarkSize.eyebrow),
+                          const SizedBox(height: 8),
                           Text(
-                            DateFormat(
-                              'EEE · MMM d · HH:mm',
-                              l10n.localeName,
-                            ).format(ride.startedAt),
-                            style: GoogleFonts.rajdhani(
-                              color: AppTheme.steel,
-                              fontSize: 15,
+                            ride.displayTitle(
+                              dateFormat: (d) => DateFormat(
+                                'EEE · MMM d · HH:mm',
+                                l10n.localeName,
+                              ).format(d),
+                            ),
+                            style: GoogleFonts.exo2(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w700,
+                              height: 1.15,
                             ),
                           ),
-                        ],
-                        const SizedBox(height: 6),
-                        Text(
-                          _zoomed ? l10n.segmentZoomHint : l10n.collapseHint,
-                          style: GoogleFonts.rajdhani(
-                            color: AppTheme.steel,
-                            fontSize: 15,
-                          ),
-                        ),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: TextButton.icon(
-                            onPressed: () => _renameOrGeocodeRide(ride),
-                            icon: const Icon(Icons.edit_outlined, size: 18),
-                            label: Text(
-                              ride.title == null || ride.title!.isEmpty
-                                  ? l10n.nameFromMap
-                                  : l10n.renameRide,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            GpsQualityChip(analytics: full),
-                            if (ride.source == 'm5_logger' ||
-                                ride.source == 'import')
-                              Chip(
-                                avatar: const Icon(Icons.memory, size: 16),
-                                label: Text(
-                                  ride.source == 'm5_logger'
-                                      ? 'Logger M5'
-                                      : 'Import',
-                                  style: GoogleFonts.rajdhani(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                visualDensity: VisualDensity.compact,
+                          if (ride.title != null &&
+                              ride.title!.trim().isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              DateFormat(
+                                'EEE · MMM d · HH:mm',
+                                l10n.localeName,
+                              ).format(ride.startedAt),
+                              style: GoogleFonts.rajdhani(
+                                color: AppTheme.steel,
+                                fontSize: 15,
                               ),
+                            ),
                           ],
-                        ),
-                        ImuAzureChip(rideId: ride.id),
-                        RidePhotosStrip(rideId: ride.id),
-                        const SizedBox(height: 12),
-                        Wrap(
-                          spacing: 10,
-                          runSpacing: 8,
-                          children: [
-                            if (AppFeatures.routesEnabled)
-                              CompareLocalRouteEntry(ride: ride),
-                            ComparePeersEntry(localRideId: ride.id),
+                          if (_zoomed) ...[
+                            const SizedBox(height: 6),
+                            Text(
+                              l10n.segmentZoomHint,
+                              style: GoogleFonts.rajdhani(
+                                color: AppTheme.steel,
+                                fontSize: 15,
+                              ),
+                            ),
                           ],
-                        ),
-                        const SizedBox(height: 12),
-                        if (widget.labLoading && widget.lab == null)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8),
-                            child: LinearProgressIndicator(),
-                          )
-                        else
-                          DemoTarget(
-                            id: DemoIds.skillLab,
-                            button: true,
-                            child: RideSkillCoachCard(
-                              summary: _labOrOverview.skillSummary,
-                              onOpenLab: () {
-                                final lab = widget.lab;
-                                if (lab == null) return;
-                                Navigator.of(context).push(
-                                  MaterialPageRoute<void>(
-                                    builder: (_) => SkillLabScreen(
-                                      samples: lab.samples,
-                                      summary: lab.skillSummary,
-                                      neutralLeanDegrees:
-                                          lab.neutralLeanDegrees,
-                                      brakeEvents: lab.brakeEvents,
-                                      localRideId: ride.id,
-                                    ),
-                                  ),
-                                );
-                              },
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: TextButton.icon(
+                              onPressed: () => _renameOrGeocodeRide(ride),
+                              icon: const Icon(Icons.edit_outlined, size: 18),
+                              label: Text(
+                                ride.title == null || ride.title!.isEmpty
+                                    ? l10n.nameFromMap
+                                    : l10n.renameRide,
+                              ),
                             ),
                           ),
-                        const SizedBox(height: 12),
-                        RideSharePanel(ride: ride),
-                        const SizedBox(height: 16),
-                        LabSection(
-                          title: l10n.sectionOverview,
-                          subtitle: _zoomed
-                              ? l10n.sectionOverviewSubZoom
-                              : l10n.sectionOverviewSub,
-                          expanded: _isOpen('overview'),
-                          onToggle: () => _toggle('overview'),
-                          child: _MetricGrid(analytics: a),
-                        ),
-                        if (a.leanSides.sampleCount > 0)
+                          const SizedBox(height: 4),
+                          // The map is the core of the ride: right under the
+                          // title, before score and sharing.
                           LabSection(
-                            title: l10n.sectionLean,
-                            subtitle: l10n.sectionLeanSub,
-                            expanded: _isOpen('lean'),
-                            onToggle: () => _toggle('lean'),
+                            title: l10n.sectionMap,
+                            subtitle: l10n.sectionMapSub,
+                            expanded: _isOpen('map'),
+                            onToggle: () => _toggle('map'),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                MotorcycleLeanGauge(
-                                  leanDegrees: scrubLean,
-                                  maxLeftDegrees: a.maxLeanLeft,
-                                  maxRightDegrees: a.maxLeanRight,
-                                  neutralLabel: l10n.leanAtPlayhead(
-                                    a.neutralLeanDegrees.toStringAsFixed(0),
-                                  ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        _zoomed
+                                            ? l10n.mapHintZoom
+                                            : l10n.mapHint,
+                                        style: GoogleFonts.rajdhani(
+                                          color: AppTheme.steel,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ),
+                                    if (_zoomed) ...[
+                                      TextButton(
+                                        onPressed: _clearSegmentZoom,
+                                        child: Text(l10n.fullRide),
+                                      ),
+                                      const SizedBox(width: 4),
+                                    ],
+                                    DemoTarget(
+                                      id: DemoIds.mapFullscreen,
+                                      child: IconButton.filledTonal(
+                                        onPressed: full.samples.length >= 2
+                                            ? _openFullscreenMap
+                                            : null,
+                                        tooltip: l10n.openFullscreenMap,
+                                        icon: const Icon(Icons.fullscreen),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 const SizedBox(height: 10),
-                                Text(
-                                  l10n.leanHelp,
-                                  style: GoogleFonts.rajdhani(
-                                    color: AppTheme.steel,
-                                    fontSize: 13,
-                                    height: 1.35,
-                                  ),
+                                MapLayerToggles(
+                                  options: _mapLayers,
+                                  onChanged: (v) =>
+                                      setState(() => _mapLayers = v),
                                 ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  l10n.leanPhoneDisclaimer,
-                                  style: GoogleFonts.rajdhani(
-                                    color: AppTheme.mist.withValues(
-                                      alpha: 0.85,
+                                const SizedBox(height: 12),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: SizedBox(
+                                    height: 280,
+                                    child: PilotLineMap(
+                                      key: ValueKey(
+                                        'map-$_zoomed-$_segStart-$_segEnd-'
+                                        '${_mapLayers.showSpeedColors}-'
+                                        '${_mapLayers.showRoadKindContrast}-'
+                                        '${_mapLayers.showBrakes}',
+                                      ),
+                                      points: full.samples,
+                                      interactive: true,
+                                      scrubIndex: mapScrub,
+                                      onTapScrub: (absIndex) {
+                                        if (_zoomed) {
+                                          _setScrubIndex(absIndex - _segStart);
+                                        } else {
+                                          _setScrubIndex(absIndex);
+                                        }
+                                      },
+                                      focusStartIndex: _zoomed
+                                          ? _segStart
+                                          : null,
+                                      focusEndIndex: _zoomed ? _segEnd : null,
+                                      brakeEvents: _mapBrakeEvents,
+                                      roadStretches: full.roadStretches,
+                                      layers: _mapLayers,
                                     ),
-                                    fontSize: 12,
-                                    height: 1.4,
-                                    fontStyle: FontStyle.italic,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        LabSection(
-                          title: l10n.sectionMap,
-                          subtitle: l10n.sectionMapSub,
-                          expanded: _isOpen('map'),
-                          onToggle: () => _toggle('map'),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
                             children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      _zoomed ? l10n.mapHintZoom : l10n.mapHint,
-                                      style: GoogleFonts.rajdhani(
-                                        color: AppTheme.steel,
-                                        fontSize: 13,
-                                      ),
+                              GpsQualityChip(analytics: full),
+                              if (ride.source == 'm5_logger' ||
+                                  ride.source == 'import')
+                                Chip(
+                                  avatar: const Icon(Icons.memory, size: 16),
+                                  label: Text(
+                                    ride.source == 'm5_logger'
+                                        ? 'Logger M5'
+                                        : 'Import',
+                                    style: GoogleFonts.rajdhani(
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                  if (_zoomed) ...[
-                                    TextButton(
-                                      onPressed: _clearSegmentZoom,
-                                      child: Text(l10n.fullRide),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                            ],
+                          ),
+                          ImuAzureChip(rideId: ride.id),
+                          RidePhotosStrip(rideId: ride.id),
+                          const SizedBox(height: 12),
+                          Wrap(
+                            spacing: 10,
+                            runSpacing: 8,
+                            children: [
+                              if (AppFeatures.routesEnabled)
+                                CompareLocalRouteEntry(ride: ride),
+                              ComparePeersEntry(localRideId: ride.id),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          if (widget.labLoading && widget.lab == null)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 8),
+                              child: LinearProgressIndicator(),
+                            )
+                          else
+                            DemoTarget(
+                              id: DemoIds.skillLab,
+                              button: true,
+                              child: RideSkillCoachCard(
+                                summary: _labOrOverview.skillSummary,
+                                onOpenLab: () {
+                                  final lab = widget.lab;
+                                  if (lab == null) return;
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute<void>(
+                                      builder: (_) => SkillLabScreen(
+                                        samples: lab.samples,
+                                        summary: lab.skillSummary,
+                                        neutralLeanDegrees:
+                                            lab.neutralLeanDegrees,
+                                        brakeEvents: lab.brakeEvents,
+                                        localRideId: ride.id,
+                                      ),
                                     ),
-                                    const SizedBox(width: 4),
-                                  ],
-                                  DemoTarget(
-                                    id: DemoIds.mapFullscreen,
-                                    child: IconButton.filledTonal(
-                                      onPressed: full.samples.length >= 2
-                                          ? _openFullscreenMap
-                                          : null,
-                                      tooltip: l10n.openFullscreenMap,
-                                      icon: const Icon(Icons.fullscreen),
+                                  );
+                                },
+                              ),
+                            ),
+                          const SizedBox(height: 12),
+                          RideSharePanel(ride: ride),
+                          const SizedBox(height: 16),
+                          LabSection(
+                            title: l10n.sectionOverview,
+                            subtitle: _zoomed
+                                ? l10n.sectionOverviewSubZoom
+                                : l10n.sectionOverviewSub,
+                            expanded: _isOpen('overview'),
+                            onToggle: () => _toggle('overview'),
+                            child: _MetricGrid(analytics: a),
+                          ),
+                          if (a.leanSides.sampleCount > 0)
+                            LabSection(
+                              title: l10n.sectionLean,
+                              subtitle: l10n.sectionLeanSub,
+                              expanded: _isOpen('lean'),
+                              onToggle: () => _toggle('lean'),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  MotorcycleLeanGauge(
+                                    leanDegrees: scrubLean,
+                                    maxLeftDegrees: a.maxLeanLeft,
+                                    maxRightDegrees: a.maxLeanRight,
+                                    neutralLabel: l10n.leanAtPlayhead(
+                                      a.neutralLeanDegrees.toStringAsFixed(0),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    l10n.leanHelp,
+                                    style: GoogleFonts.rajdhani(
+                                      color: AppTheme.steel,
+                                      fontSize: 13,
+                                      height: 1.35,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    l10n.leanPhoneDisclaimer,
+                                    style: GoogleFonts.rajdhani(
+                                      color: AppTheme.mist.withValues(
+                                        alpha: 0.85,
+                                      ),
+                                      fontSize: 12,
+                                      height: 1.4,
+                                      fontStyle: FontStyle.italic,
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 10),
-                              MapLayerToggles(
-                                options: _mapLayers,
-                                onChanged: (v) =>
-                                    setState(() => _mapLayers = v),
+                            ),
+                          if (AppFeatures.routesEnabled)
+                            LabSection(
+                              title: l10n.sectionLoop,
+                              subtitle: l10n.sectionLoopSub,
+                              expanded: _isOpen('loop'),
+                              onToggle: () => _toggle('loop'),
+                              child: RideLoopPanel(
+                                ride: ride,
+                                points: full.samples,
                               ),
-                              const SizedBox(height: 12),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(16),
-                                child: SizedBox(
-                                  height: 280,
-                                  child: PilotLineMap(
-                                    key: ValueKey(
-                                      'map-$_zoomed-$_segStart-$_segEnd-'
-                                      '${_mapLayers.showSpeedColors}-'
-                                      '${_mapLayers.showRoadKindContrast}-'
-                                      '${_mapLayers.showBrakes}',
+                            ),
+                          LabSection(
+                            title: l10n.sectionRoad,
+                            subtitle: l10n.sectionRoadSub,
+                            badge:
+                                '${_labOrOverview.roadStretches.where((s) => s.kind == RoadKind.curva).length}',
+                            expanded: _isOpen('road'),
+                            onToggle: () => _toggle('road'),
+                            child: widget.labLoading && widget.lab == null
+                                ? const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 16),
+                                    child: Center(
+                                      child: CircularProgressIndicator(),
                                     ),
-                                    points: full.samples,
-                                    interactive: true,
-                                    scrubIndex: mapScrub,
-                                    onTapScrub: (absIndex) {
+                                  )
+                                : RoadStretchesPanel(
+                                    stretches: _labOrOverview.roadStretches,
+                                    onSelectStretch: _openRoadStretch,
+                                  ),
+                          ),
+                          LabSection(
+                            title: l10n.sectionBrakes,
+                            subtitle: _zoomed
+                                ? l10n.sectionBrakesSubZoom
+                                : l10n.sectionBrakesSub,
+                            badge: '${_labOrOverview.brakeEvents.length}',
+                            expanded: _isOpen('brakes'),
+                            onToggle: () => _toggle('brakes'),
+                            child: widget.labLoading && widget.lab == null
+                                ? const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 16),
+                                    child: Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  )
+                                : BrakeEventsPanel(
+                                    events: _brakeListSlice.events,
+                                    totalCount:
+                                        _labOrOverview.brakeEvents.length,
+                                    densityHiddenCount:
+                                        _brakeListSlice.hiddenCount,
+                                    zoomed: _zoomed,
+                                    secondsForIndex:
+                                        _labOrOverview.secondsForIndex,
+                                    isPro: isPro,
+                                    onSelectIndex: (i) {
+                                      final lab = widget.lab;
+                                      final mapIdx = lab == null
+                                          ? i
+                                          : _map.indexForSeconds(
+                                              lab.secondsForIndex(i),
+                                            );
                                       if (_zoomed) {
-                                        _setScrubIndex(absIndex - _segStart);
+                                        _setScrubIndex(mapIdx - _segStart);
                                       } else {
-                                        _setScrubIndex(absIndex);
+                                        _setScrubIndex(mapIdx);
                                       }
                                     },
-                                    focusStartIndex: _zoomed ? _segStart : null,
-                                    focusEndIndex: _zoomed ? _segEnd : null,
-                                    brakeEvents: _mapBrakeEvents,
-                                    roadStretches: full.roadStretches,
-                                    layers: _mapLayers,
+                                    onZoomToBrake: isPro ? _zoomToBrake : null,
+                                    onUpgrade: () =>
+                                        showProUpsellSheet(context, ref),
                                   ),
-                                ),
-                              ),
-                            ],
                           ),
-                        ),
-                        if (AppFeatures.routesEnabled)
                           LabSection(
-                            title: l10n.sectionLoop,
-                            subtitle: l10n.sectionLoopSub,
-                            expanded: _isOpen('loop'),
-                            onToggle: () => _toggle('loop'),
-                            child: RideLoopPanel(
-                              ride: ride,
-                              points: full.samples,
+                            title: l10n.sectionCharts,
+                            subtitle: l10n.sectionChartsSub,
+                            expanded: _isOpen('charts'),
+                            onToggle: () => _toggle('charts'),
+                            child: Column(
+                              children: [
+                                SpeedProfileChart(
+                                  series: a.speedSeries,
+                                  selectedSeconds: scrubSeconds,
+                                  onSelectSeconds: _setScrubSeconds,
+                                  subtitle: _zoomed
+                                      ? l10n.chartSpeedSubZoom
+                                      : l10n.chartSpeedSub,
+                                ),
+                                if (a.leanSeries.isNotEmpty) ...[
+                                  const SizedBox(height: 24),
+                                  LeanProfileChart(
+                                    series: a.leanSeries,
+                                    selectedSeconds: scrubSeconds,
+                                    onSelectSeconds: _setScrubSeconds,
+                                  ),
+                                ],
+                                if (a.accuracySeries.isNotEmpty) ...[
+                                  const SizedBox(height: 24),
+                                  RideProfileChart(
+                                    title: l10n.gpsPrecision,
+                                    subtitle: l10n.gpsPrecisionSub,
+                                    series: a.accuracySeries,
+                                    lineColor: AppTheme.signal,
+                                    unit: 'm',
+                                    baselineZero: true,
+                                    minY: 0,
+                                    selectedSeconds: scrubSeconds,
+                                    onSelectSeconds: _setScrubSeconds,
+                                  ),
+                                ],
+                                if (a.pressureSeries.isNotEmpty) ...[
+                                  const SizedBox(height: 24),
+                                  RideProfileChart(
+                                    title: l10n.pressure,
+                                    subtitle: l10n.pressureChartSub,
+                                    series: a.pressureSeries,
+                                    lineColor: AppTheme.mist,
+                                    unit: 'hPa',
+                                    selectedSeconds: scrubSeconds,
+                                    onSelectSeconds: _setScrubSeconds,
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
-                        LabSection(
-                          title: l10n.sectionRoad,
-                          subtitle: l10n.sectionRoadSub,
-                          badge:
-                              '${_labOrOverview.roadStretches.where((s) => s.kind == RoadKind.curva).length}',
-                          expanded: _isOpen('road'),
-                          onToggle: () => _toggle('road'),
-                          child: widget.labLoading && widget.lab == null
-                              ? const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 16),
-                                  child: Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                )
-                              : RoadStretchesPanel(
-                                  stretches: _labOrOverview.roadStretches,
-                                  onSelectStretch: _openRoadStretch,
-                                ),
-                        ),
-                        LabSection(
-                          title: l10n.sectionBrakes,
-                          subtitle: _zoomed
-                              ? l10n.sectionBrakesSubZoom
-                              : l10n.sectionBrakesSub,
-                          badge: '${_labOrOverview.brakeEvents.length}',
-                          expanded: _isOpen('brakes'),
-                          onToggle: () => _toggle('brakes'),
-                          child: widget.labLoading && widget.lab == null
-                              ? const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 16),
-                                  child: Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                )
-                              : BrakeEventsPanel(
-                                  events: _brakeListSlice.events,
-                                  totalCount: _labOrOverview.brakeEvents.length,
-                                  densityHiddenCount:
-                                      _brakeListSlice.hiddenCount,
-                                  zoomed: _zoomed,
-                                  secondsForIndex:
-                                      _labOrOverview.secondsForIndex,
-                                  isPro: isPro,
-                                  onSelectIndex: (i) {
-                                    final lab = widget.lab;
-                                    final mapIdx = lab == null
-                                        ? i
-                                        : _map.indexForSeconds(
-                                            lab.secondsForIndex(i),
-                                          );
-                                    if (_zoomed) {
-                                      _setScrubIndex(mapIdx - _segStart);
-                                    } else {
-                                      _setScrubIndex(mapIdx);
-                                    }
-                                  },
-                                  onZoomToBrake: isPro ? _zoomToBrake : null,
-                                  onUpgrade: () =>
-                                      showProUpsellSheet(context, ref),
-                                ),
-                        ),
-                        LabSection(
-                          title: l10n.sectionCharts,
-                          subtitle: l10n.sectionChartsSub,
-                          expanded: _isOpen('charts'),
-                          onToggle: () => _toggle('charts'),
-                          child: Column(
-                            children: [
-                              SpeedProfileChart(
-                                series: a.speedSeries,
-                                selectedSeconds: scrubSeconds,
-                                onSelectSeconds: _setScrubSeconds,
-                                subtitle: _zoomed
-                                    ? l10n.chartSpeedSubZoom
-                                    : l10n.chartSpeedSub,
-                              ),
-                              if (a.leanSeries.isNotEmpty) ...[
-                                const SizedBox(height: 24),
-                                LeanProfileChart(
-                                  series: a.leanSeries,
-                                  selectedSeconds: scrubSeconds,
-                                  onSelectSeconds: _setScrubSeconds,
-                                ),
-                              ],
-                              if (a.accuracySeries.isNotEmpty) ...[
-                                const SizedBox(height: 24),
-                                RideProfileChart(
-                                  title: l10n.gpsPrecision,
-                                  subtitle: l10n.gpsPrecisionSub,
-                                  series: a.accuracySeries,
-                                  lineColor: AppTheme.signal,
-                                  unit: 'm',
-                                  baselineZero: true,
-                                  minY: 0,
-                                  selectedSeconds: scrubSeconds,
-                                  onSelectSeconds: _setScrubSeconds,
-                                ),
-                              ],
-                              if (a.pressureSeries.isNotEmpty) ...[
-                                const SizedBox(height: 24),
-                                RideProfileChart(
-                                  title: l10n.pressure,
-                                  subtitle: l10n.pressureChartSub,
-                                  series: a.pressureSeries,
-                                  lineColor: AppTheme.mist,
-                                  unit: 'hPa',
-                                  selectedSeconds: scrubSeconds,
-                                  onSelectSeconds: _setScrubSeconds,
-                                ),
-                              ],
-                            ],
+                          LabSection(
+                            title: l10n.sectionNotes,
+                            subtitle: l10n.sectionNotesSub,
+                            expanded: _isOpen('notes'),
+                            onToggle: () => _toggle('notes'),
+                            child: _PrecisionPanel(analytics: a),
                           ),
-                        ),
-                        LabSection(
-                          title: l10n.sectionNotes,
-                          subtitle: l10n.sectionNotesSub,
-                          expanded: _isOpen('notes'),
-                          onToggle: () => _toggle('notes'),
-                          child: _PrecisionPanel(analytics: a),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        FreeAdBanner(onUpgrade: () => showProUpsellSheet(context, ref)),
-        if (hasSamples)
-          Material(
-            color: AppTheme.asphalt,
-            elevation: 12,
-            shadowColor: Colors.black54,
-            child: SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                child: _TimeScrubber(
-                  seconds: scrubSeconds,
-                  minSeconds: a.windowStartSeconds,
-                  maxSeconds: a.windowEndSeconds <= a.windowStartSeconds
-                      ? a.windowStartSeconds + 1
-                      : a.windowEndSeconds,
-                  point: scrubPoint!,
-                  leanDegrees: scrubLean,
-                  index: _scrubIndex,
-                  totalPoints: a.samples.length,
-                  onChanged: _setScrubSeconds,
+          // One pinned bottom element at a time: the scrub card when the ride
+          // has samples, else the Free banner.
+          if (!hasSamples)
+            FreeAdBanner(onUpgrade: () => showProUpsellSheet(context, ref)),
+          if (hasSamples)
+            Material(
+              color: AppTheme.asphalt,
+              elevation: 12,
+              shadowColor: Colors.black54,
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+                  child: _TimeScrubber(
+                    seconds: scrubSeconds,
+                    minSeconds: a.windowStartSeconds,
+                    maxSeconds: a.windowEndSeconds <= a.windowStartSeconds
+                        ? a.windowStartSeconds + 1
+                        : a.windowEndSeconds,
+                    point: scrubPoint!,
+                    leanDegrees: scrubLean,
+                    index: _scrubIndex,
+                    totalPoints: a.samples.length,
+                    onChanged: _setScrubSeconds,
+                  ),
                 ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -931,7 +956,7 @@ class _TimeScrubber extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+      padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
       decoration: BoxDecoration(
         color: AppTheme.asphaltElevated,
         borderRadius: BorderRadius.circular(18),
@@ -955,13 +980,13 @@ class _TimeScrubber extends StatelessWidget {
               Text(
                 _fmt(seconds),
                 style: GoogleFonts.exo2(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.w700,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 2),
           Text.rich(
             TextSpan(
               style: GoogleFonts.rajdhani(color: AppTheme.steel, fontSize: 13),
@@ -1066,7 +1091,7 @@ class _MetricGrid extends StatelessWidget {
                 value: a.leanSides.sampleCount == 0
                     ? '--'
                     : '${a.maxLeanLeft.toStringAsFixed(0)}/${a.maxLeanRight.toStringAsFixed(0)}',
-                unit: 'Â°',
+                unit: '°',
                 accent: RideVizPalette.leanLeft,
               ),
             ),

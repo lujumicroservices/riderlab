@@ -143,7 +143,9 @@ class AccountAuthSection extends ConsumerWidget {
                           final err = ref.read(authErrorProvider);
                           showAppSnackError(
                             context,
-                            err ?? l10n.deleteAccountFailed,
+                            err == null
+                                ? l10n.deleteAccountFailed
+                                : l10n.userFacingError(err),
                           );
                           return;
                         }

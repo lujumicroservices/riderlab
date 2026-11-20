@@ -31,7 +31,6 @@ String partnerCodeErrorMessage(AppLocalizations l10n, String? error) {
 
 String? proRemainingLabel(AppLocalizations l10n, ProEntitlementStatus status) {
   if (!status.isPro || status.daysLeft <= 0) return null;
-  if (status.isTrial) return l10n.proTrialDaysLeft(status.daysLeft);
   if (status.isPartner) return l10n.proPartnerDaysLeft(status.daysLeft);
   return null;
 }

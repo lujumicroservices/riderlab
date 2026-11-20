@@ -38,10 +38,36 @@ void main() {
       expect(status.expiredAfterGrant, isFalse);
     });
 
-    test('expired after trial or partner grant', () {
+    test('old no-card trial does not count as an expired grant', () {
       const status = ProEntitlementStatus(trialUsed: true);
-      expect(status.expiredAfterGrant, isTrue);
+      expect(status.expiredAfterGrant, isFalse);
       expect(status.isPro, isFalse);
+    });
+
+    test('expired after a partner code or a paid subscription lapsed', () {
+      expect(
+        const ProEntitlementStatus(partnerUsed: true).expiredAfterGrant,
+        isTrue,
+      );
+      expect(
+        const ProEntitlementStatus(paidLapsed: true).expiredAfterGrant,
+        isTrue,
+      );
+      expect(
+        const ProEntitlementStatus(
+          isPro: true,
+          source: 'partner',
+          partnerUsed: true,
+        ).expiredAfterGrant,
+        isFalse,
+      );
+    });
+
+    test('paid lapse survives the cache round trip', () {
+      const status = ProEntitlementStatus(paidLapsed: true);
+      final restored = ProEntitlementStatus.fromJson(status.toCacheJson());
+      expect(restored.paidLapsed, isTrue);
+      expect(restored.expiredAfterGrant, isTrue);
     });
 
     test('rpc result maps errors', () {

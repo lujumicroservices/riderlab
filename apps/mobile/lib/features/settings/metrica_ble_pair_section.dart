@@ -245,7 +245,9 @@ class _MetricaBlePairSectionState extends State<MetricaBlePairSection> {
       } catch (error) {
         await _dropLink();
         if (!mounted) return;
-        _fail(context.l10n.metricaBleFailedDetail(error.runtimeType.toString()));
+        _fail(
+          context.l10n.metricaBleFailedDetail(error.runtimeType.toString()),
+        );
         return;
       }
     }
@@ -371,10 +373,8 @@ class _MetricaBlePairSectionState extends State<MetricaBlePairSection> {
   }) {
     return showDialog<_WifiCreds>(
       context: context,
-      builder: (context) => _WifiNetworkPicker(
-        networks: networks,
-        phoneSsid: phoneSsid,
-      ),
+      builder: (context) =>
+          _WifiNetworkPicker(networks: networks, phoneSsid: phoneSsid),
     );
   }
 
@@ -562,10 +562,7 @@ class _PinDialogState extends State<_PinDialog> {
 }
 
 class _WifiNetworkPicker extends StatelessWidget {
-  const _WifiNetworkPicker({
-    required this.networks,
-    this.phoneSsid,
-  });
+  const _WifiNetworkPicker({required this.networks, this.phoneSsid});
 
   final List<MetricaPaddockNetwork> networks;
   final String? phoneSsid;

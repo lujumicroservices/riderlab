@@ -28,16 +28,4 @@ enum ShareVisibility {
 
   /// Legacy boolean: true only for fully public content.
   bool get legacyIsShared => this == ShareVisibility.public;
-
-  String get label => switch (this) {
-        ShareVisibility.private => 'Only me',
-        ShareVisibility.friends => 'Friends',
-        ShareVisibility.public => 'Everyone',
-      };
-
-  String get help => switch (this) {
-        ShareVisibility.private => 'Hidden from other riders',
-        ShareVisibility.friends => 'Visible to accepted friends',
-        ShareVisibility.public => 'Visible to everyone in RiderLab',
-      };
 }

@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/models/route_circuit.dart';
 import '../../core/models/share_visibility.dart';
 import '../../l10n/l10n_ext.dart';
+import '../../l10n/share_visibility_l10n.dart';
 import '../../providers/social_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/rider_alias_chip.dart';
@@ -132,7 +133,7 @@ class RoutesScreen extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            '${l10n.cloudUnavailable}: $err',
+                            l10n.cloudUnavailable,
                             style: GoogleFonts.rajdhani(
                               color: AppTheme.mist,
                               fontSize: 13,
@@ -150,7 +151,7 @@ class RoutesScreen extends ConsumerWidget {
                 padding: EdgeInsets.all(24),
                 child: Center(child: CircularProgressIndicator()),
               ),
-              error: (e, _) => Text('$e'),
+              error: (e, _) => Text(context.l10n.userFacingError(e)),
               data: (routes) {
                 if (routes.isEmpty) {
                   return Text(
@@ -303,7 +304,7 @@ class RoutesScreen extends ConsumerWidget {
       showAppSnack(context, l10n.routeCreated);
     } catch (e) {
       if (!context.mounted) return;
-      showAppSnackError(context, '$e');
+      showAppSnackError(context, context.l10n.userFacingError(e));
     }
   }
 }
@@ -381,7 +382,7 @@ class _MyRouteTile extends ConsumerWidget {
         subtitle: Text(
           [
             if (route.isLoopReady) l10n.routesLoopReady,
-            route.visibility.label,
+            l10n.visibilityOptionLabel(route.visibility),
             l10n.routesTapHint,
           ].join(' · '),
           style: const TextStyle(color: AppTheme.steel, fontSize: 12),
@@ -390,7 +391,7 @@ class _MyRouteTile extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             PopupMenuButton<ShareVisibility>(
-              tooltip: 'Visibility',
+              tooltip: l10n.visibilityMenuTooltip,
               initialValue: route.visibility,
               onSelected: (v) async {
                 await ref.read(routeServiceProvider).setVisibility(route.id, v);
@@ -399,7 +400,10 @@ class _MyRouteTile extends ConsumerWidget {
               },
               itemBuilder: (_) => [
                 for (final v in ShareVisibility.values)
-                  PopupMenuItem(value: v, child: Text(v.label)),
+                  PopupMenuItem(
+                    value: v,
+                    child: Text(l10n.visibilityOptionLabel(v)),
+                  ),
               ],
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),

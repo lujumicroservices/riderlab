@@ -42,7 +42,7 @@ class SessionsListScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, _) => Center(child: Text(context.l10n.userFacingError(e))),
       ),
     );
   }
@@ -116,16 +116,22 @@ class _SessionCard extends StatelessWidget {
               const SizedBox(height: 10),
               Row(
                 children: [
-                  Icon(Icons.thumb_up_alt_rounded,
-                      size: 16, color: OffroadTheme.sector(2)),
+                  Icon(
+                    Icons.thumb_up_alt_rounded,
+                    size: 16,
+                    color: OffroadTheme.sector(2),
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     l10n.offroadInsightCountGood(goods),
                     style: OffroadTheme.label(color: OffroadTheme.sector(2)),
                   ),
                   const SizedBox(width: 16),
-                  Icon(Icons.thumb_down_alt_rounded,
-                      size: 16, color: OffroadTheme.sector(0)),
+                  Icon(
+                    Icons.thumb_down_alt_rounded,
+                    size: 16,
+                    color: OffroadTheme.sector(0),
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     l10n.offroadInsightCountBad(bads),

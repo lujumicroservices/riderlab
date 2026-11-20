@@ -130,7 +130,9 @@ class _RodadaLiveTabState extends ConsumerState<RodadaLiveTab> {
                     Expanded(
                       child: membership.maybeWhen(
                         data: (m) {
-                          final sharing = ref.watch(rodadaSharePrefsProvider).shareLive;
+                          final sharing = ref
+                              .watch(rodadaSharePrefsProvider)
+                              .shareLive;
                           return Row(
                             children: [
                               Icon(
@@ -330,7 +332,7 @@ class _RodadaLiveMapHost extends ConsumerWidget {
       return const Center(child: CircularProgressIndicator());
     }
     if (error != null && list.isEmpty) {
-      return Center(child: Text('$error'));
+      return Center(child: Text(context.l10n.userFacingError(error)));
     }
 
     return Stack(
@@ -480,7 +482,10 @@ Future<void> _addStop(
     showAppSnack(context, l10n.stopDroppedSnack);
   } catch (e) {
     if (!context.mounted) return;
-    showAppSnackError(context, l10n.locationFailed('$e'));
+    showAppSnackError(
+      context,
+      l10n.locationFailed(context.l10n.userFacingError(e)),
+    );
   } finally {
     if (loading && context.mounted) {
       Navigator.of(context, rootNavigator: true).pop();

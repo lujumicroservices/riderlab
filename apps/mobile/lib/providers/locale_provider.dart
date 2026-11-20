@@ -5,8 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 const _localeKey = 'riderlab_locale';
 
 /// Default language: Spanish. User can switch to English.
-final localeProvider =
-    StateNotifierProvider<LocaleController, Locale>((ref) {
+final localeProvider = StateNotifierProvider<LocaleController, Locale>((ref) {
   return LocaleController();
 });
 

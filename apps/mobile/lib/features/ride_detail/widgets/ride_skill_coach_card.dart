@@ -20,11 +20,15 @@ class RideSkillCoachCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final score = summary.sessionScore;
-    final color = score >= 75
+    // No curvy stretch → nothing was scored; don't shout a red 0.
+    final hasScore = summary.curvaCount > 0;
+    final color = !hasScore
+        ? AppTheme.steel
+        : score >= 75
         ? AppTheme.line
         : score >= 55
-            ? AppTheme.lineHot
-            : AppTheme.signal;
+        ? AppTheme.lineHot
+        : AppTheme.signal;
 
     return Material(
       color: AppTheme.asphaltElevated,
@@ -60,17 +64,18 @@ class RideSkillCoachCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '$score',
+                hasScore ? '$score' : l10n.rideDetailNoScore,
                 style: GoogleFonts.exo2(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 28,
+                  fontWeight: hasScore ? FontWeight.w800 : FontWeight.w600,
+                  fontSize: hasScore ? 28 : 22,
                   color: color,
                 ),
               ),
-              Text(
-                ' /100',
-                style: GoogleFonts.rajdhani(color: AppTheme.steel),
-              ),
+              if (hasScore)
+                Text(
+                  ' /100',
+                  style: GoogleFonts.rajdhani(color: AppTheme.steel),
+                ),
               const SizedBox(width: 6),
               const Icon(Icons.chevron_right, color: AppTheme.steel),
             ],

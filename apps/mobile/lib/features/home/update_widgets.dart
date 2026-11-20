@@ -302,7 +302,7 @@ class _UpdateDownloadDialogState extends ConsumerState<_UpdateDownloadDialog> {
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (!mounted) return;
-      setState(() => _error = '$e');
+      setState(() => _error = context.l10n.userFacingError(e));
     }
   }
 

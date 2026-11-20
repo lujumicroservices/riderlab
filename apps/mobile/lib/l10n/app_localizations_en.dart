@@ -810,6 +810,69 @@ class AppLocalizationsEn extends AppLocalizations {
   String get armAutoRide => 'Start Rolling';
 
   @override
+  String get rideHoldToFinishHint => 'Press and hold to finish';
+
+  @override
+  String get rideFinishShort => 'Finish';
+
+  @override
+  String get rideBackHint => 'To exit, press and hold Finish';
+
+  @override
+  String get rideSavedToast => 'Ride saved';
+
+  @override
+  String get rideSessionCancelledNoMotion => 'Session cancelled: no movement';
+
+  @override
+  String get rideHudLeanSetting => 'Setting 0°';
+
+  @override
+  String get ridePermsIntro =>
+      'RiderLab records your GPS line while you ride, also with the screen off and the phone on the mount. Location is used only while you record or wait to start, and stops when you finish. A notification stays visible meanwhile.\n\nNext we\'ll ask for:';
+
+  @override
+  String get ridePermsStepLocation =>
+      'Location: choose \"While using the app\".';
+
+  @override
+  String get ridePermsStepBackground =>
+      'Screen off: on the next screen choose \"Allow all the time\".';
+
+  @override
+  String get ridePermsStepNotifications =>
+      'Notifications: to show that you\'re recording.';
+
+  @override
+  String get ridePermsStepBattery =>
+      'Battery: let RiderLab run unrestricted so Android doesn\'t stop the recording.';
+
+  @override
+  String get ridePermsBackgroundTitle => 'One more step';
+
+  @override
+  String get ridePermsBackgroundBody =>
+      'To record with the screen off, Android will open RiderLab\'s location settings. Choose \"Allow all the time\", then come back with Back.';
+
+  @override
+  String get ridePermsBackgroundLimited =>
+      'With the screen off, recording may pause. You can change this in Settings.';
+
+  @override
+  String get ridePermsLocationOffTitle => 'Phone location is off';
+
+  @override
+  String get ridePermsDeniedBodyAndroid =>
+      'RiderLab needs your location to record your line. In Settings → Permissions → Location choose \"Allow only while using the app\" or \"Allow all the time\".';
+
+  @override
+  String get rideNotifRecording => 'Recording ride…';
+
+  @override
+  String get rideNotifArmed =>
+      'Ready: start riding and it records on its own. You can lock the screen.';
+
+  @override
   String get disarmAutoRide => 'Cancel auto-start';
 
   @override
@@ -927,6 +990,99 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings => 'Settings';
 
   @override
+  String get settingsHubProfileGuest => 'Not signed in';
+
+  @override
+  String get settingsHubProfileSignInHint => 'Tap to sign in';
+
+  @override
+  String get settingsHubChipFree => 'Free';
+
+  @override
+  String get settingsHubChipPro => 'Pro';
+
+  @override
+  String get settingsHubProFree => 'Free plan';
+
+  @override
+  String get settingsHubProActive => 'Active';
+
+  @override
+  String settingsHubProActiveUntil(String date) {
+    return 'Active until $date';
+  }
+
+  @override
+  String get settingsHubRecording => 'Recording';
+
+  @override
+  String get settingsHubSoundOn => 'Mode sound on';
+
+  @override
+  String get settingsHubSoundOff => 'Mode sound off';
+
+  @override
+  String get settingsHubRodadas => 'Group rides and privacy';
+
+  @override
+  String get settingsHubShareLiveOn => 'You share your location on group rides';
+
+  @override
+  String get settingsHubShareLiveOff =>
+      'You don\'t share your location on group rides';
+
+  @override
+  String get settingsHubShareHelp =>
+      'These apply to all your group rides. Your group and your family only see where you are if you turn these on.';
+
+  @override
+  String get settingsHubFamilyLinkBody =>
+      'Your family can follow you without the app: in Live, tap Share and send them the link. You can resend the same link anytime.';
+
+  @override
+  String get settingsHubData => 'Data and sync';
+
+  @override
+  String get settingsHubDataSub => 'Back up your rides to the cloud';
+
+  @override
+  String settingsHubLastSync(String time) {
+    return 'Last sync: $time';
+  }
+
+  @override
+  String get settingsHubAccessories => 'Accessories';
+
+  @override
+  String get settingsHubAccessoriesSub => 'GoPro camera and M5 Logger';
+
+  @override
+  String get settingsHubAccessoriesSubCameraOnly => 'GoPro camera';
+
+  @override
+  String get settingsHubM5LoggerSub =>
+      'Pair the device or import an SD card session';
+
+  @override
+  String get settingsHubLegal => 'Legal and help';
+
+  @override
+  String get settingsHubLegalSub => 'Terms, privacy and community guidelines';
+
+  @override
+  String get settingsHubLab => 'Lab';
+
+  @override
+  String get settingsHubLabSub => 'Features in testing';
+
+  @override
+  String get settingsHubStaff => 'Staff';
+
+  @override
+  String get settingsHubStaffSub =>
+      'View as another rider, reports and partner codes';
+
+  @override
   String get proUnlock => 'RiderLab Pro';
 
   @override
@@ -940,9 +1096,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proFeatureBrakes => 'Full braking details (not just a preview)';
 
   @override
-  String get proFeatureNoAds => 'No advertising banners';
-
-  @override
   String get upgradeToPro => 'Upgrade to Pro';
 
   @override
@@ -953,7 +1106,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get proToggleHelp =>
-      'Temporary unlock until store billing is ready. Turn off to see the free version.';
+      'Test builds only: turns on Pro on this phone. Turn it off to see the free version.';
 
   @override
   String proTrialDaysLeft(int days) {
@@ -967,7 +1120,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get proExpiredKeepLab =>
-      'Your Pro access ended — keep segment zoom and full corners.';
+      'Your Pro ended. Subscribe to get stretch zoom and full corner detail back.';
+
+  @override
+  String get proStoreOnlyBuild =>
+      'Subscriptions are only available in the Google Play / App Store version. If you have a partner code, redeem it here.';
+
+  @override
+  String get proStoreOnlyBuildNoCodes =>
+      'Subscriptions are only available in the store version. Please try again later.';
+
+  @override
+  String get proRestoreFailed =>
+      'Could not restore your purchases. Check your connection and try again.';
+
+  @override
+  String get proFeatureHardware =>
+      'Connect the Métrica logger and your GoPro camera';
+
+  @override
+  String get proFeatureCamera => 'Control your GoPro camera from the app';
+
+  @override
+  String get proSubscriptionFooter =>
+      'Pro is a monthly or yearly subscription that renews automatically. Cancel anytime from your store account.';
+
+  @override
+  String get proPartnerCodeHint => 'A partner code gives 90 days of Pro.';
+
+  @override
+  String get authHaveAccount => 'I already have an account';
+
+  @override
+  String get authNoAccount => 'Don\'t have an account? Create one';
 
   @override
   String get partnerProCode => 'Partner Pro code';
@@ -1022,11 +1207,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get startTrialHelp =>
-      'Every signed-in account gets 30 days of Pro. After that, Ride Lab depth is paid. Partner codes add 90 days.';
+      'Ride Lab depth is part of Pro, with a monthly or yearly subscription. A partner code gives 90 days.';
 
   @override
   String get proStoreNotReady =>
-      'Paid upgrade is not in the store yet. Sign in for a 30-day Pro trial, or redeem a partner code.';
+      'Could not open the store checkout. Try again later or redeem a partner code.';
 
   @override
   String get proStoreNotReadyIos =>
@@ -1169,7 +1354,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authGateBody =>
-      'RiderLab needs an account. Use Google or email and password — guest mode is off. This is also how store review signs in.';
+      'RiderLab needs an account to save your rides. Sign in with Google or your email.';
 
   @override
   String signInWith(String provider) {
@@ -1477,7 +1662,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rideDeckHelp =>
-      'Tap once, put the phone in a pocket or on the tank, stay still. When you feel a buzz and beep, 0° is saved and the ride starts — you won’t tap again.';
+      'Put the phone on the mount, upright, with the bike straight and still. Tap “Hold upright 4s” and keep the bike still for 4 seconds. When it buzzes, 0° is saved and the ride starts.';
 
   @override
   String get startRideNow => 'Start ride now';
@@ -1566,7 +1751,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get freezeThenArmHelp =>
-      'Tap once, put the phone in place, stay still. A buzz and beep means 0° is saved. Then lock the screen — rolling starts the ride. You won’t tap again.';
+      'Put the phone on the mount, upright, with the bike straight and still. Tap “Hold upright 4s” and keep the bike still for 4 seconds. When it buzzes, 0° is saved: lock the screen and ride off; recording starts on its own.';
 
   @override
   String get armAutoRouteArmed => 'Ready — rolling starts the ride';
@@ -1580,6 +1765,75 @@ class AppLocalizationsEn extends AppLocalizations {
   String couldNotLoadRides(String error) {
     return 'Could not load rides: $error';
   }
+
+  @override
+  String get homeDiscardRecoveredTitle => 'Discard ride?';
+
+  @override
+  String homeDiscardRecoveredBody(String date) {
+    return 'Delete the ride from $date? This can\'t be undone.';
+  }
+
+  @override
+  String get homeSaveRecoveredError => 'Couldn\'t save the line. Try again.';
+
+  @override
+  String homeRideMaxSpeed(String speed) {
+    return 'max $speed km/h';
+  }
+
+  @override
+  String homeRideMaxLean(String lean) {
+    return 'lean $lean°';
+  }
+
+  @override
+  String get homeNavRodadas => 'Rodadas';
+
+  @override
+  String get homeNavFriends => 'Friends';
+
+  @override
+  String get homeModeStreet => 'Street';
+
+  @override
+  String get homeModeTrack => 'Track';
+
+  @override
+  String homeModeSemantics(String mode) {
+    return 'App mode: $mode. Tap to switch between Street and Track.';
+  }
+
+  @override
+  String get homeModeLockedHint => 'Finish or disarm the ride to switch modes.';
+
+  @override
+  String get rideDetailAppBarTitle => 'Ride Lab';
+
+  @override
+  String get rideDetailAppBarTitleSegment => 'Segment';
+
+  @override
+  String get rideDetailNoScore => '—';
+
+  @override
+  String get rideDetailVisibilityPrivate => 'Only me';
+
+  @override
+  String get rideDetailVisibilityFriends => 'Friends';
+
+  @override
+  String get rideDetailVisibilityPublic => 'Everyone';
+
+  @override
+  String get rideDetailVisibilityPrivateHelp => 'Hidden from other riders';
+
+  @override
+  String get rideDetailVisibilityFriendsHelp => 'Visible to accepted friends';
+
+  @override
+  String get rideDetailVisibilityPublicHelp =>
+      'Visible to everyone in RiderLab';
 
   @override
   String get rodadasTitle => 'Rodadas';
@@ -1623,9 +1877,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get familyRodadaTipBody =>
       'Pack = rodada map in the app. Family without the app = share from Live (same link can be resent).';
-
-  @override
-  String get familyRodadaTipCta => 'Open family circle';
 
   @override
   String get familyWatchScreenTitle => 'Notify family';
@@ -1709,10 +1960,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Creates a link and opens the share sheet so you can send it (they don’t need the app).';
 
   @override
-  String get familyNotifyHelpRodada =>
-      'Notify family/friends outside the pack. You can resend the same link to more people.';
-
-  @override
   String get familyNotifyStart => 'Share';
 
   @override
@@ -1736,9 +1983,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get familySos => 'Need help';
-
-  @override
-  String get familyShareLink => 'Resend link';
 
   @override
   String get familyShareAgain => 'Send to another';
@@ -2248,19 +2492,25 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get invitePushReasonSession => 'your session expired; sign in again';
+
+  @override
+  String get invitePushReasonService =>
+      'the notification service did not respond';
+
+  @override
+  String get invitePushReasonUnknown => 'unknown error';
+
+  @override
+  String get visibilityMenuTooltip => 'Visibility';
+
+  @override
   String rodadaCodeBanner(String code) {
     return 'code $code';
   }
 
   @override
   String get meetup => 'Meetup';
-
-  @override
-  String get yourSharing => 'Your sharing';
-
-  @override
-  String get sharingDefaultsHelp =>
-      'Off until you turn it on. When the rodada starts, RiderLab uses whatever you enabled below.';
 
   @override
   String get notRodadaMember => 'You are not a member.';
@@ -2773,9 +3023,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leanLabTitle => 'Lean Lab';
-
-  @override
-  String get settingsRideSection => 'Ride';
 
   @override
   String get settingsShareSection => 'Group rides and sharing';
@@ -3635,7 +3882,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get locationServicesOff =>
-      'Turn on location services to record your line.';
+      'Turn on your phone\'s location to record your line.';
 
   @override
   String get locationPermissionDenied =>
@@ -3644,6 +3891,100 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get locationPermissionDeniedForever =>
       'Enable location in Settings, then try again.';
+
+  @override
+  String get errNoConnection =>
+      'No connection. Check your internet and try again.';
+
+  @override
+  String get errTimeout =>
+      'That took too long. Check your connection and try again.';
+
+  @override
+  String get errServer => 'The server had a problem. Try again in a moment.';
+
+  @override
+  String get errSignInRequired => 'Sign in to continue.';
+
+  @override
+  String get errSessionExpired => 'Your session expired. Sign in again.';
+
+  @override
+  String get errNotAllowed => 'You don\'t have permission to do that.';
+
+  @override
+  String get errPermissionDenied =>
+      'A permission is missing. Enable it in Settings and try again.';
+
+  @override
+  String get errNotFound => 'Not found. It may have been deleted.';
+
+  @override
+  String get errRideAlreadyRecording => 'A ride is already recording.';
+
+  @override
+  String get errRecordingWhileImpersonating =>
+      'Recording is off while viewing as another rider.';
+
+  @override
+  String get errGeneric => 'Something went wrong. Try again.';
+
+  @override
+  String get copyLoggerIntro =>
+      'Post-ride hardware: microSD on track, Wi‑Fi in the paddock. Pair the Basic with your account or import a session folder.';
+
+  @override
+  String get copyLoggerPairSection => 'Pair';
+
+  @override
+  String get copyLoggerGenerateCode => 'Generate code';
+
+  @override
+  String copyLoggerCodeMinted(String code) {
+    return 'Code: $code (15 min). Claim it from the logger.';
+  }
+
+  @override
+  String get copyLoggerClaimButton => 'Claim code → serial PAIR';
+
+  @override
+  String get copyLoggerClaimTitle => 'Claim pair code';
+
+  @override
+  String get copyLoggerCodeLabel => 'Code';
+
+  @override
+  String get copyLoggerCodeHint => '8 characters';
+
+  @override
+  String get copyLoggerClaim => 'Claim';
+
+  @override
+  String get copyLoggerPairCopied =>
+      'PAIR command copied. Paste it into the Basic\'s USB monitor.';
+
+  @override
+  String get copyLoggerImportSection => 'Import session';
+
+  @override
+  String get copyLoggerImportHelp =>
+      'Folder with manifest.json + gnss.ndjson (from the microSD).';
+
+  @override
+  String get copyLoggerPickFolder => 'Choose session folder';
+
+  @override
+  String get copyLoggerPickFolderTitle =>
+      'Logger session folder (manifest + gnss.ndjson)';
+
+  @override
+  String copyLoggerImported(int points, String title) {
+    return 'Imported: $points pts · $title';
+  }
+
+  @override
+  String get copyLoggerImportFailed =>
+      'Couldn\'t import the session. Check the folder has manifest.json and gnss.ndjson with points.';
 
   @override
   String get locationDisclosureTitle => 'Location for ride recording';
@@ -3830,8 +4171,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get termsAcceptDecline => 'Not now';
 
   @override
-  String get modeToggleSemantics =>
-      'Switch between street (ON) and off-road (OFF) mode';
+  String get modeToggleSemantics => 'Switch between Street and Track mode';
 
   @override
   String get offroadBrandTag => 'OFF-ROAD';
@@ -4736,4 +5076,29 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get offroadAdviceWalkAgain =>
       'One pass is a sketch. Walk each edge again and keep the pass that sits on the tape or the rut, not an average of the two.';
+
+  @override
+  String get proPurchasePending =>
+      'Your payment is pending. Pro turns on as soon as the store confirms it.';
+
+  @override
+  String get armNeedsAlwaysTitle => 'It may not record with the screen locked';
+
+  @override
+  String get armNeedsAlwaysBody =>
+      'Auto-start begins recording with the screen locked. Without \"Allow all the time\" for location, Android may not give it GPS. Pick it in Settings → Permissions → Location, or continue and keep the screen on until it starts.';
+
+  @override
+  String get armContinueAnyway => 'Continue anyway';
+
+  @override
+  String get socialNotifTitle => 'Rodada alerts';
+
+  @override
+  String get socialNotifBody =>
+      'Turn on notifications to know when you are invited to a rodada or when it starts.';
+
+  @override
+  String get errArmBackgroundGps =>
+      'Could not start background GPS. Allow notifications and remove the battery restriction for RiderLab in Settings, then try again.';
 }

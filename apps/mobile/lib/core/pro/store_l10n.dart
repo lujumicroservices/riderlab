@@ -20,8 +20,7 @@ class StoreL10n {
   String perMonth(String price) => _es ? '$price / mes' : '$price / month';
   String perYear(String price) => _es ? '$price / año' : '$price / year';
   String get subscribe => _es ? 'Suscribirme a Pro' : 'Subscribe to Pro';
-  String get loadingPlans =>
-      _es ? 'Cargando planes…' : 'Loading plans…';
+  String get loadingPlans => _es ? 'Cargando planes…' : 'Loading plans…';
   String get plansUnavailable => _es
       ? 'No pudimos cargar los planes. Revisa tu conexión e intenta de nuevo.'
       : 'Could not load plans. Check your connection and try again.';
@@ -39,41 +38,29 @@ class StoreL10n {
     final store = ios ? 'Apple ID' : 'Google Play';
     final manage = ios
         ? (_es
-            ? 'Ajustes > tu nombre > Suscripciones'
-            : 'Settings > your name > Subscriptions')
-        : (_es ? 'Google Play > Pagos y suscripciones' : 'Google Play > Payments & subscriptions');
+              ? 'Ajustes > tu nombre > Suscripciones'
+              : 'Settings > your name > Subscriptions')
+        : (_es
+              ? 'Google Play > Pagos y suscripciones'
+              : 'Google Play > Payments & subscriptions');
     return _es
         ? 'El pago se carga a tu cuenta de $store al confirmar. La suscripción '
-            'se renueva automáticamente al mismo precio salvo que la canceles al '
-            'menos 24 horas antes del fin del periodo. Adminístrala o cancélala en '
-            '$manage.'
+              'se renueva automáticamente al mismo precio salvo que la canceles al '
+              'menos 24 horas antes del fin del periodo. Adminístrala o cancélala en '
+              '$manage.'
         : 'Payment is charged to your $store account at confirmation. The '
-            'subscription renews automatically at the same price unless you '
-            'cancel at least 24 hours before the end of the period. Manage or '
-            'cancel it in $manage.';
+              'subscription renews automatically at the same price unless you '
+              'cancel at least 24 hours before the end of the period. Manage or '
+              'cancel it in $manage.';
   }
 
-  /// Trial help without partner-code wording (iOS).
-  String get trialHelpStore => _es
-      ? 'Toda cuenta con sesión recibe 30 días de Pro gratis, sin tarjeta. '
-          'Después, el detalle de Ride Lab es de pago.'
-      : 'Every signed-in account gets 30 days of Pro free, no card needed. '
-          'After that, Ride Lab depth is paid.';
-
-  String get storeNotReady => _es
-      ? 'La suscripción aún no está disponible. Entra con tu cuenta para '
-          '30 días de Pro gratis.'
-      : 'The subscription is not available yet. Sign in for a free 30-day '
-          'Pro trial.';
-
-  /// Store builds have no ads SDK: the Free strip promotes Pro, not ad removal.
+  /// No build has an ads SDK: the Free strip promotes Pro, not ad removal.
   String get freeStripLabel => 'PRO';
   String get freeStripBody => _es
       ? 'Zoom de tramo, todas las frenadas y detalle de curva'
       : 'Stretch zoom, every brake event and corner detail';
 
-  String get proHardwareTitle =>
-      _es ? 'Hardware es Pro' : 'Hardware is Pro';
+  String get proHardwareTitle => _es ? 'Hardware es Pro' : 'Hardware is Pro';
   String get proHardwareBody => _es
       ? 'El logger Métrica y el control de cámara (GoPro) son parte de Pro.'
       : 'The Métrica logger and camera (GoPro) control are part of Pro.';
