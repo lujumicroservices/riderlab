@@ -1,4 +1,8 @@
-# Estado para retomar (19 nov 2026)
+# Estado para retomar (20 nov 2026)
+
+**Actualización 20 nov 2026 (PC Windows luju3):** el pase de usabilidad (PR #12) ya está en `master`. La release que sigue es **`1.37.27+104`** (rama `release/1.37.27-104`, PR #13), no la 103: la 103 nunca se subió. AAB firmado en esta PC: `dist/RiderLab-1.37.27-104.aab`. Se armó con el `.env` y el `google-services.json` del zip de Nextcloud, que trae la clave `goog_` de RevenueCat y los clientes OAuth. Los pasos de "Publicar la 103" de abajo aplican igual a la 104. CI: Flutter fijo en 3.41.4. Demo en video: `docs/DEMO_VIDEOS.md`.
+
+## Estado anterior (19 nov 2026)
 
 Hecho en la Mac de Juan. Al abrir el repo en otra máquina, partir de la rama `android/play-no-trial`.
 
